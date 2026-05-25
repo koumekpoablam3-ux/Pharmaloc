@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Localiser une pharmacie</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --em:  #059669;
+  --em2: #10b981;
+  --eml: #d1fae5;
+  --tl:  #0d9488;
+  --ink: #0a1628;
+  --ink2:#1e293b;
+  --sl:  #475569;
+  --mu:  #94a3b8;
+  --ln:  #e2e8f0;
+  --bg:  #f8fafb;
+  --wh:  #ffffff;
+  --rd:  #ef4444;
+  --am:  #f59e0b;
+  --bl:  #3b82f6;
+  --sh:  0 4px 16px rgba(0,0,0,.08);
+  --shg: 0 8px 28px rgba(5,150,105,.28);
+  --r:   14px;
+  --t:   all .28s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+
+/* ══ NAVBAR ══════════════════════════════════════ */
+.navbar{
+  height:62px;background:var(--wh);border-bottom:1px solid var(--ln);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;flex-shrink:0;z-index:500;
+  box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;box-shadow:var(--shg)}
+.logo-txt{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--ink)}
+.logo-txt em{font-style:normal;color:var(--em)}
+.nav-mid{display:flex;align-items:center;gap:5px}
+.nav-mid a{text-decoration:none;color:var(--sl);font-size:.84rem;font-weight:500;padding:7px 13px;border-radius:9px;transition:var(--t)}
+.nav-mid a:hover{color:var(--em);background:var(--eml)}
+.nav-mid a.on{color:var(--em);background:var(--eml);font-weight:600}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-btn{padding:8px 18px;border-radius:50px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.83rem;font-weight:700;cursor:pointer;transition:var(--t)}
+.nb-ghost{background:none;border:1.5px solid var(--ln);color:var(--sl)}
+.nb-ghost:hover{border-color:var(--em);color:var(--em)}
+.nb-solid{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;box-shadow:var(--shg)}
+.nb-solid:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(5,150,105,.35)}
+
+/* ══ LAYOUT PRINCIPAL ════════════════════════════ */
+.app{display:flex;height:calc(100vh - 62px);overflow:hidden}
+
+/* ══ PANNEAU GAUCHE ══════════════════════════════ */
+.panel{
+  width:380px;flex-shrink:0;
+  background:var(--wh);border-right:1px solid var(--ln);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .3s ease;
+}
+.panel.collapsed{width:0;border:none}
+
+/* En-tête panneau */
+.panel-head{padding:16px 18px;border-bottom:1px solid var(--ln);flex-shrink:0}
+.ph-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ph-title{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700}
+.ph-count{font-size:.78rem;color:var(--mu);background:var(--bg);padding:3px 10px;border-radius:20px;font-weight:600}
+.ph-collapse{background:none;border:none;color:var(--mu);cursor:pointer;font-size:1rem;padding:4px;transition:var(--t)}
+.ph-collapse:hover{color:var(--em)}
+
+/* Barre de recherche */
+.search-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 13px;border:1.5px solid var(--ln);
+  border-radius:11px;background:var(--bg);transition:var(--t);margin-bottom:10px;
+}
+.search-bar:focus-within{border-color:var(--em);background:var(--wh);box-shadow:0 0 0 3px rgba(5,150,105,.08)}
+.search-bar i{color:var(--mu);font-size:.84rem;flex-shrink:0}
+.search-bar input{border:none;outline:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;color:var(--ink);flex:1}
+.search-bar input::placeholder{color:var(--mu)}
+.search-bar button{background:none;border:none;color:var(--mu);cursor:pointer;padding:2px;transition:var(--t)}
+.search-bar button:hover{color:var(--rd)}
+
+/* Filtres rapides */
+.quick-filters{display:flex;gap:6px;flex-wrap:wrap}
+.qf{
+  padding:5px 12px;border-radius:20px;border:1.5px solid var(--ln);
+  background:var(--bg);font-size:.73rem;font-weight:600;color:var(--sl);
+  cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.qf:hover{border-color:var(--em);color:var(--em)}
+.qf.on{background:var(--em);border-color:var(--em);color:#fff}
+.qf-dot{width:6px;height:6px;border-radius:50%}
+.dot-g{background:var(--em2)}
+.dot-b{background:var(--bl)}
+.dot-r{background:var(--rd)}
+.dot-a{background:var(--am)}
+
+/* Tri */
+.sort-row{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;border-bottom:1px solid var(--ln);flex-shrink:0}
+.sort-lbl{font-size:.74rem;color:var(--mu);font-weight:500}
+.sort-sel{border:none;outline:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;color:var(--sl);font-weight:600;cursor:pointer}
+
+/* Liste pharmacies */
+.pharma-list{flex:1;overflow-y:auto;padding:8px 0}
+.pharma-list::-webkit-scrollbar{width:3px}
+.pharma-list::-webkit-scrollbar-thumb{background:var(--ln);border-radius:2px}
+
+.pi{
+  padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.04);
+  cursor:pointer;transition:var(--t);display:flex;gap:12px;
+  align-items:flex-start;position:relative;
+}
+.pi:hover{background:#fafbfc}
+.pi.sel{background:var(--eml);border-left:3px solid var(--em)}
+.pi.sel:hover{background:#c7f7e3}
+
+.pi-badge-icon{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
+  transition:var(--t);
+}
+.pib-open{background:#d1fae5;color:var(--em)}
+.pib-closed{background:#f1f5f9;color:var(--mu)}
+.pib-h24{background:#dbeafe;color:var(--bl)}
+.pib-garde{background:#fef3c7;color:#92400e}
+
+.pi-body{flex:1;min-width:0}
+.pi-name{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-addr{font-size:.74rem;color:var(--mu);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}
+.pi-tag{padding:2px 7px;border-radius:4px;font-size:.63rem;font-weight:700}
+.tag-o{background:#d1fae5;color:#065f46}
+.tag-c{background:#f1f5f9;color:var(--sl)}
+.tag-24{background:#dbeafe;color:#1e40af}
+.tag-g{background:#fef3c7;color:#92400e}
+.tag-n{background:#ede9fe;color:#5b21b6}
+.pi-meta{display:flex;align-items:center;gap:12px}
+.pi-dist{font-size:.72rem;color:var(--mu);display:flex;align-items:center;gap:3px}
+.pi-rating{font-size:.72rem;color:var(--am);display:flex;align-items:center;gap:3px;font-weight:600}
+.pi-hours{font-size:.72rem;color:var(--sl);font-weight:500}
+.pi-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.pia{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--sl);cursor:pointer;transition:var(--t)}
+.pia:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+.pia.fav.on{border-color:#fecaca;color:var(--rd);background:#fff5f5}
+
+/* État vide */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;color:var(--mu);text-align:center;height:200px}
+.empty-icon{font-size:3rem;opacity:.3}
+
+/* ══ CARTE ═══════════════════════════════════════ */
+.map-area{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+
+/* Bouton réduire panneau (sur la carte) */
+.toggle-panel{
+  position:absolute;top:50%;left:12px;transform:translateY(-50%);
+  z-index:400;width:28px;height:60px;border-radius:8px;
+  background:var(--wh);border:1.5px solid var(--ln);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:var(--sh);color:var(--sl);font-size:.75rem;
+  transition:var(--t);
+}
+.toggle-panel:hover{background:var(--eml);color:var(--em);border-color:var(--em)}
+
+/* ── Contrôles carte ── */
+.map-controls{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  z-index:400;display:flex;align-items:center;gap:8px;
+  background:var(--wh);padding:10px 14px;border-radius:14px;
+  box-shadow:var(--sh);border:1px solid var(--ln);
+}
+.mc-search{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 14px;background:var(--bg);border-radius:10px;
+  border:1.5px solid var(--ln);transition:var(--t);min-width:260px;
+}
+.mc-search:focus-within{border-color:var(--em);background:var(--wh)}
+.mc-search i{color:var(--mu);font-size:.84rem}
+.mc-search input{border:none;outline:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;color:var(--ink);width:100%}
+.mc-search input::placeholder{color:var(--mu)}
+.mc-btn{
+  padding:8px 16px;border-radius:10px;border:none;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.82rem;font-weight:700;cursor:pointer;transition:var(--t);
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.mc-locate{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3)}
+.mc-locate:hover{opacity:.9;transform:translateY(-1px)}
+.mc-layers{background:var(--bg);color:var(--sl);border:1.5px solid var(--ln)}
+.mc-layers:hover{border-color:var(--em);color:var(--em)}
+
+/* ── Compteur résultats carte ── */
+.map-result-bar{
+  position:absolute;top:80px;left:50%;transform:translateX(-50%);
+  z-index:400;background:var(--wh);padding:7px 16px;border-radius:50px;
+  box-shadow:var(--sh);border:1px solid var(--ln);
+  font-size:.78rem;font-weight:600;color:var(--sl);
+  display:flex;align-items:center;gap:7px;
+}
+.mrb-dot{width:7px;height:7px;border-radius:50%;background:var(--em);animation:bk 2s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── Popup pharmacie sur carte ── */
+.leaflet-popup-content-wrapper{border-radius:14px!important;padding:0!important;overflow:hidden!important;box-shadow:0 16px 48px rgba(0,0,0,.18)!important;border:1px solid var(--ln)!important}
+.leaflet-popup-content{margin:0!important;width:260px!important}
+.popup-body{padding:16px}
+.popup-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.popup-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.popup-name{font-family:'Clash Display',sans-serif;font-size:.92rem;font-weight:700;color:var(--ink);line-height:1.3}
+.popup-addr{font-size:.74rem;color:var(--mu);margin-top:2px}
+.popup-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.popup-row{display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--sl);margin-bottom:5px}
+.popup-row i{color:var(--em);width:14px;flex-shrink:0}
+.popup-actions{display:flex;gap:8px;margin-top:12px}
+.ppa{flex:1;padding:8px;border-radius:9px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:5px}
+.ppa-it{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;box-shadow:0 4px 12px rgba(5,150,105,.25)}
+.ppa-it:hover{opacity:.9}
+.ppa-tel{background:var(--bg);color:var(--sl);border:1.5px solid var(--ln)}
+.ppa-tel:hover{border-color:var(--em);color:var(--em)}
+
+/* ── Fiche pharmacie (drawer bas) ── */
+.pharma-sheet{
+  position:absolute;bottom:-100%;left:0;right:0;z-index:450;
+  background:var(--wh);border-radius:20px 20px 0 0;
+  box-shadow:0 -10px 40px rgba(0,0,0,.15);
+  padding:0;transition:bottom .4s cubic-bezier(.4,0,.2,1);
+  max-height:70%;display:flex;flex-direction:column;
+}
+.pharma-sheet.open{bottom:0}
+.ps-handle{width:40px;height:4px;background:var(--ln);border-radius:2px;margin:12px auto 0}
+.ps-head{padding:16px 20px 12px;border-bottom:1px solid var(--ln)}
+.ps-close{float:right;background:none;border:none;color:var(--mu);font-size:1rem;cursor:pointer;padding:2px}
+.ps-head h3{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:3px}
+.ps-body{padding:16px 20px;overflow-y:auto;flex:1}
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ps-info-card{background:var(--bg);border-radius:11px;padding:12px;border:1px solid var(--ln)}
+.ps-info-card .pic-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:4px}
+.ps-info-card .pic-val{font-size:.86rem;font-weight:600;color:var(--ink)}
+.ps-services{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.ps-svc{padding:6px 14px;border-radius:20px;background:var(--eml);color:var(--em);font-size:.74rem;font-weight:700}
+.ps-btns{display:flex;gap:10px}
+.ps-btn{flex:1;padding:12px;border-radius:12px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:7px}
+.psb-main{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;box-shadow:var(--shg)}
+.psb-main:hover{transform:translateY(-1px)}
+.psb-ghost{background:var(--bg);color:var(--sl);border:1.5px solid var(--ln)}
+.psb-ghost:hover{border-color:var(--em);color:var(--em)}
+
+/* ── Legend ── */
+.map-legend{
+  position:absolute;bottom:24px;right:16px;z-index:400;
+  background:var(--wh);border-radius:12px;padding:12px 16px;
+  box-shadow:var(--sh);border:1px solid var(--ln);
+}
+.ml-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:8px}
+.ml-item{display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--sl);margin-bottom:6px;font-weight:500}
+.ml-item:last-child{margin-bottom:0}
+.ml-pin{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.ml-g{background:var(--em2)}
+.ml-b{background:var(--bl)}
+.ml-a{background:var(--am)}
+.ml-r{background:var(--mu)}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--ink);color:#fff;border-radius:10px;padding:10px 18px;
+  font-size:.83rem;display:flex;align-items:center;gap:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+  opacity:0;transition:all .3s;pointer-events:none;z-index:3000;white-space:nowrap;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast i{color:var(--em2)}
+
+/* ── Loading overlay ── */
+.loading{
+  position:absolute;inset:0;z-index:600;
+  background:rgba(248,250,251,.9);backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+}
+.loading-spin{width:44px;height:44px;border-radius:50%;border:3px solid var(--eml);border-top-color:var(--em);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:.9rem;color:var(--sl);font-weight:500}
+
+/* ══ RESPONSIVE ════════════════════════════════ */
+@media(max-width:768px){
+  html,body{overflow:auto}
+  .app{flex-direction:column;height:auto}
+  .panel{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--ln)}
+  .pharma-list{max-height:320px}
+  .map-area{height:60vh;min-height:400px}
+  .nav-mid{display:none}
+}
+@media(max-width:480px){
+  .map-controls{width:calc(100% - 32px);flex-wrap:wrap;gap:6px}
+  .mc-search{min-width:100%}
+  .mc-btn span{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ═══════════════════════════════════════ -->
+<div class="navbar">
+  <a href="pharma.html" class="nav-logo">
+    <div class="logo-icon"><i class="fas fa-plus"></i></div>
+    <span class="logo-txt">Pharma<em>Loc</em></span>
+  </a>
+  <div class="nav-mid">
+    <a href="pharma.html">Accueil</a>
+    <a href="apropos.html">À propos</a>
+    <a href="localisation.html" class="on">Localiser</a>
+    <a href="boutique.html">Boutique</a>
+    <a href="ordonnance.html">Ordonnance</a>
+    <a href="urgences.html">Urgences</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn nb-ghost" onclick="locateMe()"><i class="fas fa-crosshairs"></i> Ma position</button>
+    <button class="nav-btn nb-solid" onclick="window.location.href='pharma.html#boutique'"><i class="fas fa-pills"></i> Commander</button>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- ════ PANNEAU GAUCHE ════════════════════════════ -->
+  <div class="panel" id="panel">
+    <div class="panel-head">
+      <div class="ph-top">
+        <span class="ph-title">Pharmacies</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="ph-count" id="countBadge">8 résultats</span>
+          <button class="ph-collapse" onclick="collapsePanel()" title="Réduire">
+            <i class="fas fa-chevron-left" id="collapseIco"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recherche -->
+      <div class="search-bar" id="searchBar">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Nom, adresse, spécialité…" oninput="searchPharma(this.value)">
+        <button onclick="clearSearch()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Filtres rapides -->
+      <div class="quick-filters">
+        <button class="qf on" data-f="all" onclick="setFilter(this,'all')">Toutes</button>
+        <button class="qf" data-f="open" onclick="setFilter(this,'open')">
+          <span class="qf-dot dot-g"></span> Ouvertes
+        </button>
+        <button class="qf" data-f="h24" onclick="setFilter(this,'h24')">
+          <span class="qf-dot dot-b"></span> 24h/24
+        </button>
+        <button class="qf" data-f="garde" onclick="setFilter(this,'garde')">
+          <span class="qf-dot dot-a"></span> De garde
+        </button>
+        <button class="qf" data-f="nuit" onclick="setFilter(this,'nuit')">
+          <span class="qf-dot dot-r"></span> Nuit
+        </button>
+      </div>
+    </div>
+
+    <!-- Tri -->
+    <div class="sort-row">
+      <span class="sort-lbl">Trier par :</span>
+      <select class="sort-sel" onchange="sortList(this.value)">
+        <option value="dist">Distance</option>
+        <option value="name">Nom (A–Z)</option>
+        <option value="rating">Note</option>
+        <option value="open">Statut ouverture</option>
+      </select>
+    </div>
+
+    <!-- Liste -->
+    <div class="pharma-list" id="pharmaList"></div>
+  </div>
+
+  <!-- ════ CARTE ════════════════════════════════════ -->
+  <div class="map-area" id="mapArea">
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="loading-spin"></div>
+      <p>Chargement de la carte…</p>
+    </div>
+
+    <!-- Carte -->
+    <div id="map"></div>
+
+    <!-- Bouton réduire panneau -->
+    <div class="toggle-panel" onclick="collapsePanel()" title="Masquer/Afficher le panneau" id="toggleBtn">
+      <i class="fas fa-chevron-left" id="toggleIco"></i>
+    </div>
+
+    <!-- Barre de recherche sur carte -->
+    <div class="map-controls">
+      <div class="mc-search">
+        <i class="fas fa-map-marker-alt" style="color:var(--em)"></i>
+        <input type="text" id="mapSearchInput" placeholder="Rechercher une adresse ou quartier…" oninput="mapSearch(this.value)">
+      </div>
+      <button class="mc-btn mc-locate" onclick="locateMe()">
+        <i class="fas fa-crosshairs"></i>
+        <span>Me localiser</span>
+      </button>
+      <button class="mc-btn mc-layers" onclick="toggleLayer()">
+        <i class="fas fa-layer-group"></i>
+        <span>Fond</span>
+      </button>
+    </div>
+
+    <!-- Résultats -->
+    <div class="map-result-bar">
+      <span class="mrb-dot"></span>
+      <span id="resultBarTxt">8 pharmacies affichées</span>
+    </div>
+
+    <!-- Légende -->
+    <div class="map-legend">
+      <div class="ml-title">Légende</div>
+      <div class="ml-item"><div class="ml-pin ml-g"></div> Ouverte</div>
+      <div class="ml-item"><div class="ml-pin ml-b"></div> 24h/24</div>
+      <div class="ml-item"><div class="ml-pin ml-a"></div> De garde</div>
+      <div class="ml-item"><div class="ml-pin ml-r"></div> Fermée</div>
+    </div>
+
+    <!-- Fiche pharmacie (drawer bas) -->
+    <div class="pharma-sheet" id="sheet">
+      <div class="ps-handle"></div>
+      <div class="ps-head">
+        <button class="ps-close" onclick="closeSheet()"><i class="fas fa-times"></i></button>
+        <h3 id="sheetName">Pharmacie</h3>
+        <div id="sheetAddr" style="font-size:.78rem;color:var(--mu)"></div>
+      </div>
+      <div class="ps-body" id="sheetBody"></div>
+    </div>
+
+  </div><!-- /map-area -->
+</div><!-- /app -->
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt">Position détectée</span></div>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ════════════════════════════════════════
+   DONNÉES PHARMACIES
+════════════════════════════════════════ */
+const DATA = [
+  { id:1,  name:'Pharmacie Centrale',        addr:'Boulevard du 13 Janvier, Lomé',        lat:6.1375, lng:1.2123, open:true,  h24:true,  garde:true,  nuit:true,  dist:.4,  rating:4.8, tel:'+228 22 21 00 10', horaires:'Lun–Sam 08h–22h · Dim 09h–20h',   services:['Médicaments','Pédiatrie','Livraison'],   specialites:'Médicaments généraux · Pédiatrie',       photo:'🏥' },
+  { id:2,  name:'Pharmacie du Bénin',         addr:'Rue du Commerce, Lomé',                lat:6.1420, lng:1.2180, open:true,  h24:false, garde:false, nuit:false, dist:.8,  rating:4.6, tel:'+228 22 21 05 40', horaires:'Lun–Sam 08h–20h · Dim Fermé',      services:['Médicaments','Homéopathie'],             specialites:'Dermatologie · Oncologie',               photo:'💊' },
+  { id:3,  name:'Pharmacie Nana',             addr:'Quartier Kodjoviakopé, Lomé',          lat:6.1310, lng:1.2060, open:false, h24:false, garde:false, nuit:false, dist:1.2, rating:4.3, tel:'+228 22 26 01 80', horaires:'Lun–Sam 08h–20h · Fermé actuallt',  services:['Médicaments','Phytothérapie'],           specialites:'Phytothérapie · Généraux',               photo:'🌿' },
+  { id:4,  name:'Pharmacie de la Paix',       addr:'Avenue de la Nouvelle Marche, Lomé',   lat:6.1500, lng:1.2250, open:true,  h24:false, garde:true,  nuit:false, dist:1.6, rating:4.7, tel:'+228 22 22 00 60', horaires:'Lun–Dim 07h–23h (garde)',           services:['Médicaments','Cardiologie','Garde'],     specialites:'Cardiologie · Diabétologie',             photo:'❤️' },
+  { id:5,  name:'Pharmacie Hippocrate',       addr:'Rue de Atakpamé, Lomé',                lat:6.1280, lng:1.2300, open:true,  h24:true,  garde:true,  nuit:true,  dist:2.1, rating:4.9, tel:'+228 22 25 08 00', horaires:'Ouvert 24h/24 · 7j/7',              services:['Urgences','Généraux','Livraison','Garde'],specialites:'Urgences · Toutes spécialités',          photo:'🏨' },
+  { id:6,  name:'Pharmacie Saint-Luc',        addr:'Boulevard Circulaire, Lomé',           lat:6.1450, lng:1.2050, open:false, h24:false, garde:false, nuit:false, dist:2.4, rating:4.4, tel:'+228 22 26 06 20', horaires:'Lun–Sam 08h–19h · Fermé actuallt',  services:['Pédiatrie','Maternité'],                specialites:'Pédiatrie · Maternité',                  photo:'👶' },
+  { id:7,  name:'Pharmacie Espoir',           addr:'Quartier Hédzranawoé, Lomé',           lat:6.1550, lng:1.2150, open:true,  h24:false, garde:false, nuit:false, dist:3.0, rating:4.2, tel:'+228 22 24 04 90', horaires:'Lun–Sam 08h–20h',                   services:['Généraux','Parapharmacie'],              specialites:'Généraux · Parapharmacie',               photo:'🌟' },
+  { id:8,  name:'Pharmacie de la Croix',      addr:'Avenue de la Victoire, Lomé',          lat:6.1200, lng:1.2200, open:true,  h24:true,  garde:true,  nuit:true,  dist:3.5, rating:4.7, tel:'+228 22 21 07 80', horaires:'Ouvert 24h/24 · 7j/7',              services:['Urgences','Généraux','24h/24'],          specialites:'Toutes spécialités · 24h/24',            photo:'➕' },
+  { id:9,  name:'Pharmacie Bonne Santé',      addr:'Quartier Nyékonakpoè, Lomé',           lat:6.1620, lng:1.2080, open:true,  h24:false, garde:false, nuit:false, dist:3.8, rating:4.5, tel:'+228 22 23 09 10', horaires:'Lun–Ven 08h–20h · Sam 08h–18h',    services:['Généraux','Nutrithérapie'],              specialites:'Nutrithérapie · Compléments',            photo:'🥗' },
+  { id:10, name:'Pharmacie Victoire',         addr:'Carrefour Victoire, Lomé',             lat:6.1180, lng:1.2050, open:false, h24:false, garde:false, nuit:false, dist:4.2, rating:4.1, tel:'+228 22 27 03 40', horaires:'Lun–Sam 08h–19h · Fermé actuallt',  services:['Généraux'],                             specialites:'Généraux',                               photo:'🏆' },
+  { id:11, name:'Pharmacie du Quartier',      addr:'Quartier Agbalépédogan, Lomé',         lat:6.1680, lng:1.2280, open:true,  h24:false, garde:true,  nuit:true,  dist:4.7, rating:4.6, tel:'+228 22 28 01 20', horaires:'Lun–Dim 07h–22h (garde nuit)',      services:['Généraux','Garde','Livraison'],          specialites:'Garde de nuit · Livraison',              photo:'🌙' },
+  { id:12, name:'Pharmacie Moderne',          addr:'Zone Industrielle, Lomé',              lat:6.1100, lng:1.2350, open:true,  h24:true,  garde:false, nuit:true,  dist:5.1, rating:4.3, tel:'+228 22 29 05 60', horaires:'Ouvert 24h/24',                      services:['Industriel','Généraux','Urgences'],      specialites:'Généraux · Urgences',                    photo:'⚡' },
+];
+
+/* ════════════════════════════════════════
+   ÉTAT
+════════════════════════════════════════ */
+let activeFilter = 'all';
+let activeSort   = 'dist';
+let searchQuery  = '';
+let panelOpen    = true;
+let selectedId   = null;
+let markers      = {};
+let userMarker   = null;
+let layerMode    = 0;
+let map, tileLayer;
+
+/* ════════════════════════════════════════
+   CARTE
+════════════════════════════════════════ */
+const TILES = [
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+  'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+];
+
+function initMap() {
+  map = L.map('map', { zoomControl: false }).setView([6.1375, 1.2123], 13);
+  tileLayer = L.tileLayer(TILES[0], { attribution:'© OpenStreetMap' }).addTo(map);
+  L.control.zoom({ position:'bottomright' }).addTo(map);
+
+  // Fermer sheet au clic sur carte
+  map.on('click', () => closeSheet());
+
+  document.getElementById('loading').style.display = 'none';
+  renderAll();
+}
+
+function toggleLayer() {
+  layerMode = (layerMode+1) % TILES.length;
+  map.removeLayer(tileLayer);
+  tileLayer = L.tileLayer(TILES[layerMode], { attribution:'© OpenStreetMap' }).addTo(map);
+  showToast('Fond de carte changé');
+}
+
+/* ════════════════════════════════════════
+   PINS PERSONNALISÉS
+════════════════════════════════════════ */
+function makePin(color, label) {
+  const colors = { green:['#059669','#0d9488'], blue:['#2563eb','#0891b2'], amber:['#d97706','#b45309'], gray:['#6b7280','#9ca3af'] };
+  const [c1,c2] = colors[color] || colors.gray;
+  return L.divIcon({
+    html: `<div style="position:relative">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,${c1},${c2});border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 14px rgba(0,0,0,.22);border:2.5px solid white;display:flex;align-items:center;justify-content:center">
+        <div style="transform:rotate(45deg);font-size:1rem;line-height:1">${label}</div>
+      </div>
+    </div>`,
+    iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-40],
+  });
+}
+
+function pinColor(p) {
+  if (p.h24)  return ['blue','🌙'];
+  if (p.garde) return ['amber','🛡'];
+  if (p.open)  return ['green','✚'];
+  return ['gray','✖'];
+}
+
+/* ════════════════════════════════════════
+   RENDER
+════════════════════════════════════════ */
+function getFiltered() {
+  let list = [...DATA];
+  // Filtre catégorie
+  if (activeFilter==='open')  list = list.filter(p=>p.open);
+  if (activeFilter==='h24')   list = list.filter(p=>p.h24);
+  if (activeFilter==='garde') list = list.filter(p=>p.garde);
+  if (activeFilter==='nuit')  list = list.filter(p=>p.nuit);
+  // Recherche
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(p=>p.name.toLowerCase().includes(q)||p.addr.toLowerCase().includes(q)||p.specialites.toLowerCase().includes(q)||p.services.some(s=>s.toLowerCase().includes(q)));
+  }
+  // Tri
+  if (activeSort==='dist')   list.sort((a,b)=>a.dist-b.dist);
+  if (activeSort==='name')   list.sort((a,b)=>a.name.localeCompare(b.name));
+  if (activeSort==='rating') list.sort((a,b)=>b.rating-a.rating);
+  if (activeSort==='open')   list.sort((a,b)=>Number(b.open)-Number(a.open));
+  return list;
+}
+
+function renderAll() {
+  const list = getFiltered();
+  renderList(list);
+  renderMarkers(list);
+  document.getElementById('countBadge').textContent = `${list.length} résultat${list.length>1?'s':''}`;
+  document.getElementById('resultBarTxt').textContent = `${list.length} pharmacie${list.length>1?'s':''} affichée${list.length>1?'s':''}`;
+}
+
+function renderList(list) {
+  const el = document.getElementById('pharmaList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p style="font-weight:600;color:var(--ink)">Aucune pharmacie trouvée</p><p style="font-size:.82rem">Modifiez votre recherche ou vos filtres</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(p=>{
+    const statusClass = p.h24?'pib-h24':p.open?'pib-open':'pib-closed';
+    const statusIcon  = p.h24?'moon':p.open?'check':'times';
+    const stars = '★'.repeat(Math.floor(p.rating)) + (p.rating%1>.5?'½':'');
+    return `
+    <div class="pi ${selectedId===p.id?'sel':''}" id="li-${p.id}" onclick="selectPharma(${p.id})">
+      <div class="pi-badge-icon ${statusClass}"><i class="fas fa-${statusIcon}"></i></div>
+      <div class="pi-body">
+        <div class="pi-name">${p.name}</div>
+        <div class="pi-addr">${p.addr}</div>
+        <div class="pi-tags">
+          ${p.open?`<span class="pi-tag tag-o">Ouvert</span>`:`<span class="pi-tag tag-c">Fermé</span>`}
+          ${p.h24?`<span class="pi-tag tag-24">24h/24</span>`:''}
+          ${p.garde?`<span class="pi-tag tag-g">Garde</span>`:''}
+          ${p.nuit?`<span class="pi-tag" style="background:#e0e7ff;color:#3730a3;font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:4px">Nuit</span>`:''}
+        </div>
+        <div class="pi-meta">
+          <span class="pi-dist"><i class="fas fa-map-marker-alt"></i>${p.dist} km</span>
+          <span class="pi-rating"><i class="fas fa-star"></i>${p.rating}</span>
+          <span class="pi-hours">${p.horaires.split('·')[0].trim()}</span>
+        </div>
+      </div>
+      <div class="pi-actions">
+        <div class="pia fav" onclick="event.stopPropagation();this.classList.toggle('on')" title="Favoris"><i class="fas fa-heart"></i></div>
+        <a class="pia" href="tel:${p.tel}" onclick="event.stopPropagation()" title="Appeler"><i class="fas fa-phone"></i></a>
+        <div class="pia" onclick="event.stopPropagation();itineraire(${p.id})" title="Itinéraire"><i class="fas fa-route"></i></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMarkers(list) {
+  // Supprimer anciens markers
+  Object.values(markers).forEach(m=>m.remove());
+  markers = {};
+  list.forEach(p=>{
+    const [color, icon] = pinColor(p);
+    const m = L.marker([p.lat, p.lng], { icon: makePin(color, p.photo) })
+      .addTo(map)
+      .bindPopup(buildPopup(p), { maxWidth:280, className:'pharma-popup' })
+      .on('click', ()=>{ selectPharma(p.id); openSheet(p.id); });
+    markers[p.id] = m;
+  });
+}
+
+function buildPopup(p) {
+  const statusColor = p.h24?'#1e40af':p.open?'#065f46':'#991b1b';
+  const statusBg    = p.h24?'#dbeafe':p.open?'#d1fae5':'#fee2e2';
+  const statusLabel = p.h24?'24h/24':p.open?'Ouvert':'Fermé';
+  return `<div class="popup-body">
+    <div class="popup-head">
+      <div class="popup-icon" style="background:${statusBg};font-size:1.2rem">${p.photo}</div>
+      <div><div class="popup-name">${p.name}</div><div class="popup-addr">${p.addr}</div></div>
+    </div>
+    <div class="popup-tags">
+      <span style="background:${statusBg};color:${statusColor};padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:800">${statusLabel}</span>
+      ${p.garde?`<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:800">Garde</span>`:''}
+    </div>
+    <div class="popup-row"><i class="fas fa-clock"></i>${p.horaires.split('·')[0]}</div>
+    <div class="popup-row"><i class="fas fa-phone"></i>${p.tel}</div>
+    <div class="popup-row"><i class="fas fa-map-marker-alt"></i>${p.dist} km · ★ ${p.rating}</div>
+    <div class="popup-row"><i class="fas fa-stethoscope"></i>${p.specialites}</div>
+    <div class="popup-actions">
+      <button class="ppa ppa-it" onclick="openSheet(${p.id})"><i class="fas fa-info-circle"></i> Voir fiche</button>
+      <a class="ppa ppa-tel" href="tel:${p.tel}"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════
+   INTERACTIONS
+════════════════════════════════════════ */
+function selectPharma(id) {
+  selectedId = id;
+  // Highlight liste
+  document.querySelectorAll('.pi').forEach(el=>el.classList.remove('sel'));
+  const li = document.getElementById('li-'+id);
+  if (li) { li.classList.add('sel'); li.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  // Centrer carte
+  const p = DATA.find(x=>x.id===id);
+  if (p) map.flyTo([p.lat, p.lng], 15, {duration:.8});
+}
+
+function openSheet(id) {
+  const p = DATA.find(x=>x.id===id);
+  if (!p) return;
+  selectPharma(id);
+  document.getElementById('sheetName').textContent = p.name;
+  document.getElementById('sheetAddr').textContent = p.addr;
+  document.getElementById('sheetBody').innerHTML = `
+    <div class="ps-grid">
+      <div class="ps-info-card">
+        <div class="pic-label">Statut</div>
+        <div class="pic-val" style="color:${p.open?'var(--em)':'var(--rd)'}">
+          ${p.h24?'Ouvert 24h/24':p.open?'Ouvert maintenant':'Fermé'}
+        </div>
+      </div>
+      <div class="ps-info-card">
+        <div class="pic-label">Distance</div>
+        <div class="pic-val">${p.dist} km de vous</div>
+      </div>
+      <div class="ps-info-card">
+        <div class="pic-label">Note</div>
+        <div class="pic-val" style="color:var(--am)">★ ${p.rating}/5</div>
+      </div>
+      <div class="ps-info-card">
+        <div class="pic-label">Téléphone</div>
+        <div class="pic-val">${p.tel}</div>
+      </div>
+    </div>
+    <div class="ps-info-card" style="margin-bottom:14px">
+      <div class="pic-label">Horaires</div>
+      <div class="pic-val" style="font-size:.82rem;margin-top:2px">${p.horaires}</div>
+    </div>
+    <div class="ps-info-card" style="margin-bottom:14px">
+      <div class="pic-label">Spécialités</div>
+      <div class="pic-val" style="font-size:.82rem;margin-top:2px">${p.specialites}</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="pic-label" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:8px">Services</div>
+      <div class="ps-services">${p.services.map(s=>`<span class="ps-svc">${s}</span>`).join('')}</div>
+    </div>
+    <div class="ps-btns">
+      <button class="ps-btn psb-main" onclick="itineraire(${p.id})"><i class="fas fa-route"></i> Itinéraire</button>
+      <a class="ps-btn psb-ghost" href="tel:${p.tel}"><i class="fas fa-phone"></i> Appeler</a>
+      <button class="ps-btn psb-ghost" onclick="commanderPharma(${p.id})"><i class="fas fa-cart-plus"></i> Commander</button>
+    </div>`;
+  document.getElementById('sheet').classList.add('open');
+}
+
+function closeSheet() { document.getElementById('sheet').classList.remove('open'); }
+
+/* ════════════════════════════════════════
+   FILTRES, RECHERCHE, TRI
+════════════════════════════════════════ */
+function setFilter(btn, f) {
+  document.querySelectorAll('.qf').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  activeFilter = f;
+  renderAll();
+}
+
+function searchPharma(q) { searchQuery = q; renderAll(); }
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  searchQuery = '';
+  renderAll();
+}
+
+function sortList(val) { activeSort = val; renderAll(); }
+
+function mapSearch(q) {
+  if (!q.trim()) return;
+  const p = DATA.find(x=>x.name.toLowerCase().includes(q.toLowerCase())||x.addr.toLowerCase().includes(q.toLowerCase()));
+  if (p) { map.flyTo([p.lat,p.lng],15,{duration:.8}); selectPharma(p.id); }
+}
+
+/* ════════════════════════════════════════
+   GÉOLOCALISATION
+════════════════════════════════════════ */
+function locateMe() {
+  if (!navigator.geolocation) { showToast('Géolocalisation non supportée'); return; }
+  showToast('Localisation en cours…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const {latitude:lat, longitude:lng} = pos.coords;
+      map.flyTo([lat,lng], 14, {duration:1});
+      if (userMarker) userMarker.remove();
+      userMarker = L.marker([lat,lng], {
+        icon: L.divIcon({
+          html:`<div style="width:20px;height:20px;background:var(--bl);border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 4px rgba(59,130,246,.25)"></div>`,
+          iconSize:[20,20], iconAnchor:[10,10]
+        })
+      }).addTo(map).bindPopup('<b>Vous êtes ici</b>').openPopup();
+      showToast('Position détectée avec succès !');
+    },
+    () => showToast('Impossible d\'accéder à votre position')
+  );
+}
+
+/* ════════════════════════════════════════
+   AUTRES ACTIONS
+════════════════════════════════════════ */
+function itineraire(id) {
+  const p = DATA.find(x=>x.id===id);
+  if (p) window.open(`https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`, '_blank');
+}
+
+function commanderPharma(id) {
+  closeSheet();
+  showToast('Redirection vers la boutique…');
+  setTimeout(()=>window.location.href='pharma.html#boutique',1200);
+}
+
+/* ════════════════════════════════════════
+   PANNEAU COLLAPSE
+════════════════════════════════════════ */
+function collapsePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('panel').classList.toggle('collapsed', !panelOpen);
+  const ico = document.getElementById('collapseIco');
+  const tIco = document.getElementById('toggleIco');
+  ico.className = panelOpen?'fas fa-chevron-left':'fas fa-chevron-right';
+  tIco.className = panelOpen?'fas fa-chevron-left':'fas fa-chevron-right';
+  setTimeout(()=>map.invalidateSize(),310);
+}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  document.getElementById('toastTxt').textContent=msg;
+  t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2800);
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+window.addEventListener('load', initMap);
+</script>
+</body>
+</html>

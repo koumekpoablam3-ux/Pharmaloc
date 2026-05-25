@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Trouvez votre pharmacie, commandez en ligne</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#059669">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PharmaLoc">
+<style>
+/* ══ TOKENS ════════════════════════════════════════ */
+:root {
+  --em:#059669; --em2:#10b981; --eml:#d1fae5; --tl:#0d9488;
+  --ink:#0a1628; --ink2:#1e293b; --sl:#475569; --mu:#94a3b8;
+  --ln:#e2e8f0; --bg:#f8fafb; --wh:#ffffff;
+  --rd:#ef4444; --am:#f59e0b; --bl:#3b82f6;
+  --sh-sm: 0 1px 3px rgba(0,0,0,.06);
+  --sh-md: 0 4px 16px rgba(0,0,0,.08);
+  --sh-lg: 0 20px 50px rgba(0,0,0,.12);
+  --sh-em: 0 8px 28px rgba(5,150,105,.28);
+  --r:14px; --rl:22px;
+  --t: all .3s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--ink); overflow-x:hidden; line-height:1.6; }
+img { display:block; }
+
+/* ══ TOPBAR ANNONCE ══════════════════════════════ */
+.topbar {
+  background:linear-gradient(135deg,var(--ink),var(--ink2));
+  padding:9px 5%; display:flex; align-items:center; justify-content:center; gap:20px;
+  font-size:.78rem; color:rgba(255,255,255,.75); position:relative;
+}
+.topbar strong { color:#fff; font-weight:700; }
+.tb-close { position:absolute; right:5%; background:none; border:none; color:rgba(255,255,255,.4); font-size:.9rem; cursor:pointer; transition:var(--t); }
+.tb-close:hover { color:#fff; }
+.tb-badge { background:var(--em); color:#fff; padding:2px 10px; border-radius:50px; font-size:.7rem; font-weight:800; margin-right:8px; }
+
+/* ══ NAVBAR ══════════════════════════════════════ */
+nav {
+  position:sticky; top:0; z-index:900;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(22px) saturate(180%);
+  border-bottom:1px solid var(--ln);
+  padding:0 5%; height:68px;
+  display:flex; align-items:center; justify-content:space-between;
+  transition:var(--t);
+}
+nav.scrolled { box-shadow:var(--sh-md); }
+.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+.nav-logo-ic {
+  width:38px; height:38px; border-radius:11px;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; color:#fff; box-shadow:var(--sh-em);
+}
+.nav-logo-txt { font-family:'Clash Display',sans-serif; font-size:1.3rem; font-weight:700; color:var(--ink); letter-spacing:-.3px; }
+.nav-logo-txt em { font-style:normal; color:var(--em); }
+.nav-links { display:flex; align-items:center; gap:4px; }
+.nav-links a {
+  text-decoration:none; color:var(--sl); font-size:.87rem; font-weight:500;
+  padding:8px 13px; border-radius:10px; transition:var(--t); white-space:nowrap;
+}
+.nav-links a:hover { color:var(--em); background:var(--eml); }
+.nav-links a.on { color:var(--em); font-weight:700; }
+.nav-actions { display:flex; align-items:center; gap:8px; }
+
+/* Bouton Mon Compte */
+.nav-account {
+  display:flex; align-items:center; gap:7px;
+  padding:8px 14px; border-radius:10px;
+  border:1.5px solid var(--ln); background:var(--wh);
+  color:var(--sl); font-size:.85rem; font-weight:600;
+  text-decoration:none; transition:var(--t); white-space:nowrap;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.nav-account:hover { border-color:var(--em); color:var(--em); background:var(--eml); }
+.nav-account i { font-size:.9rem; }
+
+.nav-cart {
+  position:relative; width:40px; height:40px; border-radius:11px;
+  background:var(--eml); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--em); font-size:1.1rem; transition:var(--t);
+}
+.nav-cart:hover { background:var(--em); color:#fff; }
+.cart-badge {
+  position:absolute; top:-4px; right:-4px;
+  width:18px; height:18px; border-radius:50%;
+  background:var(--rd); color:#fff;
+  font-size:.62rem; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  border:2px solid #fff;
+}
+.btn-cta {
+  padding:9px 22px; border-radius:50px; border:none;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  color:#fff; font-weight:700; font-size:.87rem;
+  cursor:pointer; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif;
+  box-shadow:var(--sh-em); white-space:nowrap; text-decoration:none;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn-cta:hover { transform:translateY(-1px); box-shadow:0 12px 32px rgba(5,150,105,.38); }
+.hamburger { display:none; background:none; border:none; font-size:1.3rem; color:var(--ink); cursor:pointer; }
+
+/* ══ HERO ════════════════════════════════════════ */
+.hero {
+  position:relative; overflow:hidden; min-height:94vh;
+  display:flex; align-items:center;
+}
+.hero-bg { position:absolute; inset:0; z-index:0; }
+.hero-bg img { width:100%; height:100%; object-fit:cover; object-position:center; }
+.hero-bg::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(105deg,rgba(10,22,40,.92) 0%,rgba(10,22,40,.78) 45%,rgba(10,22,40,.35) 75%,transparent 100%);
+}
+.hero-content { position:relative; z-index:1; padding:110px 5% 70px; max-width:640px; }
+.hero-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.35);
+  border-radius:50px; padding:6px 16px;
+  font-size:.75rem; font-weight:700; color:#6ee7b7;
+  letter-spacing:.6px; text-transform:uppercase; margin-bottom:24px;
+}
+.hero-dot { width:6px; height:6px; border-radius:50%; background:var(--em2); animation:blink 2.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.hero h1 {
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(2.5rem,5.5vw,4.2rem);
+  font-weight:700; letter-spacing:-1.5px; line-height:1.06;
+  color:#fff; margin-bottom:20px;
+}
+.hero h1 span { background:linear-gradient(135deg,#34d399,#6ee7b7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero-desc { font-size:1.08rem; color:rgba(255,255,255,.72); line-height:1.78; max-width:480px; margin-bottom:36px; }
+
+/* Barre de recherche */
+.hero-search {
+  display:flex; background:#fff; border-radius:16px;
+  box-shadow:var(--sh-lg); border:1px solid rgba(255,255,255,.15);
+  overflow:hidden; margin-bottom:42px;
+}
+.hs-part { display:flex; align-items:center; gap:10px; flex:1; padding:15px 18px; border-right:1px solid var(--ln); }
+.hs-part:last-of-type { border-right:none; }
+.hs-part i { color:var(--em); font-size:.95rem; flex-shrink:0; }
+.hs-part input { border:none; outline:none; font-family:'Plus Jakarta Sans',sans-serif; font-size:.9rem; color:var(--ink); background:none; width:100%; }
+.hs-part input::placeholder { color:var(--mu); }
+.hs-submit {
+  padding:0 28px; border:none;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  color:#fff; font-weight:700; font-size:.9rem;
+  cursor:pointer; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.hs-submit:hover { opacity:.92; }
+
+/* Stats hero */
+.hero-stats { display:flex; gap:28px; flex-wrap:wrap; margin-bottom:36px; }
+.hst { display:flex; align-items:center; gap:11px; }
+.hst-ic { width:42px; height:42px; border-radius:11px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+.hst-n { font-family:'Clash Display',sans-serif; font-size:1.35rem; font-weight:700; color:#fff; line-height:1; }
+.hst-l { font-size:.72rem; color:rgba(255,255,255,.55); margin-top:2px; font-weight:500; }
+
+/* Cartes flottantes hero */
+.hero-floating-cards { display:flex; gap:14px; flex-wrap:wrap; }
+.hfc { background:rgba(255,255,255,.12); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:10px; animation:floatY 6s ease-in-out infinite; }
+.hfc:nth-child(2) { animation-delay:-2s; }
+.hfc:nth-child(3) { animation-delay:-4s; }
+@keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.hfc-ic { font-size:1.4rem; }
+.hfc-t { font-size:.8rem; font-weight:700; color:#fff; }
+.hfc-s { font-size:.7rem; color:rgba(255,255,255,.6); }
+
+/* Cartes droite hero */
+.hero-right-cards { position:absolute; right:5%; top:50%; transform:translateY(-50%); z-index:2; display:flex; flex-direction:column; gap:12px; max-width:300px; }
+.hrc { background:rgba(255,255,255,.96); border-radius:var(--r); padding:14px 16px; box-shadow:var(--sh-lg); border:1px solid rgba(255,255,255,.9); animation:floatY 7s ease-in-out infinite; }
+.hrc:nth-child(2) { animation-delay:-3.5s; }
+.hrc-top { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.hrc-badge { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+.hrc-badge.g { background:var(--eml); color:var(--em); }
+.hrc-badge.b { background:#dbeafe; color:var(--bl); }
+.hrc-badge.a { background:#fef3c7; color:var(--am); }
+.hrc-name { font-family:'Clash Display',sans-serif; font-size:.88rem; font-weight:700; color:var(--ink); }
+.hrc-sub { font-size:.72rem; color:var(--mu); }
+.hrc-line { display:flex; align-items:center; justify-content:space-between; font-size:.75rem; }
+.hrc-st { display:flex; align-items:center; gap:5px; font-weight:700; }
+.hrc-dot { width:6px; height:6px; border-radius:50%; }
+.dot-g { background:var(--em); animation:blink 2s infinite; }
+.dot-a { background:var(--am); }
+.hrc-dist { color:var(--mu); }
+
+/* ══ SECTION GÉNÉRIQUE ════════════════════════ */
+.section { padding:88px 5%; }
+.sec-wh { background:var(--wh); }
+.sec-bg { background:var(--bg); }
+.sec-center { text-align:center; }
+.sec-inner { max-width:1200px; margin:0 auto; }
+.sec-tag { display:inline-block; background:var(--eml); border:1px solid rgba(5,150,105,.15); border-radius:50px; padding:4px 16px; font-size:.72rem; font-weight:700; color:var(--em); letter-spacing:.8px; text-transform:uppercase; margin-bottom:14px; }
+.sec-title { font-family:'Clash Display',sans-serif; font-size:clamp(1.8rem,3.5vw,2.6rem); font-weight:700; letter-spacing:-.8px; color:var(--ink); margin-bottom:12px; }
+.sec-sub { font-size:.98rem; color:var(--sl); line-height:1.72; max-width:520px; }
+.sec-center .sec-sub { margin:0 auto; }
+
+/* ══ COMMENT ÇA MARCHE ════════════════════════ */
+.how-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; margin-top:52px; }
+.how-card { padding:32px 28px; border-radius:var(--rl); background:var(--bg); border:1.5px solid var(--ln); transition:var(--t); position:relative; overflow:hidden; }
+.how-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--em),var(--tl)); transform:scaleX(0); transform-origin:left; transition:transform .4s; }
+.how-card:hover::after { transform:scaleX(1); }
+.how-card:hover { border-color:rgba(5,150,105,.28); transform:translateY(-6px); box-shadow:var(--sh-lg); }
+.how-num { font-family:'Clash Display',sans-serif; font-size:3.5rem; font-weight:700; color:rgba(5,150,105,.08); line-height:1; margin-bottom:16px; }
+.how-ic { width:54px; height:54px; border-radius:15px; margin-bottom:18px; background:linear-gradient(135deg,var(--em),var(--tl)); display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#fff; box-shadow:var(--sh-em); }
+.how-card h3 { font-family:'Clash Display',sans-serif; font-size:1.06rem; font-weight:700; margin-bottom:10px; color:var(--ink); }
+.how-card p { font-size:.86rem; color:var(--sl); line-height:1.72; }
+
+/* ══ STATS BANDE ══════════════════════════════ */
+.stats-strip { background:linear-gradient(135deg,var(--em),var(--tl)); padding:50px 5%; position:relative; overflow:hidden; }
+.stats-strip::before { content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px); background-size:26px 26px; pointer-events:none; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); max-width:900px; margin:0 auto; }
+.stat-box { text-align:center; padding:20px; border-right:1px solid rgba(255,255,255,.15); }
+.stat-box:last-child { border-right:none; }
+.stat-n { font-family:'Clash Display',sans-serif; font-size:2.6rem; font-weight:700; color:#fff; line-height:1; margin-bottom:6px; }
+.stat-l { font-size:.8rem; color:rgba(255,255,255,.72); font-weight:500; }
+
+/* ══ CARTE MAP ════════════════════════════════ */
+.map-layout { display:grid; grid-template-columns:360px 1fr; gap:22px; height:560px; margin-top:50px; }
+.pharma-panel { background:var(--wh); border-radius:var(--rl); border:1.5px solid var(--ln); overflow:hidden; display:flex; flex-direction:column; box-shadow:var(--sh-md); }
+.pp-head { padding:18px 20px; border-bottom:1px solid var(--ln); flex-shrink:0; }
+.pp-head h3 { font-family:'Clash Display',sans-serif; font-size:.98rem; font-weight:700; margin-bottom:10px; }
+.pp-search { display:flex; align-items:center; gap:8px; padding:9px 13px; background:var(--bg); border-radius:10px; border:1.5px solid var(--ln); transition:var(--t); }
+.pp-search:focus-within { border-color:var(--em); }
+.pp-search i { color:var(--mu); font-size:.84rem; }
+.pp-search input { border:none; outline:none; background:none; font-size:.85rem; font-family:'Plus Jakarta Sans',sans-serif; color:var(--ink); flex:1; }
+.pp-search input::placeholder { color:var(--mu); }
+.pp-items { flex:1; overflow-y:auto; }
+.pp-items::-webkit-scrollbar { width:3px; }
+.pp-items::-webkit-scrollbar-thumb { background:var(--ln); border-radius:2px; }
+.ph-item { padding:13px 18px; border-bottom:1px solid rgba(0,0,0,.04); cursor:pointer; transition:var(--t); display:flex; gap:11px; align-items:flex-start; }
+.ph-item:hover { background:var(--bg); }
+.ph-item.sel { background:var(--eml); border-left:3px solid var(--em); }
+.phi-ic { width:38px; height:38px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.95rem; }
+.phi-ic.open { background:#d1fae5; color:var(--em); }
+.phi-ic.closed { background:#fee2e2; color:var(--rd); }
+.phi-ic.h24 { background:#dbeafe; color:var(--bl); }
+.phi-info { flex:1; min-width:0; }
+.phi-name { font-size:.87rem; font-weight:700; margin-bottom:2px; }
+.phi-addr { font-size:.74rem; color:var(--mu); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:5px; }
+.phi-tags { display:flex; gap:4px; flex-wrap:wrap; }
+.phi-tag { padding:2px 7px; border-radius:4px; font-size:.63rem; font-weight:700; }
+.t-open { background:#d1fae5; color:#065f46; }
+.t-closed { background:#fee2e2; color:#991b1b; }
+.t-h24 { background:#dbeafe; color:#1e40af; }
+.t-garde { background:#fef3c7; color:#92400e; }
+.phi-dist { font-size:.71rem; color:var(--mu); margin-top:4px; display:flex; align-items:center; gap:3px; }
+#mapEl { border-radius:var(--rl); border:1.5px solid var(--ln); box-shadow:var(--sh-md); overflow:hidden; z-index:1; }
+
+/* ══ GALERIE PHOTOS ═══════════════════════════ */
+.gallery-grid { display:grid; grid-template-columns:1.6fr 1fr 1fr; grid-template-rows:240px 220px; gap:14px; margin-top:50px; border-radius:var(--rl); overflow:hidden; }
+.gal-item { overflow:hidden; position:relative; border-radius:var(--r); }
+.gal-item img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+.gal-item:hover img { transform:scale(1.07); }
+.gal-item.main { grid-row:1/3; border-radius:var(--rl); }
+.gal-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(10,22,40,.65),transparent 50%); display:flex; align-items:flex-end; padding:18px; opacity:0; transition:opacity .3s; }
+.gal-item:hover .gal-overlay { opacity:1; }
+.gal-overlay span { color:#fff; font-size:.82rem; font-weight:700; }
+
+/* ══ BOUTIQUE ════════════════════════════════ */
+.shop-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:34px; }
+.sfbtn { padding:8px 18px; border-radius:50px; border:1.5px solid var(--ln); background:var(--bg); font-size:.83rem; font-weight:600; color:var(--sl); cursor:pointer; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:6px; }
+.sfbtn:hover { border-color:var(--em); color:var(--em); }
+.sfbtn.on { background:var(--em); border-color:var(--em); color:#fff; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px; }
+.pc { background:var(--bg); border-radius:var(--rl); border:1.5px solid var(--ln); overflow:hidden; transition:var(--t); cursor:pointer; }
+.pc:hover { transform:translateY(-5px); box-shadow:var(--sh-lg); border-color:rgba(5,150,105,.3); }
+.pc.hidden { display:none; }
+.pc-img { height:158px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:3.5rem; position:relative; overflow:hidden; border-bottom:1px solid var(--ln); }
+.pc-img-bg { position:absolute; inset:0; background:linear-gradient(135deg,#ecfdf5,#f0fdfa); }
+.pc-em { position:relative; z-index:1; }
+.pc-bgtop { position:absolute; top:10px; left:10px; z-index:2; padding:3px 9px; border-radius:5px; font-size:.65rem; font-weight:800; text-transform:uppercase; }
+.bg-promo { background:var(--rd); color:#fff; }
+.bg-new { background:var(--em); color:#fff; }
+.bg-ord { background:var(--am); color:#fff; }
+.pc-fav { position:absolute; top:10px; right:10px; z-index:2; width:30px; height:30px; border-radius:50%; background:#fff; border:1px solid var(--ln); display:flex; align-items:center; justify-content:center; font-size:.82rem; color:var(--mu); cursor:pointer; transition:var(--t); }
+.pc-fav:hover,.pc-fav.on { color:var(--rd); border-color:#fecaca; background:#fff5f5; }
+.pc-body { padding:14px 15px 16px; }
+.pc-cat { font-size:.66rem; font-weight:700; color:var(--em); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.pc-name { font-family:'Clash Display',sans-serif; font-size:.95rem; font-weight:700; color:var(--ink); margin-bottom:4px; line-height:1.3; }
+.pc-desc { font-size:.74rem; color:var(--mu); line-height:1.5; margin-bottom:10px; }
+.pc-stk { display:flex; align-items:center; gap:5px; font-size:.71rem; margin-bottom:10px; }
+.stk-dot { width:6px; height:6px; border-radius:50%; }
+.d-in { background:var(--em); }
+.d-low { background:var(--am); }
+.d-out { background:var(--rd); }
+.pc-foot { display:flex; align-items:center; justify-content:space-between; }
+.pc-price { display:flex; flex-direction:column; }
+.pc-old { font-size:.7rem; color:var(--mu); text-decoration:line-through; }
+.pc-new { font-family:'Clash Display',sans-serif; font-size:1.08rem; font-weight:700; color:var(--ink); }
+.pc-new em { font-style:normal; color:var(--em); font-size:.7rem; }
+.pc-add { padding:8px 14px; border-radius:50px; border:none; background:linear-gradient(135deg,var(--em),var(--tl)); color:#fff; font-weight:700; font-size:.76rem; cursor:pointer; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif; display:flex; align-items:center; gap:5px; box-shadow:0 4px 12px rgba(5,150,105,.22); }
+.pc-add:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(5,150,105,.35); }
+.pc-add.ok { background:linear-gradient(135deg,#16a34a,#15803d); }
+.pc-add:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+/* ══ ORDONNANCE ═══════════════════════════════ */
+.ord-section { background:linear-gradient(145deg,#f0fdf4,#ecfdf5,#f0fdfa); position:relative; overflow:hidden; }
+.ord-section::before { content:'+'; position:absolute; right:-2%; top:50%; transform:translateY(-50%); font-family:'Clash Display',sans-serif; font-size:28rem; font-weight:700; color:rgba(5,150,105,.05); line-height:1; pointer-events:none; }
+.ord-layout { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; max-width:1100px; margin:0 auto; }
+.ord-upload { border:2px dashed rgba(5,150,105,.3); border-radius:var(--rl); padding:40px; text-align:center; transition:var(--t); cursor:pointer; background:rgba(5,150,105,.02); position:relative; }
+.ord-upload:hover,.ord-upload.drag { border-color:var(--em); background:var(--eml); }
+.ord-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.ord-upload-ico { font-size:3.5rem; margin-bottom:14px; }
+.ord-upload h3 { font-family:'Clash Display',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+.ord-upload p { font-size:.85rem; color:var(--sl); line-height:1.6; }
+.ord-upload-btn { margin-top:18px; padding:10px 26px; border-radius:50px; border:2px solid var(--em); background:none; color:var(--em); font-weight:700; font-size:.87rem; cursor:pointer; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif; }
+.ord-upload-btn:hover { background:var(--em); color:#fff; }
+.ord-steps { display:flex; flex-direction:column; gap:20px; }
+.ord-step { display:flex; gap:15px; align-items:flex-start; }
+.os-num { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--em),var(--tl)); display:flex; align-items:center; justify-content:center; font-family:'Clash Display',sans-serif; font-weight:700; font-size:.9rem; color:#fff; box-shadow:var(--sh-em); }
+.os-body h4 { font-family:'Clash Display',sans-serif; font-size:.94rem; font-weight:700; margin-bottom:4px; }
+.os-body p { font-size:.83rem; color:var(--sl); line-height:1.6; }
+
+/* ══ CONFIANCE ════════════════════════════════ */
+.trust-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:48px; }
+.trust-card { padding:26px 22px; border-radius:var(--rl); border:1.5px solid var(--ln); background:var(--wh); transition:var(--t); text-align:center; }
+.trust-card:hover { border-color:rgba(5,150,105,.25); transform:translateY(-4px); box-shadow:var(--sh-lg); }
+.trust-ic { width:58px; height:58px; border-radius:16px; margin:0 auto 16px; background:linear-gradient(135deg,var(--em),var(--tl)); display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#fff; box-shadow:var(--sh-em); }
+.trust-card h3 { font-family:'Clash Display',sans-serif; font-size:1rem; font-weight:700; margin-bottom:8px; color:var(--ink); }
+.trust-card p { font-size:.84rem; color:var(--sl); line-height:1.65; }
+
+/* ══ URGENCES ════════════════════════════════ */
+.urg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:44px; }
+.urg-card { padding:24px 20px; border-radius:var(--rl); border:1.5px solid var(--ln); transition:var(--t); cursor:pointer; display:flex; align-items:flex-start; gap:14px; background:var(--wh); }
+.urg-card:hover { border-color:var(--em); transform:translateY(-3px); box-shadow:var(--sh-md); }
+.urg-ic { width:48px; height:48px; border-radius:13px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+.ui-red { background:#fee2e2; }
+.ui-am { background:#fef3c7; }
+.ui-bl { background:#dbeafe; }
+.ui-gr { background:var(--eml); }
+.urg-card h4 { font-family:'Clash Display',sans-serif; font-size:.97rem; font-weight:700; margin-bottom:5px; }
+.urg-card p { font-size:.8rem; color:var(--sl); line-height:1.5; }
+.urg-cta { font-size:.78rem; font-weight:700; color:var(--em); margin-top:8px; display:flex; align-items:center; gap:4px; transition:var(--t); }
+.urg-card:hover .urg-cta { gap:8px; }
+
+/* ══ TÉMOIGNAGES ═════════════════════════════ */
+.testi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px; margin-top:48px; }
+.testi-card { background:var(--wh); border-radius:var(--rl); padding:24px; border:1.5px solid var(--ln); transition:var(--t); display:flex; flex-direction:column; gap:14px; position:relative; overflow:hidden; }
+.testi-card::before { content:'\201C'; position:absolute; top:-8px; right:14px; font-family:'Clash Display',sans-serif; font-size:7rem; color:var(--eml); line-height:1; pointer-events:none; font-weight:700; z-index:0; }
+.testi-card:hover { border-color:rgba(5,150,105,.25); transform:translateY(-4px); box-shadow:var(--sh-md); }
+.testi-stars { display:flex; gap:3px; position:relative; z-index:1; }
+.testi-stars i { color:var(--am); font-size:.84rem; }
+.testi-txt { font-size:.88rem; color:var(--sl); line-height:1.72; position:relative; z-index:1; }
+.testi-author { display:flex; align-items:center; gap:11px; margin-top:auto; }
+.ta-av { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Clash Display',sans-serif; font-size:.95rem; font-weight:700; color:#fff; flex-shrink:0; }
+.ta-name { font-weight:700; font-size:.87rem; color:var(--ink); }
+.ta-role { font-size:.73rem; color:var(--mu); }
+.ta-svc { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:4px; background:var(--eml); color:var(--em); width:fit-content; margin-top:3px; }
+
+/* ══ NEWSLETTER ══════════════════════════════ */
+.nl-wrap { background:linear-gradient(135deg,var(--ink) 0%,var(--ink2) 100%); padding:80px 5%; position:relative; overflow:hidden; }
+.nl-wrap::before { content:''; position:absolute; top:-150px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle,rgba(16,185,129,.1),transparent 65%); pointer-events:none; }
+.nl-inner { max-width:580px; margin:0 auto; text-align:center; position:relative; z-index:1; }
+.nl-tag { display:inline-block; background:rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.2); border-radius:50px; padding:4px 16px; font-size:.72rem; font-weight:700; color:var(--em2); letter-spacing:.8px; text-transform:uppercase; margin-bottom:14px; }
+.nl-inner h2 { font-family:'Clash Display',sans-serif; font-size:clamp(1.6rem,3vw,2.2rem); font-weight:700; color:#fff; margin-bottom:12px; }
+.nl-inner p { color:rgba(255,255,255,.55); margin-bottom:28px; }
+.nl-form { display:flex; gap:10px; max-width:460px; margin:0 auto; }
+.nl-form input { flex:1; padding:13px 18px; border-radius:50px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.08); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:.9rem; outline:none; transition:var(--t); }
+.nl-form input::placeholder { color:rgba(255,255,255,.35); }
+.nl-form input:focus { border-color:rgba(16,185,129,.5); }
+.nl-form button { padding:13px 24px; border-radius:50px; border:none; background:linear-gradient(135deg,var(--em),var(--tl)); color:#fff; font-weight:700; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-size:.9rem; white-space:nowrap; transition:var(--t); }
+.nl-form button:hover { opacity:.9; transform:translateY(-1px); }
+.nl-note { font-size:.73rem; color:rgba(255,255,255,.3); margin-top:12px; }
+
+/* ══ FOOTER ══════════════════════════════════ */
+footer { background:var(--ink); padding:60px 5% 0; }
+.ft-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; max-width:1200px; margin:0 auto 48px; }
+.ft-brand p { font-size:.85rem; color:rgba(255,255,255,.5); line-height:1.72; max-width:240px; margin-top:14px; }
+.ft-socials { display:flex; gap:10px; margin-top:18px; }
+.ft-soc { width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.45); text-decoration:none; font-size:.9rem; transition:var(--t); }
+.ft-soc:hover { background:var(--em); border-color:var(--em); color:#fff; }
+.ft-col h4 { font-family:'Clash Display',sans-serif; font-size:.85rem; font-weight:700; color:#fff; margin-bottom:18px; }
+.ft-col a { display:block; font-size:.83rem; color:rgba(255,255,255,.44); text-decoration:none; margin-bottom:10px; transition:var(--t); }
+.ft-col a:hover { color:var(--em2); }
+.ft-bottom { border-top:1px solid rgba(255,255,255,.08); padding:22px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; max-width:1200px; margin:0 auto; }
+.ft-bottom p { font-size:.8rem; color:rgba(255,255,255,.3); }
+.ft-badge { display:flex; align-items:center; gap:6px; padding:5px 14px; background:rgba(5,150,105,.15); border:1px solid rgba(5,150,105,.25); border-radius:50px; font-size:.74rem; color:var(--em2); font-weight:600; }
+
+/* ══ PANIER ══════════════════════════════════ */
+.cart-ov { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .3s; }
+.cart-ov.open { opacity:1; pointer-events:all; }
+.cart-dr { position:fixed; top:0; right:-440px; bottom:0; width:420px; background:#fff; z-index:2001; box-shadow:-20px 0 60px rgba(0,0,0,.15); transition:right .4s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
+.cart-ov.open .cart-dr { right:0; }
+.cart-hd { padding:22px 24px; border-bottom:1px solid var(--ln); display:flex; justify-content:space-between; align-items:center; }
+.cart-hd h3 { font-family:'Clash Display',sans-serif; font-size:1.1rem; font-weight:700; }
+.cart-cls { background:none; border:none; color:var(--mu); font-size:1.2rem; cursor:pointer; }
+.cart-cls:hover { color:var(--ink); }
+.cart-list { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.cart-list::-webkit-scrollbar { width:3px; }
+.cart-list::-webkit-scrollbar-thumb { background:var(--ln); }
+.ci { display:flex; gap:12px; padding:13px; background:var(--bg); border-radius:12px; border:1px solid var(--ln); }
+.ci-em { font-size:2rem; flex-shrink:0; }
+.ci-nm { font-size:.87rem; font-weight:700; margin-bottom:2px; }
+.ci-ph { font-size:.73rem; color:var(--mu); margin-bottom:7px; }
+.ci-row { display:flex; align-items:center; gap:9px; }
+.ci-qb { width:26px; height:26px; border-radius:7px; border:1.5px solid var(--ln); background:#fff; font-size:.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--t); }
+.ci-qb:hover { background:var(--em); color:#fff; border-color:var(--em); }
+.ci-qty { font-size:.9rem; font-weight:700; min-width:18px; text-align:center; }
+.ci-pr { font-family:'Clash Display',sans-serif; font-size:1rem; font-weight:700; color:var(--em); }
+.ci-del { background:none; border:none; color:var(--mu); cursor:pointer; font-size:.85rem; transition:var(--t); }
+.ci-del:hover { color:var(--rd); }
+.cart-empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:40px; color:var(--mu); text-align:center; }
+.ces-ico { font-size:3.5rem; opacity:.25; }
+.cart-ft { padding:20px 24px; border-top:1px solid var(--ln); }
+.cft-row { display:flex; justify-content:space-between; margin-bottom:7px; font-size:.87rem; }
+.cft-tot { display:flex; justify-content:space-between; font-family:'Clash Display',sans-serif; font-size:1.1rem; font-weight:700; margin-top:12px; padding-top:12px; border-top:1px solid var(--ln); }
+.cft-tot span:last-child { color:var(--em); }
+.btn-checkout { width:100%; padding:14px; border-radius:13px; border:none; background:linear-gradient(135deg,var(--em),var(--tl)); color:#fff; font-weight:700; font-size:1rem; cursor:pointer; margin-top:14px; transition:var(--t); font-family:'Plus Jakarta Sans',sans-serif; box-shadow:var(--sh-em); display:flex; align-items:center; justify-content:center; gap:9px; }
+.btn-checkout:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(5,150,105,.38); }
+
+/* ══ TOAST ════════════════════════════════════ */
+.toast { position:fixed; bottom:24px; right:24px; z-index:3000; background:var(--ink); border:1px solid rgba(16,185,129,.3); border-radius:12px; padding:13px 20px; display:flex; align-items:center; gap:10px; font-size:.84rem; color:#fff; box-shadow:var(--sh-lg); transform:translateY(20px); opacity:0; transition:all .35s cubic-bezier(.4,0,.2,1); pointer-events:none; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast i { color:var(--em2); }
+
+/* WhatsApp float */
+.wa-float { position:fixed; bottom:28px; right:28px; z-index:800; width:54px; height:54px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#fff; text-decoration:none; box-shadow:0 6px 24px rgba(37,211,102,.45); transition:var(--t); }
+.wa-float:hover { transform:scale(1.1); }
+
+/* ══ RESPONSIVE ══════════════════════════════ */
+@media(max-width:1024px) {
+  .hero-right-cards { display:none; }
+  .map-layout { grid-template-columns:1fr; height:auto; }
+  .pharma-panel { height:280px; }
+  #mapEl { height:380px; }
+  .gallery-grid { grid-template-columns:1fr 1fr; grid-template-rows:auto; }
+  .gal-item.main { grid-row:auto; }
+  .ord-layout { grid-template-columns:1fr; }
+  .ft-grid { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:768px) {
+  .topbar { justify-content:center; }
+  .tb-close { display:none; }
+  nav { padding:0 18px; }
+  .nav-links { display:none; }
+  .nav-links.open { display:flex; flex-direction:column; position:fixed; top:68px; left:0; right:0; background:#fff; border-bottom:1px solid var(--ln); padding:14px; z-index:999; box-shadow:var(--sh-md); }
+  .hamburger { display:block; }
+  .nav-account span { display:none; }
+  .hero-search { flex-direction:column; }
+  .hs-part { border-right:none; border-bottom:1px solid var(--ln); }
+  .hs-submit { padding:14px; justify-content:center; }
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .stat-box:nth-child(2) { border-right:none; }
+  .gallery-grid { grid-template-columns:1fr; }
+  .nl-form { flex-direction:column; }
+  .ft-grid { grid-template-columns:1fr; }
+  .ft-bottom { flex-direction:column; text-align:center; }
+  .cart-dr { width:100%; right:-100%; }
+}
+@media(max-width:480px) {
+  .hero-floating-cards { display:none; }
+  .hero-stats { gap:16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══════════════════════════════════════════ -->
+<div class="topbar" id="topbar">
+  <span><span class="tb-badge">NOUVEAU</span> <strong>Livraison gratuite</strong> dès 5 000 FCFA · Pharmaciens certifiés 24h/24 · <strong>Lomé, Togo</strong></span>
+  <button class="tb-close" onclick="document.getElementById('topbar').style.display='none'"><i class="fas fa-times"></i></button>
+</div>
+
+<!-- ══ NAVBAR ══════════════════════════════════════════ -->
+<nav id="navbar">
+  <a href="pharma.html" class="nav-logo">
+    <div class="nav-logo-ic"><i class="fas fa-plus"></i></div>
+    <span class="nav-logo-txt">Pharma<em>Loc</em></span>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="pharma.html" class="on">Accueil</a>
+    <a href="localisation.html">Localiser</a>
+    <a href="boutique.html">Boutique</a>
+    <a href="ordonnance.html">Ordonnance</a>
+    <a href="urgences.html">Urgences</a>
+    <a href="apropos.html">À propos</a>
+  </div>
+  <div class="nav-actions">
+    <!-- ✅ NOUVEAU — Bouton Mon Compte -->
+    <a href="login.html" class="nav-account" id="navAccount">
+      <i class="fas fa-user-circle"></i>
+      <span>Mon compte</span>
+    </a>
+    <button class="nav-cart" onclick="toggleCart()">
+      <i class="fas fa-shopping-bag"></i>
+      <span class="cart-badge" id="cartBadge" style="display:none">0</span>
+    </button>
+    <!-- ✅ NOUVEAU — CTA Commander redirige vers boutique.html -->
+    <a href="boutique.html" class="btn-cta">
+      Commander <i class="fas fa-arrow-right"></i>
+    </a>
+    <button class="hamburger" id="menuBtn" onclick="toggleNav()"><i class="fas fa-bars" id="menuIco"></i></button>
+  </div>
+</nav>
+
+<!-- ══ HERO ════════════════════════════════════════════ -->
+<section class="hero" id="accueil">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1800&q=80" alt="Pharmacie moderne" loading="eager">
+  </div>
+  <div class="hero-content">
+    <div class="hero-pill">
+      <span class="hero-dot"></span>
+      Votre santé, notre priorité
+    </div>
+    <h1>Trouvez une pharmacie,<br><span>commandez en ligne</span></h1>
+    <p class="hero-desc">Localisez les pharmacies ouvertes près de chez vous, consultez les stocks en temps réel et recevez vos médicaments à domicile en moins de 2h.</p>
+
+    <!-- Barre de recherche -->
+    <div class="hero-search">
+      <div class="hs-part">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchMed" placeholder="Médicament, produit, marque…">
+      </div>
+      <div class="hs-part">
+        <i class="fas fa-map-marker-alt"></i>
+        <input type="text" id="searchLoc" placeholder="Ville ou quartier…" value="Lomé, Togo">
+      </div>
+      <button class="hs-submit" onclick="doSearch()">
+        <i class="fas fa-search"></i> Rechercher
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="hero-stats">
+      <div class="hst"><div class="hst-ic">🏥</div><div class="hst-txt"><div class="hst-n">240+</div><div class="hst-l">Pharmacies partenaires</div></div></div>
+      <div class="hst"><div class="hst-ic">📦</div><div class="hst-txt"><div class="hst-n">1 200+</div><div class="hst-l">Produits disponibles</div></div></div>
+      <div class="hst"><div class="hst-ic">⚡</div><div class="hst-txt"><div class="hst-n">2h</div><div class="hst-l">Livraison express</div></div></div>
+      <div class="hst"><div class="hst-ic">🌙</div><div class="hst-txt"><div class="hst-n">24/7</div><div class="hst-l">Pharmacies de garde</div></div></div>
+    </div>
+
+    <!-- Cartes flottantes -->
+    <div class="hero-floating-cards" style="margin-top:32px">
+      <div class="hfc"><div class="hfc-ic">✅</div><div><div class="hfc-t">Stock confirmé</div><div class="hfc-s">Pharmacie Centrale · 0.4 km</div></div></div>
+      <div class="hfc"><div class="hfc-ic">🚴</div><div><div class="hfc-t">Livraison en route</div><div class="hfc-s">ETA : 35 minutes</div></div></div>
+      <div class="hfc"><div class="hfc-ic">👨‍⚕️</div><div><div class="hfc-t">5 pharmaciens en ligne</div><div class="hfc-s">Conseil gratuit</div></div></div>
+    </div>
+  </div>
+
+  <!-- Cartes côté droit -->
+  <div class="hero-right-cards">
+    <div class="hrc">
+      <div class="hrc-top"><div class="hrc-badge g"><i class="fas fa-check-circle"></i></div><div><div class="hrc-name">Pharmacie Centrale</div><div class="hrc-sub">Boulevard 13 Janvier</div></div></div>
+      <div class="hrc-line"><span class="hrc-st"><span class="hrc-dot dot-g"></span><span style="color:var(--em);font-weight:700">Ouverte</span> · 24h/24</span><span class="hrc-dist"><i class="fas fa-map-marker-alt" style="color:var(--em);font-size:.7rem"></i> 0.4 km</span></div>
+    </div>
+    <div class="hrc">
+      <div class="hrc-top"><div class="hrc-badge a"><i class="fas fa-shield-alt"></i></div><div><div class="hrc-name">Pharmacie Hippocrate</div><div class="hrc-sub">Rue de Atakpamé</div></div></div>
+      <div class="hrc-line"><span class="hrc-st"><span class="hrc-dot dot-g"></span><span style="color:var(--em);font-weight:700">De garde</span></span><span class="hrc-dist"><i class="fas fa-map-marker-alt" style="color:var(--em);font-size:.7rem"></i> 2.1 km</span></div>
+    </div>
+    <div class="hrc">
+      <div class="hrc-top"><div class="hrc-badge b"><i class="fas fa-truck"></i></div><div><div class="hrc-name">Livraison en cours</div><div class="hrc-sub">Commande #2847</div></div></div>
+      <div class="hrc-line"><span class="hrc-st"><span class="hrc-dot dot-a"></span><span style="color:var(--am);font-weight:700">En route</span></span><span class="hrc-dist">⏱ 28 min</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ COMMENT ÇA MARCHE ════════════════════════════ -->
+<section class="section sec-wh">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Simple &amp; rapide</div>
+    <h2 class="sec-title">Comment ça marche ?</h2>
+    <p class="sec-sub">En quelques étapes simples, trouvez, commandez et recevez vos médicaments sans sortir de chez vous.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-ic"><i class="fas fa-map-marked-alt"></i></div>
+        <h3>Localisez une pharmacie</h3>
+        <p>Activez votre géolocalisation ou entrez votre adresse pour voir les pharmacies ouvertes autour de vous avec leurs stocks en temps réel.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-ic"><i class="fas fa-pills"></i></div>
+        <h3>Choisissez vos produits</h3>
+        <p>Parcourez notre catalogue de 1 200+ médicaments et parapharmacie. Filtrez par catégorie, prix ou disponibilité.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-ic"><i class="fas fa-truck"></i></div>
+        <h3>Recevez à domicile</h3>
+        <p>Commandez et recevez vos médicaments en moins de 2h. Paiement sécurisé Mobile Money, carte ou à la livraison.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <div class="how-ic"><i class="fas fa-file-medical"></i></div>
+        <h3>Ordonnance en ligne</h3>
+        <p>Envoyez votre ordonnance en photo et notre équipe prépare votre commande validée par un pharmacien diplômé.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS BANDE ══════════════════════════════════ -->
+<div class="stats-strip">
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-n" id="st1">0</div><div class="stat-l">Pharmacies partenaires</div></div>
+    <div class="stat-box"><div class="stat-n" id="st2">0</div><div class="stat-l">Commandes livrées</div></div>
+    <div class="stat-box"><div class="stat-n" id="st3">0</div><div class="stat-l">Produits en catalogue</div></div>
+    <div class="stat-box"><div class="stat-n" id="st4">0</div><div class="stat-l">Satisfaction clients</div></div>
+  </div>
+</div>
+
+<!-- ══ GALERIE PHOTOS ════════════════════════════════ -->
+<section class="section sec-bg" id="galerie">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Notre réseau</div>
+    <h2 class="sec-title">Des pharmacies de confiance</h2>
+    <p class="sec-sub">240+ pharmacies partenaires soigneusement sélectionnées pour leur qualité et sérieux.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="gallery-grid">
+      <div class="gal-item main">
+        <img src="https://images.unsplash.com/photo-1583324113626-70df0f4deaab?auto=format&fit=crop&w=700&h=500&q=80" alt="Pharmacie intérieur">
+        <div class="gal-overlay"><span>🏥 Pharmacie Centrale — Lomé</span></div>
+      </div>
+      <div class="gal-item">
+        <img src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=400&h=240&q=80" alt="Médicaments">
+        <div class="gal-overlay"><span>💊 1 200+ produits</span></div>
+      </div>
+      <div class="gal-item">
+        <img src="https://images.unsplash.com/photo-1585435557343-3b092031a831?auto=format&fit=crop&w=400&h=240&q=80" alt="Pharmacien">
+        <div class="gal-overlay"><span>👨‍⚕️ Pharmaciens certifiés</span></div>
+      </div>
+      <div class="gal-item">
+        <img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=400&h=220&q=80" alt="Livraison">
+        <div class="gal-overlay"><span>🚴 Livraison express 2h</span></div>
+      </div>
+      <div class="gal-item">
+        <img src="https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?auto=format&fit=crop&w=400&h=220&q=80" alt="Ordonnance">
+        <div class="gal-overlay"><span>📋 Ordonnance en ligne</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CARTE LOCALISATION ════════════════════════════ -->
+<section class="section sec-wh" id="localiser">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Carte interactive</div>
+    <h2 class="sec-title">Pharmacies près de vous</h2>
+    <p class="sec-sub">Toutes les pharmacies partenaires — ouvertes, fermées et de garde — avec horaires et stocks en direct.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="map-layout">
+      <div class="pharma-panel">
+        <div class="pp-head">
+          <h3>Pharmacies (<span id="phCount">8</span>)</h3>
+          <div class="pp-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Rechercher une pharmacie…" oninput="filterPharma(this.value)">
+          </div>
+        </div>
+        <div class="pp-items" id="pharmaList"></div>
+      </div>
+      <div id="mapEl"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BOUTIQUE ══════════════════════════════════════ -->
+<section class="section sec-bg" id="boutique">
+  <div class="sec-inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:10px">
+      <div>
+        <div class="sec-tag">Pharmacie en ligne</div>
+        <h2 class="sec-title">Notre Catalogue</h2>
+      </div>
+      <p class="sec-sub">1 200+ produits · Livraison en 2h · Pharmaciens certifiés</p>
+    </div>
+    <div class="shop-filters">
+      <button class="sfbtn on" data-cat="all" onclick="filterP(this,'all')">Tout afficher</button>
+      <button class="sfbtn" data-cat="medicament" onclick="filterP(this,'medicament')">💊 Médicaments</button>
+      <button class="sfbtn" data-cat="vitamine" onclick="filterP(this,'vitamine')">🍋 Vitamines</button>
+      <button class="sfbtn" data-cat="bebe" onclick="filterP(this,'bebe')">👶 Bébé &amp; Maman</button>
+      <button class="sfbtn" data-cat="beaute" onclick="filterP(this,'beaute')">💆 Beauté &amp; Soin</button>
+      <button class="sfbtn" data-cat="materiel" onclick="filterP(this,'materiel')">🩺 Matériel médical</button>
+      <button class="sfbtn" data-cat="promo" onclick="filterP(this,'promo')">🔥 Promotions</button>
+    </div>
+    <div class="products-grid" id="productsGrid"></div>
+    <div style="text-align:center;margin-top:36px">
+      <!-- ✅ NOUVEAU — Lien vers boutique.html complète -->
+      <a href="boutique.html" style="display:inline-flex;align-items:center;gap:9px;padding:14px 32px;border-radius:50px;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.95rem;text-decoration:none;box-shadow:var(--sh-em);transition:var(--t)" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        <i class="fas fa-store"></i> Voir les 1 200+ produits <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ORDONNANCE ════════════════════════════════════ -->
+<section class="section ord-section" id="ordonnance">
+  <div class="sec-inner">
+    <div class="ord-layout">
+      <div>
+        <div class="sec-tag">Service rapide &amp; sécurisé</div>
+        <h2 class="sec-title">Envoyez votre ordonnance</h2>
+        <p class="sec-sub" style="margin-bottom:30px">Prenez votre ordonnance en photo, envoyez-la et notre équipe de pharmaciens prépare votre commande en toute sécurité et la livre sous 2 heures.</p>
+        <div class="ord-steps">
+          <div class="ord-step"><div class="os-num">1</div><div class="os-body"><h4>Photographiez l'ordonnance</h4><p>Photo nette et lisible · JPG, PNG ou PDF · Taille max 10 Mo</p></div></div>
+          <div class="ord-step"><div class="os-num">2</div><div class="os-body"><h4>Envoyez via le formulaire</h4><p>Téléversez-la ici ou envoyez-la par WhatsApp au +228 96 32 79 92</p></div></div>
+          <div class="ord-step"><div class="os-num">3</div><div class="os-body"><h4>Validation pharmacien</h4><p>Un pharmacien diplômé valide votre ordonnance sous 30 minutes</p></div></div>
+          <div class="ord-step"><div class="os-num">4</div><div class="os-body"><h4>Livraison à domicile</h4><p>Vos médicaments livrés directement à votre adresse en moins de 2h</p></div></div>
+        </div>
+        <!-- ✅ NOUVEAU — CTA vers ordonnance.html -->
+        <a href="ordonnance.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 26px;border-radius:50px;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;box-shadow:var(--sh-em);transition:var(--t)" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+          <i class="fas fa-file-medical"></i> Page complète ordonnance
+        </a>
+      </div>
+      <div>
+        <div style="position:relative;margin-bottom:18px">
+          <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=560&h=280&q=80" alt="Pharmacienne PharmaLoc" style="width:100%;border-radius:var(--rl);object-fit:cover;height:200px;border:1.5px solid var(--ln)">
+          <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:#fff;border-radius:50px;padding:8px 18px;box-shadow:var(--sh-md);border:1px solid var(--ln);white-space:nowrap;font-size:.8rem;font-weight:700;color:var(--em);display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--em);animation:blink 2s infinite"></span>
+            5 pharmaciens disponibles maintenant
+          </div>
+        </div>
+        <div class="ord-upload" id="uploadZone" style="margin-top:24px">
+          <input type="file" accept="image/*,application/pdf" onchange="handleUpload(this)">
+          <div class="ord-upload-ico">📋</div>
+          <h3>Glissez votre ordonnance ici</h3>
+          <p>JPG · PNG · PDF · Max 10 Mo</p>
+          <button class="ord-upload-btn" type="button"><i class="fas fa-upload"></i> Parcourir les fichiers</button>
+        </div>
+        <div style="margin-top:14px;padding:12px 16px;background:rgba(5,150,105,.08);border-radius:11px;border:1px solid rgba(5,150,105,.15)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:#065f46;font-weight:600">
+            <i class="fas fa-shield-alt" style="color:var(--em)"></i>
+            Données 100% sécurisées · Traitement sous 30 min · Pharmacien certifié
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONFIANCE ════════════════════════════════════ -->
+<section class="section sec-wh">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Pourquoi nous choisir</div>
+    <h2 class="sec-title">Un service de confiance</h2>
+    <p class="sec-sub">La santé ne mérite que le meilleur. Voici pourquoi 50 000+ Togolais nous font confiance.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="trust-grid">
+      <div class="trust-card"><div class="trust-ic"><i class="fas fa-user-md"></i></div><h3>Pharmaciens diplômés</h3><p>Chaque ordonnance est vérifiée par un pharmacien d'État certifié avant toute délivrance.</p></div>
+      <div class="trust-card"><div class="trust-ic"><i class="fas fa-shipping-fast"></i></div><h3>Livraison express 2h</h3><p>30 livreurs certifiés assurent vos livraisons dans Lomé et les grandes villes du Togo.</p></div>
+      <div class="trust-card"><div class="trust-ic"><i class="fas fa-shield-alt"></i></div><h3>Données sécurisées</h3><p>Vos ordonnances et données médicales sont chiffrées et confidentielles. Supprimées après 30j.</p></div>
+      <div class="trust-card"><div class="trust-ic"><i class="fas fa-headset"></i></div><h3>Support 24h/24</h3><p>Notre équipe est disponible par WhatsApp pour répondre à toutes vos questions, jour et nuit.</p></div>
+    </div>
+    <!-- Photo équipe -->
+    <div style="margin-top:52px;border-radius:var(--rl);overflow:hidden;position:relative">
+      <img src="https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1200&h=360&q=80" alt="Notre équipe PharmaLoc" style="width:100%;height:360px;object-fit:cover;object-position:center top">
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,22,40,.7) 0%,rgba(10,22,40,.2) 60%,transparent 100%);display:flex;align-items:center;padding:0 5%">
+        <div>
+          <div class="sec-tag" style="background:rgba(16,185,129,.2);color:#6ee7b7;border-color:rgba(16,185,129,.25)">Notre équipe</div>
+          <h3 style="font-family:'Clash Display',sans-serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:700;color:#fff;margin-bottom:8px;margin-top:6px">12 pharmaciens certifiés<br>à votre service</h3>
+          <p style="color:rgba(255,255,255,.65);font-size:.9rem;max-width:340px">Une équipe dévouée de professionnels de santé, disponible 24h/24 pour valider vos ordonnances et répondre à vos questions.</p>
+          <a href="apropos.html" style="display:inline-flex;align-items:center;gap:7px;margin-top:18px;padding:10px 22px;border-radius:50px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:700;font-size:.87rem;text-decoration:none;transition:var(--t)" onmouseover="this.style.background='rgba(5,150,105,.5)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">
+            Rencontrer l'équipe <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ URGENCES ══════════════════════════════════════ -->
+<section class="section sec-bg" id="urgences">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Assistance immédiate</div>
+    <h2 class="sec-title">Services d'urgence 24h/24</h2>
+    <p class="sec-sub">Besoin d'aide urgente ? Nos services sont disponibles à toute heure.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="urg-grid">
+      <div class="urg-card" onclick="location.href='urgences.html'">
+        <div class="urg-ic ui-red">🏥</div>
+        <div><h4>Pharmacies de garde</h4><p>Trouvez les pharmacies ouvertes la nuit et les jours fériés.</p><div class="urg-cta">Voir les gardes <i class="fas fa-arrow-right"></i></div></div>
+      </div>
+      <div class="urg-card" onclick="window.open('https://wa.me/22896327992','_blank')">
+        <div class="urg-ic ui-am">📞</div>
+        <div><h4>Conseil pharmacien</h4><p>Parlez à un pharmacien en ligne maintenant, gratuitement.</p><div class="urg-cta">Contacter <i class="fas fa-arrow-right"></i></div></div>
+      </div>
+      <div class="urg-card" onclick="location.href='boutique.html'">
+        <div class="urg-ic ui-bl">🚑</div>
+        <div><h4>Livraison express</h4><p>Médicaments urgents livrés en moins de 45 minutes.</p><div class="urg-cta">Commander <i class="fas fa-arrow-right"></i></div></div>
+      </div>
+      <div class="urg-card" onclick="window.open('https://wa.me/22896327992','_blank')">
+        <div class="urg-ic ui-gr">💬</div>
+        <div><h4>WhatsApp 24h/24</h4><p>Envoyez votre ordonnance ou question par WhatsApp.</p><div class="urg-cta">WhatsApp <i class="fas fa-arrow-right"></i></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TÉMOIGNAGES ════════════════════════════════ -->
+<section class="section sec-wh" id="temoignages">
+  <div class="sec-inner sec-center">
+    <div class="sec-tag">Ils nous font confiance</div>
+    <h2 class="sec-title">Ce que disent nos clients</h2>
+    <p class="sec-sub">50 000+ clients satisfaits. Voici leurs expériences authentiques.</p>
+  </div>
+  <div class="sec-inner">
+    <div class="testi-grid" id="testiGrid"></div>
+    <!-- ✅ NOUVEAU — CTA Créer un compte sous les témoignages -->
+    <div style="text-align:center;margin-top:40px">
+      <p style="font-size:.95rem;color:var(--sl);margin-bottom:16px">Rejoignez 50 000+ clients satisfaits</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="login.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:50px;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.92rem;text-decoration:none;box-shadow:var(--sh-em);transition:var(--t)" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <i class="fas fa-user-plus"></i> Créer un compte gratuit
+        </a>
+        <a href="login.html" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:50px;border:2px solid var(--em);color:var(--em);font-weight:700;font-size:.92rem;text-decoration:none;transition:var(--t)" onmouseover="this.style.background='var(--eml)'" onmouseout="this.style.background='transparent'">
+          <i class="fas fa-sign-in-alt"></i> Se connecter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NEWSLETTER ════════════════════════════════════ -->
+<section class="nl-wrap">
+  <div class="nl-inner">
+    <div class="nl-tag">Restez informé</div>
+    <h2>Alertes médicaments &amp; promotions</h2>
+    <p>Recevez les alertes de disponibilité, les promotions et les rappels de renouvellement d'ordonnance.</p>
+    <form class="nl-form" onsubmit="nlSub(event)">
+      <input type="email" placeholder="votre@email.com" required>
+      <button type="submit"><i class="fas fa-bell"></i> S'abonner</button>
+    </form>
+    <p class="nl-note">Aucun spam · Désabonnement en un clic</p>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════════ -->
+<footer>
+  <div class="ft-grid">
+    <div class="ft-brand">
+      <a href="pharma.html" class="nav-logo">
+        <div class="nav-logo-ic"><i class="fas fa-plus"></i></div>
+        <span class="nav-logo-txt">Pharma<em>Loc</em></span>
+      </a>
+      <p>Votre plateforme de référence pour localiser les pharmacies et commander vos médicaments en ligne en toute sécurité au Togo.</p>
+      <div class="ft-socials">
+        <a href="#" class="ft-soc"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="ft-soc"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/22896327992" class="ft-soc" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="ft-soc"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="ft-col">
+      <h4>Services</h4>
+      <a href="localisation.html">Localiser une pharmacie</a>
+      <a href="boutique.html">Boutique en ligne</a>
+      <a href="ordonnance.html">Envoi d'ordonnance</a>
+      <a href="urgences.html">Pharmacie de garde</a>
+      <a href="apropos.html">À propos</a>
+    </div>
+    <div class="ft-col">
+      <h4>Catégories</h4>
+      <a href="boutique.html">Médicaments</a>
+      <a href="boutique.html">Vitamines &amp; Compléments</a>
+      <a href="boutique.html">Bébé &amp; Maman</a>
+      <a href="boutique.html">Beauté &amp; Soin</a>
+      <a href="boutique.html">Matériel médical</a>
+    </div>
+    <div class="ft-col">
+      <h4>Mon compte</h4>
+      <!-- ✅ NOUVEAU — Colonne Mon compte dans le footer -->
+      <a href="login.html"><i class="fas fa-sign-in-alt" style="color:var(--em2);margin-right:5px"></i> Se connecter</a>
+      <a href="login.html"><i class="fas fa-user-plus" style="color:var(--em2);margin-right:5px"></i> Créer un compte</a>
+      <a href="dashboard.html"><i class="fas fa-tachometer-alt" style="color:var(--em2);margin-right:5px"></i> Tableau de bord</a>
+      <a href="dashboard.html"><i class="fas fa-shopping-bag" style="color:var(--em2);margin-right:5px"></i> Mes commandes</a>
+      <a href="dashboard.html"><i class="fas fa-file-medical" style="color:var(--em2);margin-right:5px"></i> Mes ordonnances</a>
+      <a href="tel:+22896327992">+228 96 32 79 92</a>
+      <a href="mailto:contact@pharmaloc.tg">contact@pharmaloc.tg</a>
+    </div>
+  </div>
+  <div class="ft-bottom">
+    <p>© 2026 PharmaLoc · Tous droits réservés · Lomé, Togo</p>
+    <div class="ft-badge"><i class="fas fa-shield-alt"></i> Site sécurisé · Pharmaciens certifiés</div>
+  </div>
+</footer>
+
+<!-- WhatsApp flottant -->
+<a href="https://wa.me/22896327992" target="_blank" class="wa-float" title="WhatsApp PharmaLoc">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- Panier drawer -->
+<div class="cart-ov" id="cartOv" onclick="closeCartOut(event)">
+  <div class="cart-dr">
+    <div class="cart-hd">
+      <h3>🛒 Mon panier <span id="cartItemCount" style="font-size:.8rem;color:var(--mu);font-weight:400"></span></h3>
+      <button class="cart-cls" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-ft" id="cartFt" style="display:none">
+      <div class="cft-row"><span>Sous-total</span><span id="cartSub">0 FCFA</span></div>
+      <div class="cft-row"><span>Livraison</span><span style="color:var(--em)">Gratuite</span></div>
+      <div class="cft-tot"><span>Total</span><span id="cartTot">0 FCFA</span></div>
+      <!-- ✅ NOUVEAU — Checkout redirige vers login si pas connecté -->
+      <button class="btn-checkout" onclick="checkout()"><i class="fas fa-lock"></i> Passer la commande</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt"></span></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ════ DONNÉES ════════════════════════════════════ */
+const PHARMAS = [
+  {id:1, name:'Pharmacie Centrale',    addr:'Bd du 13 Janvier, Lomé',     lat:6.1375,lng:1.2123, open:true,  h24:true,  garde:false, dist:'0.4 km', tel:'+228 22 21 00 10'},
+  {id:2, name:'Pharmacie du Bénin',    addr:'Rue du Commerce, Lomé',       lat:6.1420,lng:1.2180, open:true,  h24:false, garde:false, dist:'0.8 km', tel:'+228 22 21 05 40'},
+  {id:3, name:'Pharmacie Nana',        addr:'Quartier Kodjoviakopé, Lomé', lat:6.1310,lng:1.2060, open:false, h24:false, garde:false, dist:'1.2 km', tel:'+228 22 26 01 80'},
+  {id:4, name:'Pharmacie de la Paix',  addr:'Av. Nouvelle Marche, Lomé',   lat:6.1500,lng:1.2250, open:true,  h24:false, garde:true,  dist:'1.6 km', tel:'+228 22 22 00 60'},
+  {id:5, name:'Pharmacie Hippocrate',  addr:'Rue de Atakpamé, Lomé',       lat:6.1280,lng:1.2300, open:true,  h24:true,  garde:true,  dist:'2.1 km', tel:'+228 22 25 08 00'},
+  {id:6, name:'Pharmacie Saint-Luc',   addr:'Boulevard Circulaire, Lomé',  lat:6.1450,lng:1.2050, open:false, h24:false, garde:false, dist:'2.4 km', tel:'+228 22 26 06 20'},
+  {id:7, name:'Pharmacie Espoir',      addr:'Quartier Hédzranawoé, Lomé',  lat:6.1550,lng:1.2150, open:true,  h24:false, garde:false, dist:'3.0 km', tel:'+228 22 24 04 90'},
+  {id:8, name:'Pharmacie de la Croix', addr:'Av. de la Victoire, Lomé',    lat:6.1200,lng:1.2200, open:true,  h24:true,  garde:true,  dist:'3.5 km', tel:'+228 22 21 07 80'},
+];
+
+const PRODUCTS = [
+  {id:1,  name:'Paracétamol 500mg',    cat:'medicament', em:'💊', desc:'Antidouleur · Boîte 20 cp',         p:1500,  o:2000,  promo:true,  st:'in',  lbl:'En stock',         ph:'Pharmacie Centrale'},
+  {id:2,  name:'Vitamine C 1000mg',    cat:'vitamine',   em:'🍋', desc:'Immunité · Effervescent · 20 cp',   p:3500,  o:null,  promo:false, st:'in',  lbl:'En stock',         ph:'Pharmacie du Bénin'},
+  {id:3,  name:'Doliprane Nourrisson', cat:'bebe',       em:'👶', desc:'Sirop paracétamol · 0-1 an · 90ml', p:4200,  o:null,  promo:false, st:'low', lbl:'Stock limité',     ph:'Pharmacie Nana'},
+  {id:4,  name:'Crème SPF50',          cat:'beaute',     em:'🧴', desc:'Protection solaire · 150 ml',        p:8500,  o:10000, promo:true,  st:'in',  lbl:'En stock',         ph:'Pharmacie de la Paix'},
+  {id:5,  name:'Thermomètre digital',  cat:'materiel',   em:'🌡️', desc:'Buccal / axillaire · alerte fièvre', p:5500,  o:null,  promo:false, st:'in',  lbl:'En stock',         ph:'Pharmacie Hippocrate'},
+  {id:6,  name:'Amoxicilline 500mg',   cat:'medicament', em:'💉', desc:'Antibiotique · ordonnance · 16 gél', p:6000,  o:null,  promo:false, st:'in',  lbl:'Sur ordonnance',   ph:'Pharmacie Saint-Luc'},
+  {id:7,  name:'Zinc + Magnésium',     cat:'vitamine',   em:'⚗️', desc:'Fatigue & immunité · 60 cp',         p:7200,  o:8000,  promo:true,  st:'in',  lbl:'En stock',         ph:'Pharmacie Espoir'},
+  {id:8,  name:'Couches Pampers T3',   cat:'bebe',       em:'🍼', desc:'6-10 kg · 40 unités',                p:9500,  o:null,  promo:false, st:'in',  lbl:'En stock',         ph:'Pharmacie de la Croix'},
+  {id:9,  name:'Gel Hydroalcoolique',  cat:'beaute',     em:'🧼', desc:'Désinfectant · 500 ml',               p:2800,  o:3500,  promo:true,  st:'low', lbl:'Stock limité',     ph:'Pharmacie Centrale'},
+  {id:10, name:'Tensiomètre bras',     cat:'materiel',   em:'💓', desc:'Tension · Mémoire 90 mesures',       p:28000, o:32000, promo:true,  st:'in',  lbl:'En stock',         ph:'Pharmacie du Bénin'},
+  {id:11, name:'Ibuprofène 400mg',     cat:'medicament', em:'💊', desc:'Anti-inflammatoire · 20 cp',         p:2200,  o:null,  promo:false, st:'in',  lbl:'En stock',         ph:'Pharmacie Nana'},
+  {id:12, name:'Oméga-3 DHA EPA',      cat:'vitamine',   em:'🐟', desc:'Cerveau & Cœur · 60 capsules',       p:12000, o:null,  promo:false, st:'out', lbl:'Rupture de stock', ph:'Pharmacie de la Paix'},
+];
+
+const TESTI = [
+  {stars:5, txt:"Incroyable service ! J'ai commandé du Paracétamol à 23h et le livreur était chez moi en 40 minutes. Pharmacienne très professionnelle.", name:'Koffi Amevor',  role:'Ingénieur · Lomé',    svc:'Livraison urgente',  color:'#059669'},
+  {stars:5, txt:"J'ai envoyé ma photo d'ordonnance via WhatsApp, tout était validé en 25 minutes. Mes médicaments livrés avant que je finisse de dîner.", name:'Abla Mensah',   role:'Retraitée · Lomé',    svc:'Ordonnance en ligne', color:'#3b82f6'},
+  {stars:5, txt:"La carte de localisation est top ! J'ai trouvé la pharmacie de garde à 3h du matin pour mon bébé fiévreux. Service irremplaçable.",     name:'Yawa Dossou',   role:'Maman · Kpalimé',     svc:'Pharmacie de garde', color:'#7c3aed'},
+  {stars:4, txt:"Service très bien. La livraison a pris 2h30 au lieu de 2h, mais la qualité des médicaments et la gentillesse du livreur compensent.",   name:'Séna Akouété',  role:'Étudiante · Lomé',    svc:'Boutique en ligne',  color:'#0d9488'},
+  {stars:5, txt:"En tant que diabétique, je commande mon insuline régulièrement. PharmaLoc assure une chaîne du froid parfaite. Je recommande vivement !", name:'Hubert Klutse', role:'Entrepreneur · Lomé', svc:'Renouvellement',     color:'#ef4444'},
+  {stars:5, txt:"Le pharmacien m'a expliqué les interactions entre mes médicaments en détail. Conseil gratuit et très professionnel. Merci PharmaLoc !",  name:'Rodrigue Agbo', role:'Développeur · Lomé',  svc:'Conseil pharmacien', color:'#f59e0b'},
+];
+
+/* ════ CARTE ══════════════════════════════════════ */
+const map = L.map('mapEl').setView([6.1375, 1.2123], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap', maxZoom:18}).addTo(map);
+
+function mkPin(color, text) {
+  const c = {g:['#059669','#0d9488'], b:['#2563eb','#0891b2'], r:['#6b7280','#9ca3af']}[color];
+  return L.divIcon({
+    html:`<div style="width:32px;height:32px;background:linear-gradient(135deg,${c[0]},${c[1]});border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(0,0,0,.25);border:2.5px solid #fff;display:flex;align-items:center;justify-content:center"><div style="transform:rotate(45deg);font-size:.75rem;color:#fff;font-weight:700">${text}</div></div>`,
+    iconSize:[32,32], iconAnchor:[16,32], popupAnchor:[0,-36]
+  });
+}
+
+const mks = {};
+PHARMAS.forEach(p => {
+  const col = p.h24 ? 'b' : p.open ? 'g' : 'r';
+  const m = L.marker([p.lat, p.lng], {icon: mkPin(col, '+')})
+    .bindPopup(`<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:200px;padding:4px">
+      <div style="font-family:'Clash Display',sans-serif;font-weight:700;font-size:.92rem;margin-bottom:4px">${p.name}</div>
+      <div style="font-size:.76rem;color:#64748b;margin-bottom:8px">${p.addr}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+        ${p.open?'<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700">Ouvert</span>':'<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700">Fermé</span>'}
+        ${p.h24?'<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700">24h/24</span>':''}
+        ${p.garde?'<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:700">Garde</span>':''}
+      </div>
+      <div style="font-size:.76rem;margin-bottom:4px">📞 ${p.tel}</div>
+      <div style="font-size:.74rem;color:#64748b">📍 ${p.dist}</div>
+    </div>`)
+    .addTo(map);
+  mks[p.id] = m;
+});
+
+/* ════ LISTE PHARMACIES ════════════════════════ */
+function renderPharmaList(f = '') {
+  const el = document.getElementById('pharmaList');
+  const list = PHARMAS.filter(p => p.name.toLowerCase().includes(f.toLowerCase()) || p.addr.toLowerCase().includes(f.toLowerCase()));
+  el.innerHTML = list.map(p => `
+    <div class="ph-item${p.id===selPh?' sel':''}" id="phi-${p.id}" onclick="selPharma(${p.id})">
+      <div class="phi-ic ${p.h24?'h24':p.open?'open':'closed'}">
+        <i class="fas fa-${p.h24?'moon':p.open?'check':'times'}"></i>
+      </div>
+      <div class="phi-info">
+        <div class="phi-name">${p.name}</div>
+        <div class="phi-addr">${p.addr}</div>
+        <div class="phi-tags">
+          ${p.open?'<span class="phi-tag t-open">Ouvert</span>':'<span class="phi-tag t-closed">Fermé</span>'}
+          ${p.h24?'<span class="phi-tag t-h24">24h/24</span>':''}
+          ${p.garde?'<span class="phi-tag t-garde">Garde</span>':''}
+        </div>
+        <div class="phi-dist"><i class="fas fa-map-marker-alt"></i>${p.dist}</div>
+      </div>
+    </div>`).join('');
+}
+
+let selPh = null;
+function selPharma(id) {
+  selPh = id;
+  document.querySelectorAll('.ph-item').forEach(el => el.classList.remove('sel'));
+  const li = document.getElementById('phi-'+id);
+  if (li) { li.classList.add('sel'); li.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  const p = PHARMAS.find(x => x.id === id);
+  if (p) { map.flyTo([p.lat, p.lng], 15, {duration:.8}); mks[id].openPopup(); }
+}
+function filterPharma(v) { renderPharmaList(v); }
+renderPharmaList();
+
+/* ════ PRODUITS ════════════════════════════════ */
+function renderProducts() {
+  const g = document.getElementById('productsGrid');
+  g.innerHTML = PRODUCTS.map(p => {
+    const disc = p.o ? Math.round((1-p.p/p.o)*100) : 0;
+    const bage = p.promo ? `<div class="pc-bgtop bg-promo">−${disc}%</div>` :
+                 p.st==='out' ? '' :
+                 p.lbl==='Sur ordonnance' ? '<div class="pc-bgtop bg-ord">Ordonnance</div>' :
+                 !p.o ? '<div class="pc-bgtop bg-new">Nouveau</div>' : '';
+    const stc = p.st==='in'?'d-in':p.st==='low'?'d-low':'d-out';
+    const addBtn = p.st === 'out'
+      ? `<button class="pc-add" disabled><i class="fas fa-times"></i> Indisponible</button>`
+      : `<button class="pc-add" id="add-${p.id}" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Ajouter</button>`;
+    return `<div class="pc" data-cat="${p.cat}${p.promo?' promo':''}">
+      <div class="pc-img">
+        <div class="pc-img-bg"></div>
+        <span class="pc-em">${p.em}</span>
+        ${bage}
+        <div class="pc-fav" onclick="this.classList.toggle('on')"><i class="fas fa-heart"></i></div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-cat">${p.cat}</div>
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-desc">${p.desc}</div>
+        <div class="pc-stk"><div class="stk-dot ${stc}"></div><span style="font-size:.73rem;color:var(--sl);font-weight:500">${p.lbl}</span></div>
+        <div class="pc-foot">
+          <div class="pc-price">
+            ${p.o?`<span class="pc-old">${p.o.toLocaleString()} FCFA</span>`:''}
+            <span class="pc-new">${p.p.toLocaleString()} <em>FCFA</em></span>
+          </div>
+          ${addBtn}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterP(btn, cat) {
+  document.querySelectorAll('.sfbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.pc').forEach(c => {
+    c.classList.toggle('hidden', cat !== 'all' && !c.dataset.cat.includes(cat));
+  });
+}
+renderProducts();
+
+/* ════ TÉMOIGNAGES ═════════════════════════════ */
+document.getElementById('testiGrid').innerHTML = TESTI.map(t => {
+  const stars = '<i class="fas fa-star"></i>'.repeat(t.stars) + '<i class="far fa-star"></i>'.repeat(5-t.stars);
+  const initials = t.name.split(' ').map(w => w[0]).join('').slice(0,2);
+  return `<div class="testi-card">
+    <div class="testi-stars">${stars}</div>
+    <p class="testi-txt">${t.txt}</p>
+    <div class="testi-author">
+      <div class="ta-av" style="background:linear-gradient(135deg,${t.color},${t.color}88)">${initials}</div>
+      <div>
+        <div class="ta-name">${t.name}</div>
+        <div class="ta-role">${t.role}</div>
+        <div class="ta-svc">${t.svc}</div>
+      </div>
+    </div>
+  </div>`;
+}).join('');
+
+/* ════ PANIER ══════════════════════════════════ */
+let cart = [];
+function addToCart(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p || p.st === 'out') return;
+  const ex = cart.find(x => x.id === id);
+  ex ? ex.qty++ : cart.push({...p, qty:1});
+  updateCartUI();
+  showToast(`${p.name} ajouté au panier`);
+  const btn = document.getElementById('add-'+id);
+  if (btn) {
+    btn.classList.add('ok'); btn.innerHTML = '<i class="fas fa-check"></i> Ajouté';
+    setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter'; }, 2000);
+  }
+}
+function remFromCart(id) { cart = cart.filter(x => x.id !== id); updateCartUI(); }
+function chgQty(id, d) { const i = cart.find(x => x.id===id); if(i) i.qty = Math.max(1, i.qty+d); updateCartUI(); }
+function updateCartUI() {
+  const total = cart.reduce((s,i) => s + i.p*i.qty, 0);
+  const count = cart.reduce((s,i) => s + i.qty, 0);
+  const badge = document.getElementById('cartBadge');
+  badge.textContent = count; badge.style.display = count > 0 ? 'flex' : 'none';
+  document.getElementById('cartItemCount').textContent = count > 0 ? `(${count} article${count>1?'s':''})` : '';
+  const listEl = document.getElementById('cartList');
+  const ftEl   = document.getElementById('cartFt');
+  if (!cart.length) {
+    listEl.innerHTML = `<div class="cart-empty-state"><div class="ces-ico">🛒</div><p style="font-weight:600;color:var(--ink)">Panier vide</p><p style="font-size:.83rem">Ajoutez des produits depuis le catalogue</p></div>`;
+    ftEl.style.display = 'none';
+  } else {
+    listEl.innerHTML = cart.map(i => `
+      <div class="ci">
+        <div class="ci-em">${i.em}</div>
+        <div style="flex:1;min-width:0">
+          <div class="ci-nm">${i.name}</div>
+          <div class="ci-ph">${i.ph}</div>
+          <div class="ci-row">
+            <button class="ci-qb" onclick="chgQty(${i.id},-1)">−</button>
+            <span class="ci-qty">${i.qty}</span>
+            <button class="ci-qb" onclick="chgQty(${i.id},1)">+</button>
+            <span class="ci-pr">${(i.p*i.qty).toLocaleString()} FCFA</span>
+          </div>
+        </div>
+        <button class="ci-del" onclick="remFromCart(${i.id})"><i class="fas fa-trash"></i></button>
+      </div>`).join('');
+    document.getElementById('cartSub').textContent = total.toLocaleString() + ' FCFA';
+    document.getElementById('cartTot').textContent = total.toLocaleString() + ' FCFA';
+    ftEl.style.display = 'block';
+  }
+}
+function toggleCart() { document.getElementById('cartOv').classList.toggle('open'); }
+function closeCartOut(e) { if (e.target === document.getElementById('cartOv')) toggleCart(); }
+/* ✅ NOUVEAU — Checkout redirige vers login.html si panier non vide */
+function checkout() {
+  if (cart.length === 0) return;
+  toggleCart();
+  showToast('Connexion requise pour finaliser votre commande…');
+  setTimeout(() => window.location.href = 'login.html', 1500);
+}
+
+/* ════ STATS COMPTEURS ═════════════════════════ */
+const STATS = [
+  {id:'st1', t:240,   s:'+'},
+  {id:'st2', t:50000, s:'k+'},
+  {id:'st3', t:1200,  s:'+'},
+  {id:'st4', t:98,    s:'%'},
+];
+function animateN(el, target, suffix) {
+  let c = 0, step = Math.max(1, Math.ceil(target/60));
+  const tm = setInterval(() => {
+    c = Math.min(c+step, target);
+    el.textContent = suffix === 'k+' ? (c >= target ? '50k+' : c >= 1000 ? Math.floor(c/1000)+'k' : c) : c.toLocaleString() + suffix;
+    if (c >= target) clearInterval(tm);
+  }, 20);
+}
+const statsObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    STATS.forEach(s => animateN(document.getElementById(s.id), s.t, s.s));
+    statsObs.disconnect();
+  }
+}, {threshold: 0.3});
+const stripEl = document.querySelector('.stats-strip');
+if (stripEl) statsObs.observe(stripEl);
+
+/* ════ AUTRES ══════════════════════════════════ */
+function doSearch() {
+  const med = document.getElementById('searchMed').value.trim();
+  if (med) { document.getElementById('boutique').scrollIntoView({behavior:'smooth'}); showToast(`Recherche : "${med}"`); }
+  else document.getElementById('localiser').scrollIntoView({behavior:'smooth'});
+}
+
+function handleUpload(input) {
+  if (input.files && input.files[0]) {
+    showToast('📋 Ordonnance reçue — validation sous 30 minutes !');
+    document.getElementById('uploadZone').innerHTML = `
+      <div class="ord-upload-ico">✅</div>
+      <h3 style="color:var(--em)">Ordonnance envoyée !</h3>
+      <p>Fichier : ${input.files[0].name}<br>Notre pharmacien valide votre ordonnance.</p>`;
+  }
+}
+
+function nlSub(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  btn.innerHTML = '<i class="fas fa-check"></i> Abonné !';
+  btn.style.background = '#16a34a';
+  e.target.querySelector('input').value = '';
+  setTimeout(() => { btn.innerHTML = '<i class="fas fa-bell"></i> S\'abonner'; btn.style.background = ''; }, 3000);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function toggleNav() {
+  const links = document.getElementById('navLinks');
+  const ico   = document.getElementById('menuIco');
+  const open  = links.classList.toggle('open');
+  ico.className = open ? 'fas fa-times' : 'fas fa-bars';
+}
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('menuIco').className = 'fas fa-bars';
+  });
+});
+
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* ✅ NOUVEAU — Détection connexion (simulated) pour adapter bouton Mon compte */
+function updateAuthNav() {
+  const isLoggedIn = sessionStorage.getItem('pharmaloc_user');
+  const btn = document.getElementById('navAccount');
+  if (isLoggedIn) {
+    btn.href = 'dashboard.html';
+    btn.innerHTML = '<i class="fas fa-user-circle"></i><span>Mon espace</span>';
+    btn.style.background = 'var(--eml)';
+    btn.style.borderColor = 'var(--em)';
+    btn.style.color = 'var(--em)';
+  }
+}
+updateAuthNav();
+
+/* Animations entrée */
+const animObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+      animObs.unobserve(e.target);
+    }
+  });
+}, {threshold:.08});
+document.querySelectorAll('.how-card, .pc, .urg-card, .trust-card').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(22px)';
+  el.style.transition = `opacity .55s ease ${Math.min(i*.07,.4)}s, transform .55s ease ${Math.min(i*.07,.4)}s, border-color .3s, box-shadow .3s`;
+  animObs.observe(el);
+});
+document.querySelectorAll('.testi-card').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(22px)';
+  el.style.transition = `opacity .55s ease ${Math.min(i*.1,.5)}s, transform .55s ease ${Math.min(i*.1,.5)}s, border-color .3s, box-shadow .3s`;
+  const o2 = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; o2.unobserve(e.target); }
+    });
+  }, {threshold:.08});
+  o2.observe(el);
+});
+
+/* PWA Service Worker */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[PharmaLoc] SW enregistré:', reg.scope))
+      .catch(err => console.warn('[PharmaLoc] SW échec:', err));
+  });
+}
+</script>
+</body>
+</html>

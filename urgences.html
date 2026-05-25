@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Urgences & Pharmacies de Garde 24h/24</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{
+  --em:#059669;--em2:#10b981;--eml:#d1fae5;--tl:#0d9488;
+  --rd:#ef4444;--rdl:#fee2e2;--rdd:#dc2626;
+  --am:#f59e0b;--aml:#fef3c7;
+  --bl:#3b82f6;--bll:#dbeafe;
+  --vt:#7c3aed;--vtl:#ede9fe;
+  --ink:#0a1628;--ink2:#1e293b;--sl:#475569;--mu:#94a3b8;
+  --ln:#e2e8f0;--bg:#f8fafb;--wh:#ffffff;
+  --sh:0 2px 12px rgba(0,0,0,.06);--shg:0 8px 28px rgba(5,150,105,.28);
+  --shr:0 8px 28px rgba(239,68,68,.28);
+  --r:14px;--rl:20px;--t:all .28s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+
+/* ══ BARRE URGENCE TOP ═══════════════════════════ */
+.urg-strip{
+  background:linear-gradient(135deg,#7f1d1d,var(--rd));
+  padding:10px 4%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.us-left{display:flex;align-items:center;gap:12px;font-size:.82rem;font-weight:700;color:#fff}
+.us-pulse{width:10px;height:10px;border-radius:50%;background:#fecaca;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(254,202,202,.7)}50%{box-shadow:0 0 0 8px rgba(254,202,202,0)}}
+.us-right{display:flex;align-items:center;gap:10px}
+.us-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:50px;font-size:.78rem;font-weight:800;cursor:pointer;text-decoration:none;transition:var(--t);border:none;font-family:'Plus Jakarta Sans',sans-serif}
+.us-btn-w{background:#fff;color:var(--rd)}
+.us-btn-w:hover{background:#fee2e2}
+.us-btn-g{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.us-btn-g:hover{background:rgba(255,255,255,.3)}
+
+/* ══ NAVBAR ═════════════════════════════════════ */
+nav{position:sticky;top:0;z-index:900;background:var(--wh);border-bottom:1px solid var(--ln);box-shadow:var(--sh)}
+.nav-inner{display:flex;align-items:center;gap:12px;padding:0 4%;height:64px;max-width:1400px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-ic{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;box-shadow:var(--shg)}
+.logo-tx{font-family:'Clash Display',sans-serif;font-size:1.2rem;font-weight:700;color:var(--ink)}
+.logo-tx em{font-style:normal;color:var(--em)}
+.nav-links{display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
+.nav-links a{text-decoration:none;color:var(--sl);font-size:.84rem;font-weight:500;padding:7px 13px;border-radius:9px;transition:var(--t)}
+.nav-links a:hover{color:var(--em);background:var(--eml)}
+.nav-links a.on{color:var(--rd);background:var(--rdl);font-weight:700}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:10px;border:1.5px solid var(--ln);background:var(--wh);color:var(--sl);font-size:.82rem;font-weight:600;cursor:pointer;transition:var(--t);text-decoration:none;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.nbtn:hover{border-color:var(--em);color:var(--em)}
+.nbtn-red{background:var(--rd)!important;border-color:var(--rd)!important;color:#fff!important;box-shadow:var(--shr)}
+.nbtn-red:hover{background:var(--rdd)!important;transform:translateY(-1px)}
+.hamburger{display:none;background:none;border:none;font-size:1.3rem;color:var(--ink);cursor:pointer}
+
+/* ══ HERO URGENCES ═══════════════════════════════ */
+.hero{
+  background:linear-gradient(145deg,#1c0505 0%,#450a0a 40%,#7f1d1d 100%);
+  padding:70px 4% 60px;position:relative;overflow:hidden;
+}
+.hero::before{content:'🚑';position:absolute;right:3%;top:50%;transform:translateY(-50%);font-size:22rem;opacity:.05;pointer-events:none}
+.hero::after{content:'';position:absolute;top:-150px;left:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,.15),transparent 65%);pointer-events:none}
+.hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
+.hero-top{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:50px}
+
+/* Badge urgence */
+.urg-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.35);border-radius:50px;padding:6px 16px;font-size:.74rem;font-weight:800;color:#fca5a5;letter-spacing:.5px;text-transform:uppercase;margin-bottom:18px}
+.ub-dot{width:7px;height:7px;border-radius:50%;background:var(--rd);animation:pulse 1.5s infinite}
+
+.hero h1{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4.5vw,3.4rem);font-weight:700;color:#fff;letter-spacing:-1.2px;line-height:1.08;margin-bottom:16px}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,#fca5a5,#fecaca);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:.98rem;color:rgba(255,255,255,.65);line-height:1.75;margin-bottom:28px;max-width:460px}
+
+/* Boutons d'action rapide */
+.quick-actions{display:flex;flex-direction:column;gap:11px}
+.qa-btn{
+  display:flex;align-items:center;gap:14px;padding:16px 20px;
+  border-radius:14px;border:none;cursor:pointer;transition:var(--t);
+  font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;
+}
+.qa-btn:hover{transform:translateX(4px)}
+.qa-red{background:var(--rd);color:#fff;box-shadow:0 6px 24px rgba(239,68,68,.4)}
+.qa-red:hover{background:var(--rdd)}
+.qa-green{background:var(--em);color:#fff;box-shadow:var(--shg)}
+.qa-green:hover{background:var(--tl)}
+.qa-blue{background:var(--bl);color:#fff;box-shadow:0 6px 24px rgba(59,130,246,.35)}
+.qa-blue:hover{background:#2563eb}
+.qa-amber{background:var(--am);color:#fff;box-shadow:0 6px 24px rgba(245,158,11,.35)}
+.qa-amber:hover{background:#d97706}
+.qa-ico{width:44px;height:44px;border-radius:11px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.qa-txt{text-align:left}
+.qa-title{font-size:.95rem;font-weight:800;display:block;margin-bottom:2px}
+.qa-sub{font-size:.76rem;opacity:.85;display:block}
+.qa-arrow{margin-left:auto;font-size:.85rem;opacity:.7}
+
+/* Stats hero */
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.hs-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px;text-align:center;transition:var(--t);backdrop-filter:blur(8px)}
+.hs-card:hover{background:rgba(255,255,255,.12)}
+.hs-ic{font-size:1.8rem;margin-bottom:8px}
+.hs-num{font-family:'Clash Display',sans-serif;font-size:1.6rem;font-weight:700;color:#fff;line-height:1}
+.hs-lbl{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:4px;font-weight:500}
+
+/* ══ NUMÉROS URGENCE ════════════════════════════ */
+.numbers-section{padding:70px 4%;background:var(--wh)}
+.ns-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1100px;margin:40px auto 0}
+.num-card{
+  padding:26px 22px;border-radius:var(--rl);border:2px solid var(--ln);
+  text-align:center;transition:var(--t);cursor:pointer;position:relative;overflow:hidden;
+}
+.num-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:var(--rl)}
+.num-card:hover::before{opacity:1}
+.num-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.1)}
+.nc-red::before{background:rgba(239,68,68,.04)} .nc-red:hover{border-color:rgba(239,68,68,.35)}
+.nc-green::before{background:rgba(5,150,105,.04)} .nc-green:hover{border-color:rgba(5,150,105,.35)}
+.nc-blue::before{background:rgba(59,130,246,.04)} .nc-blue:hover{border-color:rgba(59,130,246,.35)}
+.nc-amber::before{background:rgba(245,158,11,.04)} .nc-amber:hover{border-color:rgba(245,158,11,.35)}
+.nc-vt::before{background:rgba(124,58,237,.04)} .nc-vt:hover{border-color:rgba(124,58,237,.35)}
+.num-ic{width:60px;height:60px;border-radius:16px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.ic-red{background:var(--rdl);color:var(--rd)}
+.ic-green{background:var(--eml);color:var(--em)}
+.ic-blue{background:var(--bll);color:var(--bl)}
+.ic-amber{background:var(--aml);color:var(--am)}
+.ic-vt{background:var(--vtl);color:var(--vt)}
+.num-label{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:6px}
+.num-card h3{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:8px}
+.num-number{font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:4px}
+.nc-red .num-number{color:var(--rd)}
+.nc-green .num-number{color:var(--em)}
+.nc-blue .num-number{color:var(--bl)}
+.nc-amber .num-number{color:var(--am)}
+.nc-vt .num-number{color:var(--vt)}
+.num-sub{font-size:.78rem;color:var(--mu);line-height:1.5;margin-bottom:14px}
+.call-btn{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:50px;
+  border:2px solid currentColor;background:none;font-weight:700;font-size:.82rem;
+  cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;
+  text-decoration:none;
+}
+.nc-red   .call-btn{color:var(--rd)}
+.nc-green .call-btn{color:var(--em)}
+.nc-blue  .call-btn{color:var(--bl)}
+.nc-amber .call-btn{color:var(--am)}
+.nc-vt    .call-btn{color:var(--vt)}
+.nc-red   .call-btn:hover{background:var(--rd);color:#fff;border-color:var(--rd)}
+.nc-green .call-btn:hover{background:var(--em);color:#fff;border-color:var(--em)}
+.nc-blue  .call-btn:hover{background:var(--bl);color:#fff;border-color:var(--bl)}
+.nc-amber .call-btn:hover{background:var(--am);color:#fff;border-color:var(--am)}
+.nc-vt    .call-btn:hover{background:var(--vt);color:#fff;border-color:var(--vt)}
+
+/* ══ PHARMACIES DE GARDE ════════════════════════ */
+.garde-section{padding:70px 4%;background:var(--bg)}
+.garde-layout{max-width:1200px;margin:40px auto 0;display:grid;grid-template-columns:380px 1fr;gap:22px;height:560px}
+
+/* Liste garde */
+.garde-list-panel{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh)}
+.glp-head{padding:16px 18px;border-bottom:1px solid var(--ln)}
+.glp-title{font-family:'Clash Display',sans-serif;font-size:.98rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.glp-title .online-dot{width:8px;height:8px;border-radius:50%;background:var(--em);animation:pulse 2s infinite}
+.glp-search{display:flex;align-items:center;gap:8px;padding:9px 13px;background:var(--bg);border-radius:10px;border:1.5px solid var(--ln);transition:var(--t)}
+.glp-search:focus-within{border-color:var(--em)}
+.glp-search i{color:var(--mu);font-size:.82rem}
+.glp-search input{border:none;outline:none;background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;color:var(--ink);flex:1}
+.glp-search input::placeholder{color:var(--mu)}
+.garde-items{flex:1;overflow-y:auto}
+.garde-items::-webkit-scrollbar{width:3px}
+.garde-items::-webkit-scrollbar-thumb{background:var(--ln);border-radius:2px}
+.gi{padding:13px 18px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:var(--t);display:flex;gap:11px;align-items:flex-start}
+.gi:hover{background:var(--bg)}
+.gi.sel{background:var(--rdl);border-left:3px solid var(--rd)}
+.gi-ic{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.gi-ic.h24{background:var(--bll);color:var(--bl)}
+.gi-ic.garde{background:var(--aml);color:var(--am)}
+.gi-ic.open{background:var(--eml);color:var(--em)}
+.gi-body{flex:1;min-width:0}
+.gi-name{font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi-addr{font-size:.73rem;color:var(--mu);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.git{padding:2px 7px;border-radius:4px;font-size:.62rem;font-weight:800}
+.git-h24{background:var(--bll);color:#1e40af}
+.git-garde{background:var(--aml);color:#92400e}
+.git-nuit{background:#ede9fe;color:#4c1d95}
+.gi-meta{display:flex;align-items:center;gap:10px;font-size:.7rem}
+.gi-dist{color:var(--mu);display:flex;align-items:center;gap:3px}
+.gi-tel{color:var(--em);font-weight:700;text-decoration:none;display:flex;align-items:center;gap:3px}
+.gi-tel:hover{text-decoration:underline}
+.gi-actions{display:flex;flex-direction:column;gap:4px}
+.gia{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--sl);cursor:pointer;transition:var(--t);text-decoration:none}
+.gia:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+
+/* Carte */
+#gardeMap{border-radius:var(--rl);border:1.5px solid var(--ln);overflow:hidden;box-shadow:var(--sh);z-index:1}
+
+/* ══ SERVICES URGENCE ═══════════════════════════ */
+.services-section{padding:70px 4%;background:var(--wh)}
+.serv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1200px;margin:40px auto 0}
+.serv-card{border-radius:var(--rl);padding:28px 24px;border:1.5px solid var(--ln);transition:var(--t);position:relative;overflow:hidden;cursor:pointer}
+.serv-card::before{content:'';position:absolute;inset:0;border-radius:var(--rl);opacity:0;transition:opacity .4s}
+.serv-card:hover::before{opacity:1}
+.serv-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.1)}
+.sc-red::before{background:linear-gradient(135deg,rgba(239,68,68,.04),transparent)} .sc-red:hover{border-color:rgba(239,68,68,.3)}
+.sc-green::before{background:linear-gradient(135deg,rgba(5,150,105,.04),transparent)} .sc-green:hover{border-color:rgba(5,150,105,.3)}
+.sc-blue::before{background:linear-gradient(135deg,rgba(59,130,246,.04),transparent)} .sc-blue:hover{border-color:rgba(59,130,246,.3)}
+.sc-amber::before{background:linear-gradient(135deg,rgba(245,158,11,.04),transparent)} .sc-amber:hover{border-color:rgba(245,158,11,.3)}
+.sc-vt::before{background:linear-gradient(135deg,rgba(124,58,237,.04),transparent)} .sc-vt:hover{border-color:rgba(124,58,237,.3)}
+.sc-tl::before{background:linear-gradient(135deg,rgba(13,148,136,.04),transparent)} .sc-tl:hover{border-color:rgba(13,148,136,.3)}
+.sc-ico{width:56px;height:56px;border-radius:16px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.ico-red{background:var(--rdl);color:var(--rd)}
+.ico-green{background:var(--eml);color:var(--em)}
+.ico-blue{background:var(--bll);color:var(--bl)}
+.ico-amber{background:var(--aml);color:var(--am)}
+.ico-vt{background:var(--vtl);color:var(--vt)}
+.ico-tl{background:#ccfbf1;color:var(--tl)}
+.serv-card h3{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.serv-card p{font-size:.84rem;color:var(--sl);line-height:1.65;margin-bottom:16px}
+.sc-meta{display:flex;align-items:center;justify-content:space-between}
+.sc-dispo{font-size:.74rem;font-weight:700;display:flex;align-items:center;gap:5px}
+.sc-dispo .dot{width:6px;height:6px;border-radius:50%;animation:pulse 2s infinite}
+.sc-action{font-size:.78rem;font-weight:700;color:var(--em);display:flex;align-items:center;gap:4px;transition:var(--t)}
+.sc-action:hover{gap:8px}
+
+/* ══ CONSEILS URGENCE ═══════════════════════════ */
+.tips-section{padding:70px 4%;background:linear-gradient(145deg,#0f172a,#1e293b)}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;max-width:1200px;margin:40px auto 0}
+.tip-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--rl);padding:24px;transition:var(--t)}
+.tip-card:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.2)}
+.tip-num{font-family:'Clash Display',sans-serif;font-size:2.5rem;font-weight:700;color:rgba(255,255,255,.08);line-height:1;margin-bottom:10px}
+.tip-ic{font-size:1.6rem;margin-bottom:12px}
+.tip-card h3{font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;color:#fff;margin-bottom:8px}
+.tip-card p{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.65}
+
+/* ══ CHAT URGENCE ═══════════════════════════════ */
+.chat-section{padding:70px 4%;background:var(--bg)}
+.chat-layout{max-width:900px;margin:40px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chat-card{background:var(--wh);border-radius:var(--rl);padding:28px;border:1.5px solid var(--ln);box-shadow:var(--sh);transition:var(--t)}
+.chat-card:hover{border-color:rgba(5,150,105,.25);transform:translateY(-3px)}
+.cc-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.cc-ic{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.cc-ic.g{background:var(--eml);color:var(--em)}
+.cc-ic.w{background:#dcfce7;color:#25D366}
+.cc-ic.t{background:var(--bll);color:var(--bl)}
+.cc-head h3{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--ink)}
+.cc-head p{font-size:.76rem;color:var(--mu)}
+.chat-card ul{list-style:none;margin-bottom:18px}
+.chat-card ul li{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--sl);padding:5px 0;border-bottom:1px solid var(--ln)}
+.chat-card ul li:last-child{border-bottom:none}
+.chat-card ul li i{color:var(--em);font-size:.72rem;flex-shrink:0}
+.cc-btn{width:100%;padding:12px;border-radius:11px;border:none;font-weight:800;font-size:.9rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+.cc-btn-g{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;box-shadow:var(--shg)}
+.cc-btn-g:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(5,150,105,.38)}
+.cc-btn-w{background:#25D366;color:#fff;box-shadow:0 6px 24px rgba(37,211,102,.35)}
+.cc-btn-w:hover{background:#22c55e;transform:translateY(-2px)}
+
+/* ══ CTA ════════════════════════════════════════ */
+.cta-section{
+  padding:90px 4%;text-align:center;
+  background:linear-gradient(145deg,#1c0505,#450a0a,#7f1d1d);
+  position:relative;overflow:hidden;
+}
+.cta-section::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(239,68,68,.06);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.cta-section h2{font-family:'Clash Display',sans-serif;font-size:clamp(1.7rem,3.5vw,2.6rem);font-weight:700;color:#fff;margin-bottom:12px;position:relative;z-index:1}
+.cta-section p{font-size:1rem;color:rgba(255,255,255,.6);max-width:500px;margin:0 auto 32px;line-height:1.7;position:relative;z-index:1}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.cta-btn-r{padding:15px 32px;border-radius:50px;border:none;background:var(--rd);color:#fff;font-weight:800;font-size:.97rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(239,68,68,.4)}
+.cta-btn-r:hover{background:var(--rdd);transform:translateY(-2px)}
+.cta-btn-t{padding:14px 26px;border-radius:50px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-weight:700;font-size:.97rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px;text-decoration:none}
+.cta-btn-t:hover{background:rgba(255,255,255,.2)}
+
+/* ══ FOOTER ════════════════════════════════════ */
+footer{background:var(--ink);padding:55px 4% 0;color:rgba(255,255,255,.5)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:44px;max-width:1400px;margin:0 auto 44px}
+.footer-col h4{font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:16px}
+.footer-col a{display:block;font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:10px;transition:.2s}
+.footer-col a:hover{color:var(--em2)}
+.footer-socials{display:flex;gap:9px;margin-top:16px}
+.fsoc{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);text-decoration:none;font-size:.88rem;transition:var(--t)}
+.fsoc:hover{background:var(--em);border-color:var(--em);color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding:22px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;max-width:1400px;margin:0 auto}
+.foot-badge{display:flex;align-items:center;gap:7px;padding:5px 14px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);border-radius:50px;font-size:.74rem;color:#fca5a5;font-weight:600}
+
+/* ══ TOAST & MODAL ══════════════════════════════ */
+.toast{position:fixed;bottom:20px;right:20px;z-index:3000;background:var(--ink);color:#fff;border-radius:10px;padding:11px 18px;font-size:.83rem;display:flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(0,0,0,.22);opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast i{color:var(--em2)}
+
+/* Modal conseil */
+.modal-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--wh);border-radius:var(--rl);width:100%;max-width:500px;overflow:hidden;transform:scale(.95);transition:transform .3s;box-shadow:0 30px 80px rgba(0,0,0,.2)}
+.modal-ov.open .modal{transform:scale(1)}
+.modal-head{padding:22px 24px;border-bottom:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700}
+.modal-x{background:none;border:none;color:var(--mu);font-size:1.1rem;cursor:pointer;padding:3px;transition:.2s}
+.modal-x:hover{color:var(--ink)}
+.modal-body{padding:24px}
+.modal-pharm-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.mp-item{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--bg);border-radius:12px;border:1.5px solid var(--ln);transition:var(--t);cursor:pointer}
+.mp-item:hover{border-color:var(--rd);background:var(--rdl)}
+.mp-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--rd),#dc2626);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+.mp-info{flex:1}
+.mp-name{font-size:.88rem;font-weight:700;color:var(--ink)}
+.mp-dist{font-size:.74rem;color:var(--mu)}
+.mp-phone{font-size:.84rem;font-weight:700;color:var(--rd)}
+.btn-modal{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--rd),#dc2626);color:#fff;font-weight:800;font-size:.94rem;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(239,68,68,.35);transition:var(--t)}
+.btn-modal:hover{transform:translateY(-2px)}
+
+/* WhatsApp float */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:800;width:54px;height:54px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;text-decoration:none;box-shadow:0 6px 24px rgba(37,211,102,.45);transition:var(--t)}
+.wa-float:hover{transform:scale(1.1)}
+
+/* Section helper */
+.sec-tag{display:inline-block;background:var(--eml);border:1px solid rgba(5,150,105,.15);border-radius:50px;padding:4px 16px;font-size:.72rem;font-weight:700;color:var(--em);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.sec-tag-red{background:var(--rdl);color:var(--rd);border-color:rgba(239,68,68,.15)}
+.sec-title{font-family:'Clash Display',sans-serif;font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-.8px;color:var(--ink);margin-bottom:10px}
+.sec-sub{font-size:.95rem;color:var(--sl);line-height:1.7;max-width:520px}
+
+/* Responsive */
+@media(max-width:1024px){.garde-layout{grid-template-columns:1fr;height:auto} #gardeMap{height:400px}}
+@media(max-width:768px){
+  .hero-top{grid-template-columns:1fr;gap:36px}
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .chat-layout{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .hamburger{display:block}
+  .nav-links.open{display:flex;flex-direction:column;position:fixed;top:0;left:0;width:100%;height:100vh;background:rgba(10,22,40,.97);backdrop-filter:blur(16px);justify-content:center;align-items:center;gap:20px;z-index:999}
+  .nav-links.open a{font-size:1.3rem;padding:12px 24px;color:#fff}
+}
+@media(max-width:480px){
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .tips-grid{grid-template-columns:1fr}
+  .cta-btns{flex-direction:column;align-items:center}
+  .us-right{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ BANDE URGENCE ════════════════════════════ -->
+<div class="urg-strip">
+  <div class="us-left">
+    <div class="us-pulse"></div>
+    <span>🚨 Service d'urgence actif — Pharmacies de garde ouvertes 24h/24</span>
+  </div>
+  <div class="us-right">
+    <a href="tel:+22896327992" class="us-btn us-btn-w">
+      <i class="fas fa-phone"></i> Appel d'urgence
+    </a>
+    <a href="https://wa.me/22896327992" target="_blank" class="us-btn us-btn-g">
+      <i class="fab fa-whatsapp"></i> WhatsApp 24h/24
+    </a>
+  </div>
+</div>
+
+<!-- ══ NAVBAR ════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="pharma.html" class="nav-logo">
+      <div class="logo-ic"><i class="fas fa-plus"></i></div>
+      <span class="logo-tx">Pharma<em>Loc</em></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="pharma.html">Accueil</a>
+      <a href="apropos.html">À propos</a>
+      <a href="localisation.html">Localiser</a>
+      <a href="boutique.html">Boutique</a>
+      <a href="ordonnance.html">Ordonnance</a>
+      <a href="urgences.html" class="on">Urgences</a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/22896327992" target="_blank" class="nbtn">
+        <i class="fab fa-whatsapp" style="color:#25D366"></i> WhatsApp
+      </a>
+      <a href="tel:+22896327992" class="nbtn nbtn-red">
+        <i class="fas fa-phone"></i> Appel urgent
+      </a>
+      <button class="hamburger" onclick="toggleNav()"><i class="fas fa-bars" id="menuIco"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-top">
+      <!-- Texte -->
+      <div>
+        <div class="urg-badge"><span class="ub-dot"></span> Urgences 24h/24 · 7j/7</div>
+        <h1>Pharmacies de garde<br>& <em>urgences médicales</em></h1>
+        <p>Trouvez une pharmacie ouverte en urgence, accédez aux numéros d'urgence et obtenez un conseil médical immédiat — à toute heure.</p>
+        <div class="quick-actions">
+          <a href="#garde" class="qa-btn qa-red">
+            <div class="qa-ico"><i class="fas fa-hospital"></i></div>
+            <div class="qa-txt">
+              <span class="qa-title">Pharmacies de garde maintenant</span>
+              <span class="qa-sub">8 pharmacies ouvertes près de vous</span>
+            </div>
+            <i class="fas fa-arrow-right qa-arrow"></i>
+          </a>
+          <a href="https://wa.me/22896327992" target="_blank" class="qa-btn qa-green">
+            <div class="qa-ico"><i class="fab fa-whatsapp"></i></div>
+            <div class="qa-txt">
+              <span class="qa-title">Conseil pharmacien en direct</span>
+              <span class="qa-sub">Réponse sous 5 minutes · Gratuit</span>
+            </div>
+            <i class="fas fa-arrow-right qa-arrow"></i>
+          </a>
+          <a href="ordonnance.html" class="qa-btn qa-blue">
+            <div class="qa-ico"><i class="fas fa-file-medical"></i></div>
+            <div class="qa-txt">
+              <span class="qa-title">Livraison urgente d'ordonnance</span>
+              <span class="qa-sub">Médicaments livrés en 45 minutes</span>
+            </div>
+            <i class="fas fa-arrow-right qa-arrow"></i>
+          </a>
+          <a href="tel:+22896327992" class="qa-btn qa-amber">
+            <div class="qa-ico"><i class="fas fa-phone"></i></div>
+            <div class="qa-txt">
+              <span class="qa-title">Appel d'urgence directement</span>
+              <span class="qa-sub">+228 96 32 79 92 · 24h/24</span>
+            </div>
+            <i class="fas fa-arrow-right qa-arrow"></i>
+          </a>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="hero-stats">
+        <div class="hs-card"><div class="hs-ic">🏥</div><div class="hs-num">8</div><div class="hs-lbl">Pharmacies de garde</div></div>
+        <div class="hs-card"><div class="hs-ic">⏱️</div><div class="hs-num">24/7</div><div class="hs-lbl">Disponibilité</div></div>
+        <div class="hs-card"><div class="hs-ic">🚑</div><div class="hs-num">45 min</div><div class="hs-lbl">Livraison urgente</div></div>
+        <div class="hs-card"><div class="hs-ic">👨‍⚕️</div><div class="hs-num">5 min</div><div class="hs-lbl">Conseil pharmacien</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ NUMÉROS D'URGENCE ════════════════════════ -->
+<section class="numbers-section">
+  <div style="text-align:center;max-width:1100px;margin:0 auto">
+    <div class="sec-tag sec-tag-red">Numéros essentiels</div>
+    <h2 class="sec-title">Numéros d'urgence au Togo</h2>
+    <p class="sec-sub" style="margin:0 auto">Composez ces numéros en cas d'urgence médicale. Disponibles 24h/24.</p>
+  </div>
+  <div class="ns-grid">
+    <div class="num-card nc-red">
+      <div class="num-ic ic-red"><i class="fas fa-ambulance"></i></div>
+      <div class="num-label">SAMU / Ambulances</div>
+      <h3>SAMU Lomé</h3>
+      <div class="num-number">118</div>
+      <p class="num-sub">Service d'Aide Médicale Urgente<br>Disponible 24h/24 · 7j/7</p>
+      <a href="tel:118" class="call-btn"><i class="fas fa-phone"></i> Appeler le 118</a>
+    </div>
+    <div class="num-card nc-red">
+      <div class="num-ic ic-red"><i class="fas fa-fire-extinguisher"></i></div>
+      <div class="num-label">Pompiers</div>
+      <h3>Brigade des Sapeurs</h3>
+      <div class="num-number">118</div>
+      <p class="num-sub">Pompiers & Secours<br>Accidents et incendies</p>
+      <a href="tel:118" class="call-btn"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+    <div class="num-card nc-blue">
+      <div class="num-ic ic-blue"><i class="fas fa-shield-alt"></i></div>
+      <div class="num-label">Police / Gendarmerie</div>
+      <h3>Police Nationale</h3>
+      <div class="num-number">117</div>
+      <p class="num-sub">Police secours<br>Urgences sécuritaires</p>
+      <a href="tel:117" class="call-btn"><i class="fas fa-phone"></i> Appeler le 117</a>
+    </div>
+    <div class="num-card nc-green">
+      <div class="num-ic ic-green"><i class="fas fa-clinic-medical"></i></div>
+      <div class="num-label">CHU Lomé</div>
+      <h3>CHU Sylvanus Olympio</h3>
+      <div class="num-number">+228 22 21 25 01</div>
+      <p class="num-sub">Centre Hospitalier Universitaire<br>Urgences médicales 24h/24</p>
+      <a href="tel:+22822212501" class="call-btn"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+    <div class="num-card nc-green">
+      <div class="num-ic ic-green"><i class="fas fa-hospital-user"></i></div>
+      <div class="num-label">Hôpital de Lomé</div>
+      <h3>Hôpital de l'Armée</h3>
+      <div class="num-number">+228 22 27 35 70</div>
+      <p class="num-sub">Urgences hospitalières<br>Service 24h/24</p>
+      <a href="tel:+22822273570" class="call-btn"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+    <div class="num-card nc-amber">
+      <div class="num-ic ic-amber"><i class="fas fa-pills"></i></div>
+      <div class="num-label">PharmaLoc Urgences</div>
+      <h3>Notre Ligne Urgence</h3>
+      <div class="num-number">+228 96 32 79 92</div>
+      <p class="num-sub">Pharmacien disponible<br>Livraison express 45 min</p>
+      <a href="tel:+22896327992" class="call-btn"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+    <div class="num-card nc-vt">
+      <div class="num-ic ic-vt"><i class="fab fa-whatsapp"></i></div>
+      <div class="num-label">WhatsApp Urgences</div>
+      <h3>Chat Médical Urgent</h3>
+      <div class="num-number" style="font-size:1.1rem">+228 96 32 79 92</div>
+      <p class="num-sub">Conseil médical par chat<br>Réponse en 5 minutes</p>
+      <a href="https://wa.me/22896327992" target="_blank" class="call-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+    </div>
+    <div class="num-card nc-blue">
+      <div class="num-ic ic-blue"><i class="fas fa-heart"></i></div>
+      <div class="num-label">Cardiologie urgence</div>
+      <h3>Infarctus · AVC</h3>
+      <div class="num-number" style="font-size:1rem">CHU · 118</div>
+      <p class="num-sub">En cas de douleur thoracique ou de paralysie soudaine, appelez immédiatement le 118.</p>
+      <a href="tel:118" class="call-btn"><i class="fas fa-phone"></i> Appeler le 118</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PHARMACIES DE GARDE ═══════════════════════ -->
+<section class="garde-section" id="garde">
+  <div class="sec-tag sec-tag-red">Ouvertes maintenant</div>
+  <h2 class="sec-title">Pharmacies de garde & 24h/24</h2>
+  <p class="sec-sub">Ces pharmacies sont actuellement ouvertes. Cliquez sur une pharmacie pour l'itinéraire.</p>
+  <div class="garde-layout">
+    <!-- Liste -->
+    <div class="garde-list-panel">
+      <div class="glp-head">
+        <div class="glp-title">
+          <div class="online-dot"></div>
+          Pharmacies disponibles
+          <span style="font-size:.74rem;color:var(--em);font-weight:600;background:var(--eml);padding:2px 9px;border-radius:20px;margin-left:auto">8 ouvertes</span>
+        </div>
+        <div class="glp-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Rechercher…" oninput="filterGarde(this.value)">
+        </div>
+      </div>
+      <div class="garde-items" id="gardeList"></div>
+    </div>
+    <!-- Carte -->
+    <div id="gardeMap"></div>
+  </div>
+</section>
+
+<!-- ══ SERVICES D'URGENCE ═══════════════════════ -->
+<section class="services-section">
+  <div style="text-align:center;max-width:1100px;margin:0 auto">
+    <div class="sec-tag sec-tag-red">Nos services</div>
+    <h2 class="sec-title">Services d'urgence disponibles</h2>
+    <p class="sec-sub" style="margin:0 auto">Tous nos services d'urgence sont actifs 24h/24, 7j/7.</p>
+  </div>
+  <div class="serv-grid">
+    <div class="serv-card sc-red" onclick="openModal()">
+      <div class="sc-ico ico-red"><i class="fas fa-ambulance"></i></div>
+      <h3>Pharmacie de garde</h3>
+      <p>Trouvez la pharmacie de garde la plus proche, ouverte la nuit et les jours fériés. Stocks vérifiés en temps réel.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> Disponible</div>
+        <div class="sc-action" onclick="document.getElementById('garde').scrollIntoView({behavior:'smooth'})">Voir la carte <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="serv-card sc-green" onclick="window.open('https://wa.me/22896327992','_blank')">
+      <div class="sc-ico ico-green"><i class="fas fa-stethoscope"></i></div>
+      <h3>Conseil pharmacien</h3>
+      <p>Parlez à un pharmacien diplômé en moins de 5 minutes par WhatsApp. Gratuit, confidentiel, disponible 24h/24.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> En ligne maintenant</div>
+        <div class="sc-action">Démarrer <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="serv-card sc-blue" onclick="window.location.href='ordonnance.html'">
+      <div class="sc-ico ico-blue"><i class="fas fa-shipping-fast"></i></div>
+      <h3>Livraison express 45 min</h3>
+      <p>Médicaments urgents livrés à domicile en moins de 45 minutes. Envoyez votre ordonnance par photo.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> Service actif</div>
+        <div class="sc-action">Commander <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="serv-card sc-amber" onclick="showToast('Centre antipoison : +228 22 21 65 21')">
+      <div class="sc-ico ico-amber"><i class="fas fa-skull-crossbones"></i></div>
+      <h3>Centre Antipoison</h3>
+      <p>En cas d'intoxication ou d'ingestion accidentelle d'un produit dangereux. Ne pas provoquer le vomissement.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> 24h/24</div>
+        <div class="sc-action">Appeler <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="serv-card sc-vt" onclick="showToast('Service périnatalité : CHU +228 22 21 25 01')">
+      <div class="sc-ico ico-vt"><i class="fas fa-baby"></i></div>
+      <h3>Urgences pédiatriques</h3>
+      <p>Soins d'urgence pour nourrissons et enfants. Médicaments pédiatriques disponibles 24h/24.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> Disponible</div>
+        <div class="sc-action">Contacter <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="serv-card sc-tl" onclick="showToast('Pharmacovigilance : signaler un effet indésirable')">
+      <div class="sc-ico ico-tl"><i class="fas fa-exclamation-triangle"></i></div>
+      <h3>Signalement d'urgence</h3>
+      <p>Effets secondaires graves, réaction allergique sévère, erreur médicamenteuse. Signalement immédiat.</p>
+      <div class="sc-meta">
+        <div class="sc-dispo" style="color:var(--em)"><div class="dot" style="background:var(--em)"></div> Actif</div>
+        <div class="sc-action">Signaler <i class="fas fa-chevron-right"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONSEILS URGENCE ═════════════════════════ -->
+<section class="tips-section">
+  <div style="text-align:center;max-width:1100px;margin:0 auto">
+    <div style="display:inline-block;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.25);border-radius:50px;padding:4px 16px;font-size:.72rem;font-weight:700;color:#fca5a5;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Que faire en cas d'urgence</div>
+    <h2 class="sec-title" style="color:#fff">Réflexes d'urgence médicale</h2>
+    <p class="sec-sub" style="color:rgba(255,255,255,.55);margin:0 auto">Quelques gestes essentiels à connaître avant l'arrivée des secours.</p>
+  </div>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-num">01</div>
+      <div class="tip-ic">📞</div>
+      <h3>Appelez immédiatement le 118</h3>
+      <p>En cas d'urgence vitale (infarctus, AVC, accident grave), composez le 118 sans attendre. Restez en ligne.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">02</div>
+      <div class="tip-ic">🫁</div>
+      <h3>Ne bougez pas le blessé</h3>
+      <p>En cas de chute ou d'accident, ne déplacez pas la personne blessée sauf danger immédiat (feu, noyade).</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">03</div>
+      <div class="tip-ic">💊</div>
+      <h3>Conservez les médicaments</h3>
+      <p>En cas d'intoxication, conservez les emballages ou flacons ingérés pour les montrer aux secours.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">04</div>
+      <div class="tip-ic">🩸</div>
+      <h3>Compresser une plaie</h3>
+      <p>En cas de saignement abondant, appuyez fermement avec un linge propre. Maintenez la pression jusqu'aux secours.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">05</div>
+      <div class="tip-ic">❤️</div>
+      <h3>Massage cardiaque</h3>
+      <p>Si la personne ne respire plus, effectuez 30 compressions thoraciques puis 2 insufflations. Appelez le 118.</p>
+    </div>
+    <div class="tip-card">
+      <div class="tip-num">06</div>
+      <div class="tip-ic">🤒</div>
+      <h3>Fièvre très élevée</h3>
+      <p>Au-delà de 39°C, administrez du paracétamol et appelez un médecin. Au-delà de 40°C, c'est une urgence.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CHAT & CONTACT ═══════════════════════════ -->
+<section class="chat-section">
+  <div style="text-align:center;max-width:900px;margin:0 auto">
+    <div class="sec-tag">Assistance immédiate</div>
+    <h2 class="sec-title">Contactez-nous maintenant</h2>
+    <p class="sec-sub" style="margin:0 auto">Choisissez votre canal de communication préféré pour obtenir de l'aide.</p>
+  </div>
+  <div class="chat-layout">
+    <div class="chat-card">
+      <div class="cc-head">
+        <div class="cc-ic w"><i class="fab fa-whatsapp"></i></div>
+        <div><h3>WhatsApp Urgences</h3><p>Réponse garantie en 5 minutes</p></div>
+      </div>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Conseil pharmacien immédiat</li>
+        <li><i class="fas fa-check-circle"></i> Envoi d'ordonnance par photo</li>
+        <li><i class="fas fa-check-circle"></i> Vérification de disponibilité stock</li>
+        <li><i class="fas fa-check-circle"></i> Organisation de la livraison</li>
+        <li><i class="fas fa-check-circle"></i> Disponible 24h/24 · 7j/7</li>
+      </ul>
+      <a href="https://wa.me/22896327992?text=URGENCE%20-%20J'ai%20besoin%20d'aide%20medicale" target="_blank" class="cc-btn cc-btn-w">
+        <i class="fab fa-whatsapp"></i> Démarrer la conversation
+      </a>
+    </div>
+    <div class="chat-card">
+      <div class="cc-head">
+        <div class="cc-ic g"><i class="fas fa-phone-volume"></i></div>
+        <div><h3>Ligne téléphonique</h3><p>Parlez directement à un pharmacien</p></div>
+      </div>
+      <ul>
+        <li><i class="fas fa-check-circle"></i> Conseil personnalisé en direct</li>
+        <li><i class="fas fa-check-circle"></i> Commande par téléphone</li>
+        <li><i class="fas fa-check-circle"></i> Suivi de livraison en temps réel</li>
+        <li><i class="fas fa-check-circle"></i> Urgences médicales 24h/24</li>
+        <li><i class="fas fa-check-circle"></i> Interprète disponible si besoin</li>
+      </ul>
+      <a href="tel:+22896327992" class="cc-btn cc-btn-g">
+        <i class="fas fa-phone"></i> Appeler le +228 96 32 79 92
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA FINAL ════════════════════════════════ -->
+<section class="cta-section">
+  <h2>Une urgence médicale ? N'attendez pas.</h2>
+  <p>Contactez-nous immédiatement. Nos pharmaciens et notre équipe de livraison sont disponibles à toute heure pour vous venir en aide.</p>
+  <div class="cta-btns">
+    <a href="tel:118" class="cta-btn-r"><i class="fas fa-ambulance"></i> Appeler le SAMU — 118</a>
+    <a href="tel:+22896327992" class="cta-btn-t"><i class="fas fa-phone"></i> PharmaLoc Urgences</a>
+    <a href="https://wa.me/22896327992" target="_blank" class="cta-btn-t"><i class="fab fa-whatsapp"></i> WhatsApp 24h/24</a>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="pharma.html" class="nav-logo" style="margin-bottom:14px;display:flex">
+        <div class="logo-ic"><i class="fas fa-plus"></i></div>
+        <span class="logo-tx">Pharma<em>Loc</em></span>
+      </a>
+      <p style="font-size:.85rem;line-height:1.75;max-width:240px;margin-bottom:6px">Votre plateforme de santé de référence — Localisation, boutique, ordonnances et urgences 24h/24 à Lomé, Togo.</p>
+      <div class="footer-socials">
+        <a href="#" class="fsoc"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="fsoc"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/22896327992" class="fsoc" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="fsoc"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Urgences</h4>
+      <a href="tel:118">🚑 SAMU — 118</a>
+      <a href="tel:117">🚔 Police — 117</a>
+      <a href="tel:+22822212501">🏥 CHU Lomé</a>
+      <a href="tel:+22896327992">💊 PharmaLoc 24h</a>
+      <a href="https://wa.me/22896327992" target="_blank">💬 WhatsApp Urgent</a>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="localisation.html">Localiser une pharmacie</a>
+      <a href="boutique.html">Boutique en ligne</a>
+      <a href="ordonnance.html">Envoi d'ordonnance</a>
+      <a href="urgences.html">Pharmacies de garde</a>
+      <a href="#">Conseil pharmacien</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+22896327992">+228 96 32 79 92</a>
+      <a href="https://wa.me/22896327992" target="_blank">WhatsApp 24h/24</a>
+      <a href="mailto:urgences@pharmaloc.tg">urgences@pharmaloc.tg</a>
+      <a href="#">Lomé, Togo</a>
+      <a href="#">Politique confidentialité</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p style="font-size:.8rem">© 2026 <strong style="color:rgba(255,255,255,.7)">PharmaLoc</strong> · Service 24h/24 · Lomé, Togo</p>
+    <div class="foot-badge"><i class="fas fa-heartbeat"></i> Service d'urgence actif 24h/24 · 7j/7</div>
+  </div>
+</footer>
+
+<!-- WhatsApp float -->
+<a href="https://wa.me/22896327992?text=URGENCE" target="_blank" class="wa-float" title="Urgence WhatsApp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- Modal pharmacies garde -->
+<div class="modal-ov" id="modalOv" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🏥 Pharmacies de garde — Maintenant</h3>
+      <button class="modal-x" onclick="document.getElementById('modalOv').classList.remove('open')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-pharm-list" id="modalList"></div>
+      <a href="#garde" onclick="document.getElementById('modalOv').classList.remove('open')" class="btn-modal">
+        <i class="fas fa-map-marker-alt"></i> Voir sur la carte
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-info-circle"></i><span id="toastTxt"></span></div>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   DONNÉES PHARMACIES DE GARDE
+═══════════════════════════════════════ */
+const GARDE = [
+  {id:1, n:'Pharmacie Centrale',        a:'Boulevard 13 Janvier, Lomé',  lat:6.1375,lng:1.2123, tel:'+228 22 21 00 10', dist:.4,  h:'24h/24',    type:'h24',  services:['Médicaments','Urgences','Livraison']},
+  {id:2, n:'Pharmacie Hippocrate',       a:'Rue de Atakpamé, Lomé',       lat:6.1280,lng:1.2300, tel:'+228 22 25 08 00', dist:2.1, h:'24h/24',    type:'h24',  services:['Urgences','Généraux','Pédiatrie']},
+  {id:3, n:'Pharmacie de la Croix',      a:'Avenue de la Victoire, Lomé', lat:6.1200,lng:1.2200, tel:'+228 22 21 07 80', dist:3.5, h:'24h/24',    type:'h24',  services:['Généraux','24h/24']},
+  {id:4, n:'Pharmacie de la Paix',       a:'Avenue Nouvelle Marche, Lomé',lat:6.1500,lng:1.2250, tel:'+228 22 22 00 60', dist:1.6, h:'Garde nuit', type:'garde',services:['Médicaments','Cardiologie','Garde']},
+  {id:5, n:'Pharmacie du Quartier',      a:'Quartier Agbalépédogan, Lomé',lat:6.1680,lng:1.2280, tel:'+228 22 28 01 20', dist:4.7, h:'Garde nuit', type:'garde',services:['Généraux','Garde','Livraison']},
+  {id:6, n:'Pharmacie Moderne',          a:'Zone Industrielle, Lomé',     lat:6.1100,lng:1.2350, tel:'+228 22 29 05 60', dist:5.1, h:'24h/24',    type:'h24',  services:['Généraux','Urgences']},
+  {id:7, n:'Pharmacie Bonne Santé',      a:'Quartier Nyékonakpoè, Lomé',  lat:6.1620,lng:1.2080, tel:'+228 22 23 09 10', dist:3.8, h:'Garde soir', type:'garde',services:['Généraux','Nutrithérapie']},
+  {id:8, n:'Pharmacie Saint-Luc',        a:'Boulevard Circulaire, Lomé',  lat:6.1450,lng:1.2050, tel:'+228 22 26 06 20', dist:2.4, h:'Garde nuit', type:'garde',services:['Pédiatrie','Maternité','Garde']},
+];
+
+let selectedG = null;
+let gMarkers  = {};
+
+/* ═══════════════════════════════════════
+   CARTE
+═══════════════════════════════════════ */
+const map = L.map('gardeMap').setView([6.1375, 1.2123], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© OpenStreetMap', maxZoom:18
+}).addTo(map);
+L.control.zoom({position:'bottomright'}).addTo(map);
+
+function makePin(type) {
+  const colors = { h24:['#2563eb','#0891b2'], garde:['#d97706','#b45309'] };
+  const [c1,c2] = colors[type]||colors.garde;
+  return L.divIcon({
+    html:`<div style="width:34px;height:34px;background:linear-gradient(135deg,${c1},${c2});border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 14px rgba(0,0,0,.25);border:2.5px solid white;display:flex;align-items:center;justify-content:center">
+      <div style="transform:rotate(45deg);font-size:1rem;line-height:1">🏥</div>
+    </div>`,
+    iconSize:[34,34], iconAnchor:[17,34], popupAnchor:[0,-38]
+  });
+}
+
+function buildGardePopup(p) {
+  const tc = p.type==='h24'?'#1e40af':'#92400e';
+  const tb = p.type==='h24'?'#dbeafe':'#fef3c7';
+  return `<div style="font-family:'Plus Jakarta Sans',sans-serif;min-width:220px;padding:14px">
+    <div style="font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;color:#0a1628;margin-bottom:3px">${p.n}</div>
+    <div style="font-size:.74rem;color:#64748b;margin-bottom:8px">${p.a}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+      <span style="background:${tb};color:${tc};padding:2px 8px;border-radius:4px;font-size:.65rem;font-weight:800">${p.type==='h24'?'24h/24':'De garde'}</span>
+    </div>
+    <div style="font-size:.76rem;color:#475569;margin-bottom:4px">📞 ${p.tel}</div>
+    <div style="font-size:.74rem;color:#64748b;margin-bottom:8px">⏰ ${p.h} · 📍 ${p.dist} km</div>
+    <div style="display:flex;gap:7px;margin-top:10px">
+      <a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" style="flex:1;padding:7px;border-radius:8px;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;font-weight:700;font-size:.74rem;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px"><i class="fas fa-route"></i> Itinéraire</a>
+      <a href="tel:${p.tel}" style="flex:1;padding:7px;border-radius:8px;background:#f8fafb;border:1.5px solid #e2e8f0;color:#475569;font-weight:700;font-size:.74rem;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px"><i class="fas fa-phone"></i> Appeler</a>
+    </div>
+  </div>`;
+}
+
+GARDE.forEach(p => {
+  const m = L.marker([p.lat, p.lng], {icon: makePin(p.type)})
+    .bindPopup(buildGardePopup(p), {maxWidth:260, className:'garde-popup'})
+    .addTo(map)
+    .on('click', () => { selectG(p.id); });
+  gMarkers[p.id] = m;
+});
+
+/* ═══════════════════════════════════════
+   LISTE GARDE
+═══════════════════════════════════════ */
+function renderGardeList(filter='') {
+  const list = document.getElementById('gardeList');
+  const flt  = GARDE.filter(p =>
+    p.n.toLowerCase().includes(filter.toLowerCase()) ||
+    p.a.toLowerCase().includes(filter.toLowerCase())
+  );
+  list.innerHTML = flt.map(p => `
+    <div class="gi${selectedG===p.id?' sel':''}" id="gi-${p.id}" onclick="selectG(${p.id})">
+      <div class="gi-ic ${p.type}"><i class="fas fa-${p.type==='h24'?'moon':'shield-alt'}"></i></div>
+      <div class="gi-body">
+        <div class="gi-name">${p.n}</div>
+        <div class="gi-addr">${p.a}</div>
+        <div class="gi-tags">
+          ${p.type==='h24'?`<span class="git git-h24">24h/24</span>`:`<span class="git git-garde">De garde</span>`}
+          <span class="git git-nuit">${p.h}</span>
+        </div>
+        <div class="gi-meta">
+          <span class="gi-dist"><i class="fas fa-map-marker-alt"></i>${p.dist} km</span>
+          <a class="gi-tel" href="tel:${p.tel}" onclick="event.stopPropagation()"><i class="fas fa-phone"></i>${p.tel}</a>
+        </div>
+      </div>
+      <div class="gi-actions">
+        <a class="gia" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}" target="_blank" onclick="event.stopPropagation()" title="Itinéraire"><i class="fas fa-route"></i></a>
+        <a class="gia" href="tel:${p.tel}" onclick="event.stopPropagation()" title="Appeler"><i class="fas fa-phone"></i></a>
+      </div>
+    </div>`).join('');
+}
+function selectG(id) {
+  selectedG = id;
+  document.querySelectorAll('.gi').forEach(el => el.classList.remove('sel'));
+  const li = document.getElementById('gi-'+id);
+  if (li) { li.classList.add('sel'); li.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+  const p = GARDE.find(x => x.id===id);
+  if (p) { map.flyTo([p.lat,p.lng], 15, {duration:.8}); gMarkers[id].openPopup(); }
+}
+function filterGarde(val) { renderGardeList(val); }
+renderGardeList();
+
+/* ═══════════════════════════════════════
+   MODAL GARDE
+═══════════════════════════════════════ */
+function openModal() {
+  const ml = document.getElementById('modalList');
+  ml.innerHTML = GARDE.filter(p=>p.type==='h24').slice(0,3).map(p=>`
+    <div class="mp-item" onclick="selectG(${p.id});document.getElementById('modalOv').classList.remove('open');document.getElementById('garde').scrollIntoView({behavior:'smooth'})">
+      <div class="mp-av">${p.n[0]}${p.n.split(' ')[1]?.[0]||''}</div>
+      <div class="mp-info">
+        <div class="mp-name">${p.n}</div>
+        <div class="mp-dist">${p.dist} km · ${p.h}</div>
+      </div>
+      <div class="mp-phone">${p.tel}</div>
+    </div>`).join('');
+  document.getElementById('modalOv').classList.add('open');
+}
+document.addEventListener('keydown', e => { if (e.key==='Escape') document.getElementById('modalOv').classList.remove('open'); });
+
+/* ═══════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════ */
+function toggleNav() {
+  const links = document.getElementById('navLinks');
+  const ico   = document.getElementById('menuIco');
+  const isOpen = links.classList.toggle('open');
+  ico.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('menuIco').className = 'fas fa-bars';
+    document.body.style.overflow = '';
+  });
+});
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 20px rgba(0,0,0,.1)' : '';
+});
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('on'), 3000);
+}
+
+/* Animation scroll */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity='1'; e.target.style.transform='translateY(0)';
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold:.1 });
+document.querySelectorAll('.num-card, .serv-card, .tip-card, .hs-card, .chat-card').forEach((el, i) => {
+  el.style.opacity='0'; el.style.transform='translateY(22px)';
+  el.style.transition=`opacity .6s ease ${i*.06}s, transform .6s ease ${i*.06}s, border-color .3s, box-shadow .3s`;
+  io.observe(el);
+});
+</script>
+</body>
+</html>

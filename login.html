@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Connexion / Inscription</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#059669">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PharmaLoc">
+<style>
+:root {
+  --em:#059669; --em2:#10b981; --eml:#d1fae5; --tl:#0d9488;
+  --ink:#0a1628; --ink2:#1e293b; --sl:#475569; --mu:#94a3b8;
+  --ln:#e2e8f0; --bg:#f8fafb; --wh:#ffffff;
+  --rd:#ef4444; --am:#f59e0b; --bl:#3b82f6;
+  --sh:0 2px 12px rgba(0,0,0,.06);
+  --shg:0 8px 28px rgba(5,150,105,.28);
+  --r:12px; --rl:18px;
+  --t:all .28s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── DARK MODE ──────────────────────────── */
+[data-theme="dark"] {
+  --ink:#f1f5f9; --ink2:#e2e8f0; --sl:#94a3b8; --mu:#64748b;
+  --ln:#334155; --bg:#0f172a; --wh:#1e293b;
+  --sh:0 2px 12px rgba(0,0,0,.3);
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg); color:var(--ink);
+  min-height:100vh; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ══ LAYOUT ════════════════════════════════ */
+.wrap { display:grid; grid-template-columns:1fr 1fr; min-height:100vh; }
+
+/* ══ PANNEAU GAUCHE ════════════════════════ */
+.left-panel {
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg,#022c22 0%,#064e3b 35%,#065f46 70%,#047857 100%);
+  display:flex; flex-direction:column;
+}
+
+/* Fonds animés */
+.lp-bg { position:absolute; inset:0; pointer-events:none; }
+.lp-orb {
+  position:absolute; border-radius:50%;
+  filter:blur(80px); animation:orbAnim 25s ease-in-out infinite;
+}
+.orb1 { width:520px; height:520px; background:radial-gradient(circle,rgba(16,185,129,.25),transparent 65%); top:-12%; right:-8%; }
+.orb2 { width:380px; height:380px; background:radial-gradient(circle,rgba(5,150,105,.2),transparent 65%); bottom:2%; left:-6%; animation-delay:-10s; }
+.orb3 { width:240px; height:240px; background:radial-gradient(circle,rgba(52,211,153,.15),transparent 65%); top:42%; left:28%; animation-delay:-5s; }
+@keyframes orbAnim {
+  0%,100%{transform:translate(0,0) scale(1)}
+  25%{transform:translate(35px,-28px) scale(1.07)}
+  50%{transform:translate(-18px,38px) scale(.94)}
+  75%{transform:translate(28px,18px) scale(1.04)}
+}
+.lp-pattern {
+  position:absolute; inset:0; opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.lp-content {
+  position:relative; z-index:2;
+  flex:1; display:flex; flex-direction:column;
+  padding:48px 52px;
+}
+
+/* Logo */
+.lp-logo { display:flex; align-items:center; gap:11px; text-decoration:none; margin-bottom:auto; }
+.lp-logo-ic {
+  width:46px; height:46px; border-radius:13px;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2rem; color:#fff; transition:var(--t);
+  backdrop-filter:blur(10px);
+}
+.lp-logo:hover .lp-logo-ic { background:rgba(255,255,255,.2); transform:rotate(-5deg) scale(1.05); }
+.lp-logo-txt { font-family:'Clash Display',sans-serif; font-size:1.5rem; font-weight:700; color:#fff; letter-spacing:-.02em; }
+.lp-logo-txt em { font-style:normal; color:#6ee7b7; }
+
+/* Hero text */
+.lp-hero { flex:1; display:flex; flex-direction:column; justify-content:center; padding:32px 0; max-width:440px; }
+.lp-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 16px; border-radius:50px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
+  font-size:.74rem; font-weight:700; color:rgba(255,255,255,.9);
+  text-transform:uppercase; letter-spacing:.5px; margin-bottom:24px; width:fit-content;
+  backdrop-filter:blur(8px);
+}
+.lp-tag-dot {
+  width:6px; height:6px; border-radius:50%; background:#34d399;
+  box-shadow:0 0 10px rgba(52,211,153,.6); animation:dotPulse 2.5s ease-in-out infinite;
+}
+@keyframes dotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+.lp-title {
+  font-family:'Clash Display',sans-serif;
+  font-size:clamp(2.1rem,3.8vw,3.1rem); font-weight:700;
+  color:#fff; line-height:1.1; letter-spacing:-.04em; margin-bottom:18px;
+}
+.lp-title .hl {
+  background:linear-gradient(135deg,#6ee7b7 0%,#34d399 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+
+.lp-desc { font-size:1rem; color:rgba(255,255,255,.6); line-height:1.75; margin-bottom:36px; }
+
+/* Features */
+.lp-features { display:flex; flex-direction:column; gap:12px; }
+.lp-feat {
+  display:flex; align-items:center; gap:14px; padding:13px 16px;
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r); transition:var(--t);
+}
+.lp-feat:hover { background:rgba(255,255,255,.09); transform:translateX(5px); }
+.lp-feat-ic {
+  width:40px; height:40px; border-radius:10px;
+  background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.22);
+  display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0;
+}
+.lp-feat-txt { font-size:.88rem; color:rgba(255,255,255,.85); font-weight:500; }
+
+/* Statistiques bas */
+.lp-stats {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+  padding-top:32px; border-top:1px solid rgba(255,255,255,.07); margin-top:auto;
+}
+.lp-stat-n { font-family:'Clash Display',sans-serif; font-size:1.6rem; font-weight:700; color:#fff; line-height:1; margin-bottom:4px; }
+.lp-stat-l { font-size:.73rem; color:rgba(255,255,255,.5); }
+
+/* Photo réelle overlay bas */
+.lp-photo-strip {
+  display:flex; align-items:center; gap:-8px; margin-bottom:4px;
+}
+.lp-photo-av {
+  width:28px; height:28px; border-radius:50%;
+  border:2px solid rgba(255,255,255,.3); overflow:hidden;
+  flex-shrink:0; margin-right:-8px;
+}
+.lp-photo-av img { width:100%; height:100%; object-fit:cover; }
+.lp-photo-txt { font-size:.72rem; color:rgba(255,255,255,.65); margin-left:18px; }
+
+/* ══ PANNEAU DROIT (FORMULAIRE) ══════════ */
+.right-panel {
+  display:flex; align-items:center; justify-content:center;
+  padding:48px 52px; background:var(--wh); position:relative; overflow:hidden;
+}
+.rp-bg {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 50% 40% at 100% 0%,rgba(5,150,105,.06) 0%,transparent 100%),
+    radial-gradient(ellipse 40% 50% at 0% 100%,rgba(59,130,246,.04) 0%,transparent 100%);
+}
+
+/* Bouton thème */
+.theme-btn {
+  position:absolute; top:28px; right:28px;
+  width:38px; height:38px; border-radius:10px;
+  background:var(--bg); border:1.5px solid var(--ln);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--sl); cursor:pointer; transition:var(--t); z-index:10;
+}
+.theme-btn:hover { border-color:var(--em); color:var(--em); }
+
+/* Retour accueil */
+.back-home {
+  position:absolute; top:28px; left:28px;
+  display:flex; align-items:center; gap:6px;
+  font-size:.8rem; font-weight:600; color:var(--sl);
+  text-decoration:none; transition:var(--t); z-index:10;
+}
+.back-home:hover { color:var(--em); }
+.back-home i { font-size:.75rem; }
+
+.form-box { position:relative; z-index:1; width:100%; max-width:420px; }
+
+/* Tabs */
+.form-tabs {
+  display:flex; background:var(--bg); border-radius:var(--r);
+  padding:4px; margin-bottom:32px; position:relative;
+  border:1px solid var(--ln);
+}
+.tab-slide {
+  position:absolute; top:4px; bottom:4px; left:4px;
+  width:calc(50% - 4px);
+  background:var(--wh); border-radius:9px; box-shadow:var(--sh);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.tab-slide.right { transform:translateX(100%); }
+.form-tab {
+  flex:1; padding:11px; background:none; border:none;
+  font-family:inherit; font-size:.88rem; font-weight:600;
+  color:var(--mu); cursor:pointer; transition:var(--t); position:relative; z-index:2;
+}
+.form-tab.on { color:var(--ink); }
+
+/* En-tête form */
+.fh { margin-bottom:28px; }
+.fh-title { font-family:'Clash Display',sans-serif; font-size:1.55rem; font-weight:700; color:var(--ink); letter-spacing:-.02em; margin-bottom:6px; }
+.fh-sub { font-size:.88rem; color:var(--sl); }
+
+/* Bouton Google */
+.btn-google {
+  width:100%; display:flex; align-items:center; justify-content:center; gap:11px;
+  padding:13px; border-radius:var(--r); border:1.5px solid var(--ln);
+  background:var(--wh); font-family:inherit; font-size:.9rem; font-weight:600;
+  color:var(--ink); cursor:pointer; transition:var(--t); margin-bottom:22px;
+}
+.btn-google:hover { border-color:var(--em); background:var(--bg); transform:translateY(-1px); }
+.btn-google svg { width:20px; height:20px; flex-shrink:0; }
+
+/* Séparateur */
+.divider { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--ln); }
+.divider span { font-size:.78rem; color:var(--mu); font-weight:500; white-space:nowrap; }
+
+/* Champ */
+.fg { margin-bottom:16px; }
+.fg label { display:block; font-size:.78rem; font-weight:700; color:var(--ink); margin-bottom:6px; }
+.fg label .req { color:var(--em); }
+.fi-wrap { position:relative; }
+.fi-ic { position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--mu); font-size:.82rem; pointer-events:none; transition:.2s; }
+.fg:focus-within .fi-ic { color:var(--em); }
+.fi {
+  width:100%; padding:13px 13px 13px 40px;
+  border:1.5px solid var(--ln); border-radius:var(--r);
+  background:var(--bg); font-family:inherit; font-size:.88rem;
+  color:var(--ink); outline:none; transition:var(--t);
+}
+.fi::placeholder { color:var(--mu); }
+.fi:focus { border-color:var(--em); background:var(--wh); box-shadow:0 0 0 3px rgba(5,150,105,.1); }
+.fi.err { border-color:var(--rd); box-shadow:0 0 0 3px rgba(239,68,68,.09); }
+.eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--mu); cursor:pointer; font-size:.88rem; padding:3px; transition:.2s; }
+.eye-btn:hover { color:var(--ink); }
+.ferr { display:none; align-items:center; gap:5px; font-size:.74rem; color:var(--rd); margin-top:5px; }
+.fg.has-err .ferr { display:flex; }
+.fg.has-err .fi { border-color:var(--rd); }
+
+/* Téléphone */
+.tel-row {
+  display:flex; border:1.5px solid var(--ln); border-radius:var(--r);
+  background:var(--bg); overflow:hidden; transition:var(--t);
+}
+.tel-row:focus-within { border-color:var(--em); background:var(--wh); box-shadow:0 0 0 3px rgba(5,150,105,.1); }
+.tel-pre {
+  padding:13px 14px; border-right:1px solid var(--ln);
+  font-size:.85rem; font-weight:700; color:var(--sl);
+  display:flex; align-items:center; gap:7px; flex-shrink:0;
+  background:rgba(0,0,0,.02);
+}
+.tel-row input { flex:1; padding:13px 14px; border:none; outline:none; background:none; font-family:inherit; font-size:.88rem; color:var(--ink); }
+.tel-row input::placeholder { color:var(--mu); }
+
+/* Force mot de passe */
+.pwd-bars { display:flex; gap:4px; margin:9px 0 5px; }
+.pwd-bar { height:3px; flex:1; background:var(--ln); border-radius:2px; transition:.3s; }
+.pb-weak { background:var(--rd); }
+.pb-med  { background:var(--am); }
+.pb-good { background:var(--em); }
+.pwd-hint { font-size:.72rem; color:var(--mu); display:flex; align-items:center; gap:5px; }
+
+/* Checkbox */
+.chk { display:flex; align-items:flex-start; gap:9px; cursor:pointer; margin-bottom:10px; }
+.chk input { width:17px; height:17px; margin-top:2px; accent-color:var(--em); cursor:pointer; flex-shrink:0; }
+.chk-lbl { font-size:.82rem; color:var(--sl); line-height:1.5; }
+.chk-lbl a { color:var(--em); text-decoration:none; font-weight:600; }
+.chk-lbl a:hover { text-decoration:underline; }
+
+/* Lien mdp oublié */
+.forgot { display:block; text-align:right; font-size:.8rem; color:var(--em); font-weight:600; text-decoration:none; margin-bottom:14px; transition:var(--t); }
+.forgot:hover { color:var(--tl); }
+
+/* Bouton submit */
+.btn-sub {
+  width:100%; padding:14px; border-radius:var(--r); border:none;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  color:#fff; font-weight:800; font-size:.95rem;
+  cursor:pointer; transition:var(--t); font-family:inherit;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  box-shadow:var(--shg); position:relative; overflow:hidden; margin-top:6px;
+}
+.btn-sub::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,.1); opacity:0; transition:.3s; }
+.btn-sub:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(5,150,105,.38); }
+.btn-sub:hover::after { opacity:1; }
+.btn-sub.loading { pointer-events:none; opacity:.8; }
+.btn-sub.ok { background:linear-gradient(135deg,#16a34a,#15803d); }
+
+/* Badge sécu */
+.sec-badge {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px; background:var(--bg); border-radius:9px;
+  font-size:.75rem; color:var(--sl); margin-top:18px; border:1px solid var(--ln);
+}
+.sec-badge i { color:var(--em); }
+
+/* Lien switch */
+.switch-lnk { text-align:center; margin-top:22px; font-size:.86rem; color:var(--sl); }
+.switch-lnk a { color:var(--em); font-weight:700; text-decoration:none; cursor:pointer; }
+.switch-lnk a:hover { text-decoration:underline; }
+
+/* Forms */
+.auth-form { display:none; animation:fadeUp .35s ease; }
+.auth-form.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* Grid 2 colonnes */
+.fg-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:22px; right:22px; z-index:3000;
+  background:var(--ink); color:#fff; padding:13px 20px;
+  border-radius:var(--r); display:flex; align-items:center; gap:10px;
+  font-size:.84rem; box-shadow:0 10px 36px rgba(0,0,0,.2);
+  opacity:0; transform:translateY(14px) scale(.95);
+  transition:var(--t); pointer-events:none;
+}
+.toast.on { opacity:1; transform:translateY(0) scale(1); }
+.toast.ok i { color:var(--em2); }
+.toast.fail i { color:var(--rd); }
+
+/* ── RESPONSIVE ─────────────────────────── */
+@media(max-width:1024px) {
+  .wrap { grid-template-columns:1fr; }
+  .left-panel { display:none; }
+  .right-panel { padding:36px 24px; }
+}
+@media(max-width:480px) {
+  .right-panel { padding:24px 16px; }
+  .fh-title { font-size:1.35rem; }
+  .fg-grid { grid-template-columns:1fr; }
+  .back-home span { display:none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══ PANNEAU GAUCHE — VISUEL ═══════════════ -->
+  <div class="left-panel">
+    <div class="lp-bg">
+      <div class="lp-pattern"></div>
+      <div class="lp-orb orb1"></div>
+      <div class="lp-orb orb2"></div>
+      <div class="lp-orb orb3"></div>
+    </div>
+    <div class="lp-content">
+      <!-- Logo -->
+      <a href="pharma.html" class="lp-logo">
+        <div class="lp-logo-ic"><i class="fas fa-plus"></i></div>
+        <span class="lp-logo-txt">Pharma<em>Loc</em></span>
+      </a>
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-tag"><span class="lp-tag-dot"></span> Espace membre sécurisé</div>
+        <h1 class="lp-title">Prenez le contrôle<br>de <span class="hl">votre santé</span></h1>
+        <p class="lp-desc">Accédez à vos commandes, ordonnances sécurisées et pharmacies favorites. Profitez d'avantages exclusifs réservés à nos membres.</p>
+
+        <div class="lp-features">
+          <div class="lp-feat">
+            <div class="lp-feat-ic">🛒</div>
+            <span class="lp-feat-txt">Historique complet de vos commandes</span>
+          </div>
+          <div class="lp-feat">
+            <div class="lp-feat-ic">📋</div>
+            <span class="lp-feat-txt">Ordonnances stockées en toute sécurité</span>
+          </div>
+          <div class="lp-feat">
+            <div class="lp-feat-ic">🚴</div>
+            <span class="lp-feat-txt">Suivi de livraison en temps réel</span>
+          </div>
+          <div class="lp-feat">
+            <div class="lp-feat-ic">🔔</div>
+            <span class="lp-feat-txt">Rappels de renouvellement automatiques</span>
+          </div>
+          <div class="lp-feat">
+            <div class="lp-feat-ic">💊</div>
+            <span class="lp-feat-txt">Offres exclusives membres et promotions</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats + photos membres -->
+      <div>
+        <div class="lp-photo-strip">
+          <div class="lp-photo-av"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=56&h=56&q=80" alt=""></div>
+          <div class="lp-photo-av"><img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=56&h=56&q=80" alt=""></div>
+          <div class="lp-photo-av"><img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=56&h=56&q=80" alt=""></div>
+          <div class="lp-photo-av"><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=56&h=56&q=80" alt=""></div>
+          <span class="lp-photo-txt">+50 000 membres nous font confiance</span>
+        </div>
+        <div class="lp-stats">
+          <div><div class="lp-stat-n">50K+</div><div class="lp-stat-l">Membres actifs</div></div>
+          <div><div class="lp-stat-n">4.9 ★</div><div class="lp-stat-l">Satisfaction</div></div>
+          <div><div class="lp-stat-n">100%</div><div class="lp-stat-l">Sécurisé</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANNEAU DROIT — FORMULAIRE ════════════ -->
+  <div class="right-panel">
+    <div class="rp-bg"></div>
+
+    <!-- Retour accueil -->
+    <a href="pharma.html" class="back-home">
+      <i class="fas fa-arrow-left"></i> <span>Accueil</span>
+    </a>
+
+    <!-- Toggle dark mode -->
+    <button class="theme-btn" onclick="toggleTheme()" title="Changer le thème">
+      <i class="fas fa-moon" id="themeIco"></i>
+    </button>
+
+    <div class="form-box">
+
+      <!-- Tabs -->
+      <div class="form-tabs">
+        <div class="tab-slide" id="tabSlide"></div>
+        <button class="form-tab on" id="tabLogin" onclick="switchTab('login')">Se connecter</button>
+        <button class="form-tab" id="tabRegister" onclick="switchTab('register')">S'inscrire</button>
+      </div>
+
+      <!-- ══ FORMULAIRE CONNEXION ═══════════════ -->
+      <form class="auth-form active" id="fLogin" onsubmit="doLogin(event)">
+        <div class="fh">
+          <div class="fh-title">Bon retour 👋</div>
+          <div class="fh-sub">Connectez-vous pour accéder à votre espace PharmaLoc.</div>
+        </div>
+
+        <!-- Google -->
+        <button type="button" class="btn-google" onclick="googleAuth()">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continuer avec Google
+        </button>
+
+        <div class="divider"><span>ou avec votre email</span></div>
+
+        <div class="fg" id="fg-lemail">
+          <label>Adresse email <span class="req">*</span></label>
+          <div class="fi-wrap">
+            <i class="fi-ic fas fa-envelope"></i>
+            <input class="fi" type="email" id="lemail" placeholder="vous@email.com" oninput="clearErr('fg-lemail')">
+          </div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Email invalide</div>
+        </div>
+
+        <div class="fg" id="fg-lpwd">
+          <label>Mot de passe <span class="req">*</span></label>
+          <div class="fi-wrap">
+            <i class="fi-ic fas fa-lock"></i>
+            <input class="fi" type="password" id="lpwd" placeholder="Votre mot de passe" oninput="clearErr('fg-lpwd')" style="padding-right:42px">
+            <button type="button" class="eye-btn" onclick="toggleEye('lpwd',this)"><i class="fas fa-eye"></i></button>
+          </div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Mot de passe requis</div>
+        </div>
+
+        <a href="#" class="forgot">Mot de passe oublié ?</a>
+
+        <label class="chk">
+          <input type="checkbox" id="remember">
+          <span class="chk-lbl">Se souvenir de moi pendant 30 jours</span>
+        </label>
+
+        <button type="submit" class="btn-sub" id="loginBtn">
+          <i class="fas fa-arrow-right" id="loginIco"></i>
+          <span id="loginTxt">Se connecter</span>
+        </button>
+
+        <div class="sec-badge"><i class="fas fa-shield-alt"></i> Connexion chiffrée SSL 256 bits · Données sécurisées</div>
+
+        <p class="switch-lnk">Pas encore de compte ? <a onclick="switchTab('register')">S'inscrire gratuitement</a></p>
+      </form>
+
+      <!-- ══ FORMULAIRE INSCRIPTION ═════════════ -->
+      <form class="auth-form" id="fRegister" onsubmit="doRegister(event)">
+        <div class="fh">
+          <div class="fh-title">Créer un compte 🌱</div>
+          <div class="fh-sub">Rejoignez 50 000+ membres et simplifiez votre santé.</div>
+        </div>
+
+        <!-- Google -->
+        <button type="button" class="btn-google" onclick="googleAuth()">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continuer avec Google
+        </button>
+
+        <div class="divider"><span>ou remplissez le formulaire</span></div>
+
+        <!-- Prénom + Nom -->
+        <div class="fg-grid">
+          <div class="fg" id="fg-rfname">
+            <label>Prénom <span class="req">*</span></label>
+            <div class="fi-wrap">
+              <i class="fi-ic fas fa-user"></i>
+              <input class="fi" type="text" id="rfname" placeholder="Kofi" oninput="clearErr('fg-rfname')">
+            </div>
+            <div class="ferr"><i class="fas fa-exclamation-circle"></i> Requis</div>
+          </div>
+          <div class="fg" id="fg-rlname">
+            <label>Nom <span class="req">*</span></label>
+            <div class="fi-wrap">
+              <i class="fi-ic fas fa-user"></i>
+              <input class="fi" type="text" id="rlname" placeholder="Mensah" oninput="clearErr('fg-rlname')">
+            </div>
+            <div class="ferr"><i class="fas fa-exclamation-circle"></i> Requis</div>
+          </div>
+        </div>
+
+        <div class="fg" id="fg-remail">
+          <label>Adresse email <span class="req">*</span></label>
+          <div class="fi-wrap">
+            <i class="fi-ic fas fa-envelope"></i>
+            <input class="fi" type="email" id="remail" placeholder="vous@email.com" oninput="clearErr('fg-remail')">
+          </div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Email invalide</div>
+        </div>
+
+        <div class="fg" id="fg-rphone">
+          <label>Téléphone <span class="req">*</span></label>
+          <div class="tel-row">
+            <div class="tel-pre">🇹🇬 +228</div>
+            <input type="tel" id="rphone" placeholder="91 00 00 00" oninput="clearErr('fg-rphone')">
+          </div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Numéro requis</div>
+        </div>
+
+        <div class="fg" id="fg-rpwd">
+          <label>Mot de passe <span class="req">*</span></label>
+          <div class="fi-wrap">
+            <i class="fi-ic fas fa-lock"></i>
+            <input class="fi" type="password" id="rpwd" placeholder="Minimum 8 caractères" oninput="checkStrength(this.value);clearErr('fg-rpwd')" style="padding-right:42px">
+            <button type="button" class="eye-btn" onclick="toggleEye('rpwd',this)"><i class="fas fa-eye"></i></button>
+          </div>
+          <!-- Barre force -->
+          <div class="pwd-bars">
+            <div class="pwd-bar" id="pb1"></div>
+            <div class="pwd-bar" id="pb2"></div>
+            <div class="pwd-bar" id="pb3"></div>
+            <div class="pwd-bar" id="pb4"></div>
+          </div>
+          <div class="pwd-hint" id="pwdHint"><i class="fas fa-info-circle"></i> Minimum 8 caractères</div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Mot de passe trop faible (min. 8 car.)</div>
+        </div>
+
+        <div class="fg" id="fg-rpwd2">
+          <label>Confirmer le mot de passe <span class="req">*</span></label>
+          <div class="fi-wrap">
+            <i class="fi-ic fas fa-lock"></i>
+            <input class="fi" type="password" id="rpwd2" placeholder="Répétez votre mot de passe" oninput="checkMatch();clearErr('fg-rpwd2')" style="padding-right:42px">
+            <button type="button" class="eye-btn" onclick="toggleEye('rpwd2',this)"><i class="fas fa-eye"></i></button>
+          </div>
+          <div class="ferr"><i class="fas fa-exclamation-circle"></i> Les mots de passe ne correspondent pas</div>
+        </div>
+
+        <label class="chk" id="chk-cgv">
+          <input type="checkbox" id="rcgv">
+          <span class="chk-lbl">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a></span>
+        </label>
+        <label class="chk" style="margin-bottom:18px">
+          <input type="checkbox" id="rnl">
+          <span class="chk-lbl">Recevoir les offres et conseils santé par email (facultatif)</span>
+        </label>
+
+        <button type="submit" class="btn-sub" id="regBtn">
+          <i class="fas fa-user-plus" id="regIco"></i>
+          <span id="regTxt">Créer mon compte</span>
+        </button>
+
+        <div class="sec-badge"><i class="fas fa-shield-alt"></i> Données chiffrées · Conforme RGPD · Sans spam</div>
+        <p class="switch-lnk">Déjà un compte ? <a onclick="switchTab('login')">Se connecter</a></p>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt"></span></div>
+
+<script>
+/* ── Thème dark/light ─────────────────────── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  const ico = document.getElementById('themeIco');
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  ico.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+  localStorage.setItem('pl-theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const t = localStorage.getItem('pl-theme');
+  if (t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('themeIco').className = t === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  }
+})();
+
+/* ── Tabs ─────────────────────────────────── */
+function switchTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('tabSlide').classList.toggle('right', !isLogin);
+  document.getElementById('tabLogin').classList.toggle('on', isLogin);
+  document.getElementById('tabRegister').classList.toggle('on', !isLogin);
+  document.getElementById('fLogin').classList.toggle('active', isLogin);
+  document.getElementById('fRegister').classList.toggle('active', !isLogin);
+}
+
+/* ── Toggle œil mot de passe ─────────────── */
+function toggleEye(id, btn) {
+  const inp = document.getElementById(id);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.querySelector('i').className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
+
+/* ── Force mot de passe ──────────────────── */
+function checkStrength(v) {
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const cls = ['','pb-weak','pb-med','pb-med','pb-good'];
+  const lbl = ['Trop court','Faible','Moyen','Bon','Excellent ✓'];
+  const ico = ['info-circle','frown','meh','smile','check-circle'];
+  const col = ['var(--mu)','var(--rd)','var(--am)','var(--am)','var(--em)'];
+  for (let i=1;i<=4;i++) {
+    document.getElementById('pb'+i).className = 'pwd-bar' + (i<=s?' '+cls[s]:'');
+  }
+  const hint = document.getElementById('pwdHint');
+  hint.innerHTML = v.length ? `<i class="fas fa-${ico[s]}"></i> ${lbl[s]}` : '<i class="fas fa-info-circle"></i> Minimum 8 caractères';
+  hint.style.color = col[s];
+}
+
+/* ── Correspondance confirmation ─────────── */
+function checkMatch() {
+  const p = document.getElementById('rpwd').value;
+  const c = document.getElementById('rpwd2').value;
+  const g = document.getElementById('fg-rpwd2');
+  if (c && p !== c) { g.classList.add('has-err'); }
+  else { g.classList.remove('has-err'); }
+}
+
+/* ── Erreurs champ ────────────────────────── */
+function setErr(id, msg) {
+  const el = document.getElementById(id);
+  el.classList.add('has-err');
+  if (msg) { const e = el.querySelector('.ferr'); if(e) e.childNodes[1].textContent = ' '+msg; }
+}
+function clearErr(id) { document.getElementById(id)?.classList.remove('has-err'); }
+
+/* ── Login ────────────────────────────────── */
+function doLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('lemail').value.trim();
+  const pwd   = document.getElementById('lpwd').value;
+  let ok = true;
+  if (!email || !/\S+@\S+\.\S+/.test(email)) { setErr('fg-lemail'); ok=false; }
+  if (!pwd) { setErr('fg-lpwd'); ok=false; }
+  if (!ok) return;
+
+  const btn = document.getElementById('loginBtn');
+  document.getElementById('loginIco').className = 'fas fa-spinner fa-spin';
+  document.getElementById('loginTxt').textContent = 'Connexion en cours…';
+  btn.classList.add('loading');
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.classList.add('ok');
+    document.getElementById('loginIco').className = 'fas fa-check';
+    document.getElementById('loginTxt').textContent = 'Connecté !';
+    sessionStorage.setItem('pharmaloc_user', JSON.stringify({name:'Kofi Mensah', email}));
+    toast('Connexion réussie ! Redirection vers votre espace…', 'ok');
+    setTimeout(() => window.location.href = 'dashboard.html', 1400);
+  }, 1800);
+}
+
+/* ── Inscription ───────────────────────────── */
+function doRegister(e) {
+  e.preventDefault();
+  const fname = document.getElementById('rfname').value.trim();
+  const lname = document.getElementById('rlname').value.trim();
+  const email = document.getElementById('remail').value.trim();
+  const phone = document.getElementById('rphone').value.trim();
+  const pwd   = document.getElementById('rpwd').value;
+  const pwd2  = document.getElementById('rpwd2').value;
+  const cgv   = document.getElementById('rcgv').checked;
+
+  let ok = true;
+  if (!fname) { setErr('fg-rfname'); ok=false; }
+  if (!lname) { setErr('fg-rlname'); ok=false; }
+  if (!email || !/\S+@\S+\.\S+/.test(email)) { setErr('fg-remail'); ok=false; }
+  if (!phone) { setErr('fg-rphone'); ok=false; }
+  if (!pwd || pwd.length < 8) { setErr('fg-rpwd'); ok=false; }
+  if (!pwd2 || pwd !== pwd2) { setErr('fg-rpwd2', 'Les mots de passe ne correspondent pas'); ok=false; }
+  if (!cgv) { toast('Veuillez accepter les conditions d\'utilisation', 'fail'); ok=false; }
+  if (!ok) return;
+
+  const btn = document.getElementById('regBtn');
+  document.getElementById('regIco').className = 'fas fa-spinner fa-spin';
+  document.getElementById('regTxt').textContent = 'Création du compte…';
+  btn.classList.add('loading');
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.classList.add('ok');
+    document.getElementById('regIco').className = 'fas fa-check';
+    document.getElementById('regTxt').textContent = 'Compte créé !';
+    sessionStorage.setItem('pharmaloc_user', JSON.stringify({name:`${fname} ${lname}`, email}));
+    toast('Bienvenue sur PharmaLoc, ' + fname + ' ! 🎉', 'ok');
+    setTimeout(() => window.location.href = 'dashboard.html', 1600);
+  }, 2000);
+}
+
+/* ── Google Auth ─────────────────────────── */
+function googleAuth() {
+  toast('Connexion Google en cours… (démo)', 'ok');
+  sessionStorage.setItem('pharmaloc_user', JSON.stringify({name:'Utilisateur Google', email:'user@gmail.com'}));
+  setTimeout(() => window.location.href = 'dashboard.html', 1200);
+}
+
+/* ── Toast ────────────────────────────────── */
+function toast(msg, type = 'ok') {
+  const t = document.getElementById('toast');
+  const ico = t.querySelector('i');
+  document.getElementById('toastTxt').textContent = msg;
+  t.className = 'toast ' + type;
+  ico.className = type === 'ok' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('on'), 3500);
+}
+
+/* ── PWA ──────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

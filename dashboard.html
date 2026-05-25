@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Mon Espace</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#059669">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PharmaLoc">
+<style>
+:root{
+  --em:#059669;--em2:#10b981;--eml:#d1fae5;--tl:#0d9488;
+  --ink:#0a1628;--ink2:#1e293b;--sl:#475569;--mu:#94a3b8;
+  --ln:#e2e8f0;--bg:#f0f4f8;--wh:#ffffff;
+  --rd:#ef4444;--am:#f59e0b;--bl:#3b82f6;--vt:#7c3aed;
+  --pink:#ec4899;--cy:#06b6d4;
+  --sh:0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --shg:0 8px 28px rgba(5,150,105,.28);
+  --r:14px;--rl:20px;--t:all .26s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;min-height:100vh}
+
+/* ══ TOPBAR ═══════════════════════════════════ */
+.topbar{
+  background:linear-gradient(135deg,var(--ink),var(--ink2));
+  padding:8px 4%;text-align:center;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.8);
+  display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;
+}
+.topbar a{color:var(--em2);text-decoration:none;font-weight:700}
+.topbar a:hover{text-decoration:underline}
+.tb-live{display:flex;align-items:center;gap:6px}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:var(--em2);animation:bk 2s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ══ NAVBAR ════════════════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:900;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--ln);
+  box-shadow:0 1px 0 rgba(0,0,0,.04);
+}
+.nav-inner{display:flex;align-items:center;gap:12px;padding:0 4%;height:66px;max-width:1500px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;box-shadow:var(--shg)}
+.logo-tx{font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;color:var(--ink)}
+.logo-tx em{font-style:normal;color:var(--em)}
+.nav-mid{display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
+.nav-mid a{text-decoration:none;color:var(--sl);font-size:.84rem;font-weight:500;padding:7px 13px;border-radius:10px;transition:var(--t);white-space:nowrap}
+.nav-mid a:hover{color:var(--em);background:var(--eml)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* Notif bell */
+.nav-bell{position:relative;width:40px;height:40px;border-radius:11px;background:var(--bg);border:1.5px solid var(--ln);display:flex;align-items:center;justify-content:center;color:var(--sl);font-size:1rem;cursor:pointer;transition:var(--t)}
+.nav-bell:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+.bell-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:var(--rd);border:2px solid var(--wh)}
+
+/* Dropdown profil */
+.nav-profile{position:relative}
+.nav-prof-btn{display:flex;align-items:center;gap:9px;padding:6px 12px 6px 6px;border-radius:50px;border:1.5px solid var(--ln);background:var(--wh);cursor:pointer;transition:var(--t)}
+.nav-prof-btn:hover{border-color:rgba(5,150,105,.3);background:var(--eml)}
+.prof-av-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;color:#fff;font-size:.8rem}
+.prof-name-sm{font-size:.82rem;font-weight:700;color:var(--ink)}
+.prof-role-sm{font-size:.7rem;color:var(--mu)}
+
+/* Dropdown menu */
+.prof-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:var(--wh);border-radius:var(--r);border:1.5px solid var(--ln);box-shadow:0 10px 40px rgba(0,0,0,.12);overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-6px);transition:var(--t);z-index:100}
+.nav-profile:hover .prof-dropdown{opacity:1;pointer-events:all;transform:translateY(0)}
+.pd-header{padding:14px 16px;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff}
+.pd-name{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700}
+.pd-email{font-size:.72rem;opacity:.8}
+.pd-item{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.84rem;color:var(--sl);cursor:pointer;transition:var(--t);text-decoration:none;border-bottom:1px solid rgba(0,0,0,.04)}
+.pd-item:last-child{border-bottom:none}
+.pd-item:hover{background:var(--bg);color:var(--em)}
+.pd-item i{width:16px;text-align:center;color:var(--mu);font-size:.82rem}
+.pd-item:hover i{color:var(--em)}
+.pd-item.danger{color:var(--rd)}
+.pd-item.danger:hover{background:#fff5f5;color:var(--rd)}
+.pd-item.danger i{color:var(--rd)}
+.hamburger{display:none;background:none;border:none;font-size:1.3rem;color:var(--ink);cursor:pointer}
+
+/* ══ LAYOUT DASHBOARD ════════════════════════ */
+.dash-layout{display:flex;max-width:1500px;margin:0 auto;gap:0;min-height:calc(100vh - 106px)}
+
+/* ══ SIDEBAR ══════════════════════════════════ */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--wh);
+  border-right:1px solid var(--ln);
+  display:flex;flex-direction:column;
+  position:sticky;top:66px;
+  height:calc(100vh - 66px);
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:0}
+
+/* User mini card */
+.sb-user{padding:20px 20px 0}
+.sb-user-inner{
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  border-radius:var(--rl);padding:18px;color:#fff;position:relative;overflow:hidden;
+}
+.sb-user-inner::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.sb-av{
+  width:52px;height:52px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.4);
+  overflow:hidden;margin-bottom:10px;position:relative;z-index:1;
+}
+.sb-av img{width:100%;height:100%;object-fit:cover}
+.sb-uname{font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:2px;position:relative;z-index:1}
+.sb-uemail{font-size:.7rem;opacity:.75;position:relative;z-index:1;margin-bottom:10px}
+.sb-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:50px;padding:3px 10px;font-size:.68rem;font-weight:700;position:relative;z-index:1}
+/* Points fidélité */
+.sb-pts{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:10px;padding:10px 14px;margin:12px 20px 0}
+.sbp-label{font-size:.74rem;color:var(--mu);font-weight:500}
+.sbp-val{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--em)}
+
+/* Menu */
+.sb-section-title{font-size:.66rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;padding:16px 20px 6px}
+.sb-menu{padding:0 10px}
+.sb-link{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:10px;cursor:pointer;transition:var(--t);
+  font-size:.84rem;font-weight:500;color:var(--sl);text-decoration:none;
+  position:relative;margin-bottom:2px;
+}
+.sb-link:hover{background:var(--bg);color:var(--em)}
+.sb-link.active{background:var(--eml);color:var(--em);font-weight:700}
+.sb-link.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--em);border-radius:2px}
+.sb-link i{font-size:.88rem;width:18px;text-align:center}
+.sb-count{margin-left:auto;background:var(--em);color:#fff;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:50px}
+.sb-count.red{background:var(--rd)}
+.sb-bottom{margin-top:auto;padding:14px 10px;border-top:1px solid var(--ln)}
+
+/* ══ MAIN CONTENT ═════════════════════════════ */
+.dash-main{flex:1;min-width:0;padding:28px 32px;background:var(--bg)}
+
+/* Panels */
+.panel{display:none;animation:fadeUp .3s ease}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* En-tête panel */
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.ph-title{font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:700;color:var(--ink);margin-bottom:3px}
+.ph-sub{font-size:.84rem;color:var(--mu)}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-sm{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;border:1.5px solid var(--ln);background:var(--wh);color:var(--sl)}
+.btn-sm:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+.btn-sm-solid{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff !important;border-color:transparent;box-shadow:var(--shg)}
+.btn-sm-solid:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── KPI GRID ─────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{
+  background:var(--wh);border-radius:var(--rl);
+  border:1.5px solid var(--ln);padding:18px 20px;
+  box-shadow:var(--sh);transition:var(--t);position:relative;overflow:hidden;
+}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.09)}
+.kpi-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;margin-bottom:14px;
+}
+.ki-g{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:var(--em)}
+.ki-b{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:var(--bl)}
+.ki-a{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#d97706}
+.ki-v{background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:var(--vt)}
+.ki-p{background:linear-gradient(135deg,#fce7f3,#fbcfe8);color:var(--pink)}
+.kpi-val{font-family:'Clash Display',sans-serif;font-size:1.7rem;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px}
+.kpi-label{font-size:.76rem;color:var(--mu);font-weight:500;margin-bottom:10px}
+.kpi-trend{display:inline-flex;align-items:center;gap:4px;font-size:.71rem;font-weight:700;padding:2px 8px;border-radius:50px}
+.kt-up{background:#d1fae5;color:#065f46}
+.kt-down{background:#fee2e2;color:#991b1b}
+.kt-neu{background:var(--bg);color:var(--mu)}
+.kpi-bar{height:3px;background:var(--ln);border-radius:2px;margin-top:12px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px;transition:width 1.2s ease}
+
+/* ── CARD GÉNÉRIQUE ────────────────────────── */
+.card{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.card-title{font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--em);font-size:.88rem}
+.card-more{font-size:.78rem;color:var(--em);font-weight:700;cursor:pointer;text-decoration:none}
+.card-more:hover{text-decoration:underline}
+
+/* ── COMMANDES TABLEAU ─────────────────────── */
+.order-item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid rgba(0,0,0,.04);transition:var(--t);cursor:pointer}
+.order-item:last-child{border-bottom:none}
+.order-item:hover{background:var(--bg)}
+.oi-num{font-size:.7rem;font-weight:800;color:var(--mu);width:80px;flex-shrink:0;font-family:'Clash Display',sans-serif}
+.oi-em{font-size:1.6rem;width:44px;height:44px;border-radius:11px;background:var(--bg);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.oi-info{flex:1;min-width:0}
+.oi-name{font-size:.87rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.oi-meta{font-size:.72rem;color:var(--mu);display:flex;align-items:center;gap:8px}
+.oi-meta i{font-size:.65rem}
+.oi-price{font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;color:var(--ink);flex-shrink:0}
+.oi-status{padding:3px 11px;border-radius:50px;font-size:.68rem;font-weight:800;white-space:nowrap;flex-shrink:0}
+.s-done{background:#d1fae5;color:#065f46}
+.s-ship{background:#dbeafe;color:#1e40af}
+.s-prep{background:#fef3c7;color:#92400e}
+.s-cancel{background:#fee2e2;color:#991b1b}
+
+/* ── ACTIONS RAPIDES ─────────────────────── */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.qa{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);padding:18px 14px;text-align:center;cursor:pointer;transition:var(--t);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:8px}
+.qa:hover{border-color:rgba(5,150,105,.3);transform:translateY(-4px);box-shadow:var(--sh)}
+.qa-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:4px}
+.qa-label{font-size:.78rem;font-weight:700;color:var(--ink)}
+.qa-sub{font-size:.68rem;color:var(--mu)}
+
+/* ── TRACKING STEPS ──────────────────────── */
+.track-wrap{padding:20px}
+.track-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:16px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border-radius:var(--r);border:1px solid rgba(5,150,105,.12)}
+.tt-info{}
+.tt-name{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;margin-bottom:3px}
+.tt-meta{font-size:.78rem;color:var(--mu)}
+.tt-eta{text-align:right}
+.tt-time{font-family:'Clash Display',sans-serif;font-size:1.4rem;font-weight:700;color:var(--em);line-height:1}
+.tt-lbl{font-size:.72rem;color:var(--mu)}
+
+/* Progress bar */
+.track-progress{margin-bottom:24px}
+.tp-bar{height:8px;background:var(--ln);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.tp-fill{height:100%;background:linear-gradient(90deg,var(--em),var(--em2));border-radius:4px;transition:width 1.5s ease}
+.tp-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--mu)}
+
+/* Steps */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:14px;position:relative;padding-bottom:20px}
+.step:last-child{padding-bottom:0}
+.step::before{content:'';position:absolute;left:17px;top:36px;bottom:0;width:2px;background:var(--ln);z-index:0}
+.step.done::before{background:var(--em)}
+.step:last-child::before{display:none}
+.step-dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;z-index:1;position:relative;transition:var(--t)}
+.step.done .step-dot{background:var(--em);border-color:var(--em);color:#fff}
+.step.current .step-dot{border-color:var(--em);color:var(--em);box-shadow:0 0 0 5px rgba(5,150,105,.12);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(5,150,105,.12)}50%{box-shadow:0 0 0 9px rgba(5,150,105,.05)}}
+.step-body{padding-top:5px;flex:1}
+.step-title{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700;color:var(--mu);margin-bottom:3px}
+.step.done .step-title,.step.current .step-title{color:var(--ink)}
+.step-sub{font-size:.76rem;color:var(--mu)}
+
+/* Livreur card */
+.livreur-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 16px;background:var(--bg);border-radius:11px;border:1px solid var(--ln);margin-top:16px}
+.lv-info{display:flex;align-items:center;gap:11px}
+.lv-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.88rem}
+.lv-name{font-size:.86rem;font-weight:700;color:var(--ink)}
+.lv-meta{font-size:.72rem;color:var(--mu)}
+.lv-actions{display:flex;gap:8px}
+.lv-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;font-size:.8rem;font-weight:700;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;text-decoration:none;border:none}
+.lv-call{background:var(--em);color:#fff;box-shadow:var(--shg)}
+.lv-call:hover{opacity:.9}
+.lv-msg{background:var(--bg);border:1.5px solid var(--ln);color:var(--sl)}
+.lv-msg:hover{border-color:var(--em);color:var(--em)}
+
+/* ── ORDONNANCES ─────────────────────────── */
+.ordo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;padding:20px}
+.ordo-card{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);overflow:hidden;transition:var(--t)}
+.ordo-card:hover{border-color:rgba(5,150,105,.25);transform:translateY(-3px);box-shadow:var(--sh)}
+.ordo-top{padding:16px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5)}
+.ordo-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ordo-ic{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.ordo-name{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700;color:var(--ink)}
+.ordo-dr{font-size:.72rem;color:var(--mu)}
+.ordo-meds{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.ordo-med{padding:3px 10px;border-radius:50px;font-size:.69rem;font-weight:700;background:rgba(255,255,255,.8);border:1px solid rgba(5,150,105,.15);color:var(--em)}
+.ordo-body{padding:12px 16px}
+.ordo-expire{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--mu);margin-bottom:10px}
+.ordo-expire i{color:var(--am)}
+.ordo-btns{display:flex;gap:8px}
+.ob{flex:1;padding:8px;border-radius:9px;font-size:.76rem;font-weight:700;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;border:1.5px solid var(--ln);background:var(--bg);color:var(--sl)}
+.ob:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+.ob.solid{background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;border-color:transparent}
+.ob.solid:hover{opacity:.9}
+
+/* ── FAVORIS ─────────────────────────────── */
+.favs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:20px}
+.fav{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);overflow:hidden;transition:var(--t)}
+.fav:hover{border-color:rgba(5,150,105,.25);transform:translateY(-4px);box-shadow:var(--sh)}
+.fav-img{height:120px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid var(--ln);position:relative}
+.fav-rm{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.9);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--rd);cursor:pointer;transition:var(--t)}
+.fav-rm:hover{background:var(--rd);color:#fff;border-color:var(--rd)}
+.fav-body{padding:12px 14px}
+.fav-name{font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:2px;color:var(--ink)}
+.fav-ph{font-size:.7rem;color:var(--mu);margin-bottom:6px}
+.fav-price{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--em);margin-bottom:8px}
+.fav-add{width:100%;padding:8px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.76rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px}
+.fav-add:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── SETTINGS ────────────────────────────── */
+.settings-wrap{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.scard{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);padding:22px;box-shadow:var(--sh)}
+.scard-title{font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px}
+.scard-title i{color:var(--em);font-size:.9rem}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.76rem;font-weight:700;color:var(--ink);margin-bottom:5px}
+.fg input,.fg select{width:100%;padding:10px 13px;border:1.5px solid var(--ln);border-radius:10px;background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;font-size:.86rem;color:var(--ink);outline:none;transition:var(--t)}
+.fg input:focus,.fg select:focus{border-color:var(--em);background:var(--wh);box-shadow:0 0 0 3px rgba(5,150,105,.08)}
+.fg input::placeholder{color:var(--mu)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-save{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.85rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;box-shadow:var(--shg)}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(5,150,105,.38)}
+/* Toggle */
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--ln)}
+.tog-row:last-child{border-bottom:none}
+.tog-left h5{font-size:.84rem;font-weight:600;color:var(--ink);margin-bottom:2px}
+.tog-left p{font-size:.73rem;color:var(--mu)}
+.tog{width:42px;height:22px;border-radius:11px;background:var(--ln);position:relative;cursor:pointer;transition:.3s;flex-shrink:0}
+.tog.on{background:var(--em)}
+.tog::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.tog.on::after{left:23px}
+
+/* ── TOAST ─────────────────────────────── */
+.toast{position:fixed;bottom:22px;right:22px;z-index:4000;background:var(--ink);color:#fff;border-radius:11px;padding:12px 20px;font-size:.83rem;display:flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(0,0,0,.22);opacity:0;transform:translateY(12px);transition:all .3s;pointer-events:none;border:1px solid rgba(16,185,129,.2)}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast i{color:var(--em2)}
+
+/* ── WhatsApp float ───────────────────────── */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;text-decoration:none;box-shadow:0 6px 24px rgba(37,211,102,.45);transition:var(--t)}
+.wa-float:hover{transform:scale(1.1)}
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media(max-width:1200px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .qa-grid{grid-template-columns:repeat(2,1fr)}
+  .settings-wrap{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+  .sidebar{display:none}
+  .dash-main{padding:18px}
+  .nav-mid{display:none}
+}
+@media(max-width:600px){
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .qa-grid{grid-template-columns:repeat(2,1fr)}
+  .ordo-grid,.favs-grid{grid-template-columns:1fr}
+  .prof-name-sm,.prof-role-sm{display:none}
+  .hamburger{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ═══════════════════════════════════════ -->
+<div class="topbar">
+  <div class="tb-live"><span class="tb-dot"></span> Tous les services opérationnels</div>
+  <span>🚴 Livraison gratuite dès 5 000 FCFA</span>
+  <a href="urgences.html">🚨 Urgences 24h/24 →</a>
+</div>
+
+<!-- ══ NAVBAR ════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="pharma.html" class="nav-logo">
+      <div class="logo-ic"><i class="fas fa-plus"></i></div>
+      <span class="logo-tx">Pharma<em>Loc</em></span>
+    </a>
+    <div class="nav-mid">
+      <a href="pharma.html">Accueil</a>
+      <a href="localisation.html">Localiser</a>
+      <a href="boutique.html">Boutique</a>
+      <a href="ordonnance.html">Ordonnance</a>
+      <a href="urgences.html">Urgences</a>
+    </div>
+    <div class="nav-right">
+      <!-- Cloche notifications -->
+      <div class="nav-bell" onclick="showToast('Vous avez 2 nouvelles notifications')">
+        <i class="fas fa-bell"></i>
+        <div class="bell-dot"></div>
+      </div>
+      <!-- Profil dropdown -->
+      <div class="nav-profile">
+        <div class="nav-prof-btn">
+          <div class="prof-av-sm">KM</div>
+          <div>
+            <div class="prof-name-sm">Kofi Mensah</div>
+            <div class="prof-role-sm">Membre Premium</div>
+          </div>
+          <i class="fas fa-chevron-down" style="font-size:.7rem;color:var(--mu)"></i>
+        </div>
+        <div class="prof-dropdown">
+          <div class="pd-header">
+            <div class="pd-name">Kofi Mensah</div>
+            <div class="pd-email">kofi.mensah@email.com</div>
+          </div>
+          <a class="pd-item" onclick="switchPanel('overview')"><i class="fas fa-home"></i> Tableau de bord</a>
+          <a class="pd-item" onclick="switchPanel('settings')"><i class="fas fa-user-cog"></i> Mon profil</a>
+          <a class="pd-item" href="boutique.html"><i class="fas fa-shopping-bag"></i> Commander</a>
+          <a class="pd-item danger" href="login.html"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+        </div>
+      </div>
+      <button class="hamburger" onclick="showToast('Menu mobile disponible !')"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ DASHBOARD LAYOUT ══════════════════════════════ -->
+<div class="dash-layout">
+
+  <!-- ══ SIDEBAR ════════════════════════════════════ -->
+  <aside class="sidebar">
+    <!-- User card -->
+    <div class="sb-user">
+      <div class="sb-user-inner">
+        <div class="sb-av">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80" alt="Kofi Mensah">
+        </div>
+        <div class="sb-uname">Kofi Mensah</div>
+        <div class="sb-uemail">kofi.mensah@email.com</div>
+        <div class="sb-badge"><i class="fas fa-star" style="font-size:.6rem"></i> Membre Premium</div>
+      </div>
+    </div>
+    <!-- Points -->
+    <div class="sb-pts">
+      <div><div class="sbp-label">Points fidélité</div><div style="font-size:.7rem;color:var(--em)">→ Prochain palier dans 150 pts</div></div>
+      <div class="sbp-val">1 850 pts</div>
+    </div>
+
+    <!-- Menu principal -->
+    <div class="sb-section-title">Principal</div>
+    <div class="sb-menu">
+      <a class="sb-link active" id="lnk-overview" onclick="switchPanel('overview')">
+        <i class="fas fa-home"></i> Tableau de bord
+      </a>
+      <a class="sb-link" id="lnk-orders" onclick="switchPanel('orders')">
+        <i class="fas fa-shopping-bag"></i> Mes commandes
+        <span class="sb-count">3</span>
+      </a>
+      <a class="sb-link" id="lnk-tracking" onclick="switchPanel('tracking')">
+        <i class="fas fa-truck"></i> Suivi livraison
+        <span class="sb-count" style="background:var(--am);color:var(--ink)">1</span>
+      </a>
+      <a class="sb-link" id="lnk-ordonnances" onclick="switchPanel('ordonnances')">
+        <i class="fas fa-file-medical"></i> Ordonnances
+        <span class="sb-count">6</span>
+      </a>
+      <a class="sb-link" id="lnk-favoris" onclick="switchPanel('favoris')">
+        <i class="fas fa-heart"></i> Mes favoris
+        <span class="sb-count red">5</span>
+      </a>
+    </div>
+
+    <!-- Menu compte -->
+    <div class="sb-section-title">Mon compte</div>
+    <div class="sb-menu">
+      <a class="sb-link" id="lnk-settings" onclick="switchPanel('settings')">
+        <i class="fas fa-user-cog"></i> Profil &amp; paramètres
+      </a>
+      <a class="sb-link" href="boutique.html">
+        <i class="fas fa-pills"></i> Commander
+      </a>
+      <a class="sb-link" href="ordonnance.html">
+        <i class="fas fa-upload"></i> Nouvelle ordonnance
+      </a>
+    </div>
+
+    <!-- Déconnexion -->
+    <div class="sb-bottom">
+      <a class="sb-link" href="login.html" style="color:var(--rd)">
+        <i class="fas fa-sign-out-alt"></i> Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN CONTENT ════════════════════════════════ -->
+  <main class="dash-main">
+
+    <!-- ═══ OVERVIEW ═══════════════════════════════ -->
+    <div class="panel active" id="panel-overview">
+      <div class="panel-head">
+        <div>
+          <div class="ph-title">Bonjour, Kofi 👋</div>
+          <div class="ph-sub">Samedi 21 mars 2026 · Voici un résumé de votre activité PharmaLoc</div>
+        </div>
+        <div class="ph-actions">
+          <a href="boutique.html" class="btn-sm btn-sm-solid"><i class="fas fa-pills"></i> Commander</a>
+          <a href="ordonnance.html" class="btn-sm"><i class="fas fa-file-medical"></i> Ordonnance</a>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-icon ki-g"><i class="fas fa-shopping-bag"></i></div>
+          <div class="kpi-val">14</div>
+          <div class="kpi-label">Commandes passées</div>
+          <span class="kpi-trend kt-up"><i class="fas fa-arrow-up"></i> +2 ce mois</span>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:82%;background:linear-gradient(90deg,var(--em),var(--em2))"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon ki-b"><i class="fas fa-file-medical"></i></div>
+          <div class="kpi-val">6</div>
+          <div class="kpi-label">Ordonnances envoyées</div>
+          <span class="kpi-trend kt-up"><i class="fas fa-arrow-up"></i> +1 ce mois</span>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:60%;background:linear-gradient(90deg,var(--bl),#60a5fa)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon ki-p"><i class="fas fa-heart"></i></div>
+          <div class="kpi-val">5</div>
+          <div class="kpi-label">Produits favoris</div>
+          <span class="kpi-trend kt-neu">Inchangé</span>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:50%;background:linear-gradient(90deg,var(--pink),#f9a8d4)"></div></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon ki-a"><i class="fas fa-coins"></i></div>
+          <div class="kpi-val">1 850</div>
+          <div class="kpi-label">Points fidélité</div>
+          <span class="kpi-trend kt-up"><i class="fas fa-arrow-up"></i> +350</span>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:74%;background:linear-gradient(90deg,var(--am),#fbbf24)"></div></div>
+        </div>
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="qa-grid">
+        <a class="qa" href="boutique.html">
+          <div class="qa-icon" style="background:linear-gradient(135deg,var(--eml),#a7f3d0)">💊</div>
+          <div class="qa-label">Commander</div>
+          <div class="qa-sub">1 200+ produits</div>
+        </a>
+        <a class="qa" href="ordonnance.html">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">📋</div>
+          <div class="qa-label">Envoyer ordonnance</div>
+          <div class="qa-sub">Validée en 30 min</div>
+        </a>
+        <a class="qa" href="localisation.html">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">🗺️</div>
+          <div class="qa-label">Trouver pharmacie</div>
+          <div class="qa-sub">240+ partenaires</div>
+        </a>
+        <a class="qa" onclick="switchPanel('tracking')">
+          <div class="qa-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)">🚴</div>
+          <div class="qa-label">Suivi livraison</div>
+          <div class="qa-sub" style="color:var(--am);font-weight:700">1 en cours</div>
+        </a>
+      </div>
+
+      <!-- Commandes récentes -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-shopping-bag"></i> Commandes récentes</div>
+          <span class="card-more" onclick="switchPanel('orders')">Voir tout →</span>
+        </div>
+        <div class="order-item">
+          <div class="oi-num">#PL-2847</div>
+          <div class="oi-em">🩺</div>
+          <div class="oi-info">
+            <div class="oi-name">Tensiomètre OMRON + Glucomètre AccuChek</div>
+            <div class="oi-meta"><i class="fas fa-store"></i> Pharmacie du Bénin <i class="fas fa-calendar" style="margin-left:4px"></i> 12 mars 2026</div>
+          </div>
+          <span class="oi-status s-ship">En livraison</span>
+          <div class="oi-price">47 000 FCFA</div>
+        </div>
+        <div class="order-item">
+          <div class="oi-num">#PL-2802</div>
+          <div class="oi-em">💊</div>
+          <div class="oi-info">
+            <div class="oi-name">Paracétamol 500mg × 3 + Vitamine C 1000mg</div>
+            <div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Centrale <i class="fas fa-calendar" style="margin-left:4px"></i> 15 mars 2026</div>
+          </div>
+          <span class="oi-status s-done">Livré</span>
+          <div class="oi-price">8 500 FCFA</div>
+        </div>
+        <div class="order-item">
+          <div class="oi-num">#PL-2789</div>
+          <div class="oi-em">👶</div>
+          <div class="oi-info">
+            <div class="oi-name">Doliprane Nourrisson + Sérum physiologique × 2</div>
+            <div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Saint-Luc <i class="fas fa-calendar" style="margin-left:4px"></i> 8 mars 2026</div>
+          </div>
+          <span class="oi-status s-done">Livré</span>
+          <div class="oi-price">7 400 FCFA</div>
+        </div>
+      </div>
+
+      <!-- Ordonnances récentes -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="fas fa-file-medical"></i> Ordonnances récentes</div>
+          <span class="card-more" onclick="switchPanel('ordonnances')">Voir tout →</span>
+        </div>
+        <div class="order-item">
+          <div class="oi-em">📋</div>
+          <div class="oi-info">
+            <div class="oi-name">Ordonnance cardiologie — Dr. Adjoa Tetteh</div>
+            <div class="oi-meta"><i class="fas fa-calendar"></i> Envoyée le 14 mars 2026 · Expire le 14 juin 2026</div>
+          </div>
+          <span class="oi-status s-done">Validée</span>
+        </div>
+        <div class="order-item">
+          <div class="oi-em">📋</div>
+          <div class="oi-info">
+            <div class="oi-name">Ordonnance diabétologie — Dr. Mensah</div>
+            <div class="oi-meta"><i class="fas fa-calendar"></i> Envoyée le 5 mars 2026 · Expire le 5 juin 2026</div>
+          </div>
+          <span class="oi-status s-prep">En attente</span>
+        </div>
+      </div>
+
+      <!-- Bannière pharmacien -->
+      <div style="border-radius:var(--rl);overflow:hidden;position:relative;margin-bottom:18px">
+        <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1100&h=180&q=80" alt="PharmaLoc" style="width:100%;height:160px;object-fit:cover;object-position:center">
+        <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(10,22,40,.82) 0%,rgba(10,22,40,.3) 70%,transparent 100%);display:flex;align-items:center;padding:0 28px;gap:20px">
+          <div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:5px">Un pharmacien disponible maintenant</div>
+            <div style="font-size:.82rem;color:rgba(255,255,255,.7);margin-bottom:12px">Posez votre question gratuitement · Réponse en moins de 5 minutes</div>
+            <a href="https://wa.me/22896327992" target="_blank" style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:50px;background:#25D366;color:#fff;font-weight:700;font-size:.82rem;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.4)">
+              <i class="fab fa-whatsapp"></i> WhatsApp maintenant
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MES COMMANDES ════════════════════════ -->
+    <div class="panel" id="panel-orders">
+      <div class="panel-head">
+        <div><div class="ph-title">Mes Commandes</div><div class="ph-sub">Historique complet de vos 14 commandes</div></div>
+        <div class="ph-actions">
+          <a href="boutique.html" class="btn-sm btn-sm-solid"><i class="fas fa-plus"></i> Nouvelle commande</a>
+        </div>
+      </div>
+      <!-- Filtres -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+        <button class="btn-sm" style="background:var(--em);color:#fff;border-color:var(--em)" onclick="filtOrders(this,'all')">Toutes (14)</button>
+        <button class="btn-sm" onclick="filtOrders(this,'ship')">En livraison (2)</button>
+        <button class="btn-sm" onclick="filtOrders(this,'prep')">En préparation (1)</button>
+        <button class="btn-sm" onclick="filtOrders(this,'done')">Livrées (11)</button>
+      </div>
+      <div class="card" id="ordersBox">
+        <div class="order-item" data-st="ship"><div class="oi-num">#PL-2856</div><div class="oi-em">💊</div><div class="oi-info"><div class="oi-name">Insuline Novorapid + Bandelettes × 50</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie du Bénin <i class="fas fa-calendar" style="margin-left:4px"></i> 20 mars 2026</div></div><span class="oi-status s-prep">En préparation</span><div class="oi-price">34 500 FCFA</div></div>
+        <div class="order-item" data-st="ship"><div class="oi-num">#PL-2847</div><div class="oi-em">🩺</div><div class="oi-info"><div class="oi-name">Tensiomètre OMRON + Glucomètre AccuChek</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie du Bénin <i class="fas fa-calendar" style="margin-left:4px"></i> 12 mars 2026</div></div><span class="oi-status s-ship">En livraison</span><div class="oi-price">47 000 FCFA</div></div>
+        <div class="order-item" data-st="ship"><div class="oi-num">#PL-2831</div><div class="oi-em">💊</div><div class="oi-info"><div class="oi-name">Amoxicilline 500mg + Métronidazole 500mg</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Hippocrate <i class="fas fa-calendar" style="margin-left:4px"></i> 11 mars 2026</div></div><span class="oi-status s-ship">En livraison</span><div class="oi-price">12 300 FCFA</div></div>
+        <div class="order-item" data-st="done"><div class="oi-num">#PL-2802</div><div class="oi-em">💊</div><div class="oi-info"><div class="oi-name">Paracétamol 500mg × 3 + Vitamine C 1000mg</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Centrale <i class="fas fa-calendar" style="margin-left:4px"></i> 15 mars 2026</div></div><span class="oi-status s-done">Livré</span><div class="oi-price">8 500 FCFA</div></div>
+        <div class="order-item" data-st="done"><div class="oi-num">#PL-2789</div><div class="oi-em">👶</div><div class="oi-info"><div class="oi-name">Doliprane Nourrisson + Sérum physiologique × 2</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Saint-Luc <i class="fas fa-calendar" style="margin-left:4px"></i> 8 mars 2026</div></div><span class="oi-status s-done">Livré</span><div class="oi-price">7 400 FCFA</div></div>
+        <div class="order-item" data-st="done"><div class="oi-num">#PL-2771</div><div class="oi-em">🧴</div><div class="oi-info"><div class="oi-name">Crème SPF50 + Gel hydroalcoolique × 2</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie de la Paix <i class="fas fa-calendar" style="margin-left:4px"></i> 3 mars 2026</div></div><span class="oi-status s-done">Livré</span><div class="oi-price">14 100 FCFA</div></div>
+        <div class="order-item" data-st="done"><div class="oi-num">#PL-2754</div><div class="oi-em">🌡️</div><div class="oi-info"><div class="oi-name">Thermomètre digital + Oxymètre de pouls</div><div class="oi-meta"><i class="fas fa-store"></i> Pharmacie Hippocrate <i class="fas fa-calendar" style="margin-left:4px"></i> 25 fév. 2026</div></div><span class="oi-status s-done">Livré</span><div class="oi-price">18 500 FCFA</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SUIVI LIVRAISON ══════════════════════ -->
+    <div class="panel" id="panel-tracking">
+      <div class="panel-head">
+        <div><div class="ph-title">Suivi de Livraison</div><div class="ph-sub">Commande #PL-2847 · En cours de livraison</div></div>
+        <div class="ph-actions">
+          <a href="https://wa.me/22896327992" target="_blank" class="btn-sm"><i class="fab fa-whatsapp" style="color:#25D366"></i> Assistance</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="track-wrap">
+          <!-- Top info -->
+          <div class="track-top">
+            <div class="tt-info">
+              <div class="tt-name">Tensiomètre OMRON + Glucomètre AccuChek</div>
+              <div class="tt-meta">Pharmacie du Bénin · Commande #PL-2847 · 12 mars 2026</div>
+            </div>
+            <div class="tt-eta">
+              <div class="tt-time">⏱ ~22 min</div>
+              <div class="tt-lbl">Temps estimé d'arrivée</div>
+            </div>
+          </div>
+          <!-- Barre -->
+          <div class="track-progress">
+            <div class="tp-bar"><div class="tp-fill" style="width:65%" id="progressBar"></div></div>
+            <div class="tp-labels"><span>Commande passée</span><span style="color:var(--em);font-weight:700">65% du trajet</span><span>Livraison</span></div>
+          </div>
+          <!-- Steps -->
+          <div class="steps">
+            <div class="step done">
+              <div class="step-dot"><i class="fas fa-check"></i></div>
+              <div class="step-body"><div class="step-title">Commande reçue</div><div class="step-sub">12 mars 2026 · 14h32</div></div>
+            </div>
+            <div class="step done">
+              <div class="step-dot"><i class="fas fa-check"></i></div>
+              <div class="step-body"><div class="step-title">Validée par le pharmacien</div><div class="step-sub">12 mars 2026 · 14h48 — Dr. Adjoa Tetteh</div></div>
+            </div>
+            <div class="step done">
+              <div class="step-dot"><i class="fas fa-check"></i></div>
+              <div class="step-body"><div class="step-title">En préparation</div><div class="step-sub">12 mars 2026 · 15h05 — Préparé en 17 min</div></div>
+            </div>
+            <div class="step current">
+              <div class="step-dot"><i class="fas fa-motorcycle"></i></div>
+              <div class="step-body"><div class="step-title">En route — Livreur Kwame A.</div><div class="step-sub">12 mars 2026 · 15h22 — ETA : ~22 min · 65% du trajet</div></div>
+            </div>
+            <div class="step">
+              <div class="step-dot"><i class="fas fa-home"></i></div>
+              <div class="step-body"><div class="step-title">Livraison à votre adresse</div><div class="step-sub">En attente · Quartier Tokoin, Rue 12, Bâtiment B</div></div>
+            </div>
+          </div>
+          <!-- Livreur -->
+          <div class="livreur-card">
+            <div class="lv-info">
+              <div class="lv-av">KA</div>
+              <div>
+                <div class="lv-name">Kwame Adeola — Livreur certifié</div>
+                <div class="lv-meta">⭐ 4.9 · 1 240 livraisons effectuées · En service depuis 2023</div>
+              </div>
+            </div>
+            <div class="lv-actions">
+              <a href="tel:+22891000001" class="lv-btn lv-call"><i class="fas fa-phone"></i> Appeler</a>
+              <a href="https://wa.me/22891000001" target="_blank" class="lv-btn lv-msg"><i class="fab fa-whatsapp"></i> Message</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ORDONNANCES ══════════════════════════ -->
+    <div class="panel" id="panel-ordonnances">
+      <div class="panel-head">
+        <div><div class="ph-title">Mes Ordonnances</div><div class="ph-sub">6 ordonnances archivées et sécurisées</div></div>
+        <div class="ph-actions">
+          <a href="ordonnance.html" class="btn-sm btn-sm-solid"><i class="fas fa-plus"></i> Nouvelle ordonnance</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ordo-grid">
+          <div class="ordo-card">
+            <div class="ordo-top">
+              <div class="ordo-header">
+                <div class="ordo-ic" style="background:var(--eml);color:var(--em)"><i class="fas fa-heartbeat"></i></div>
+                <div><div class="ordo-name">Cardiologie</div><div class="ordo-dr">Dr. Adjoa Tetteh</div></div>
+              </div>
+              <div class="ordo-meds"><span class="ordo-med">Amlodipine 5mg</span><span class="ordo-med">Aspirine 100mg</span></div>
+            </div>
+            <div class="ordo-body">
+              <div class="ordo-expire"><i class="fas fa-clock"></i> Expire le 14 juin 2026 · <span style="color:var(--em);font-weight:700">Validée</span></div>
+              <div class="ordo-btns">
+                <button class="ob"><i class="fas fa-eye"></i> Voir</button>
+                <button class="ob solid" onclick="showToast('Renouvellement commandé ! Livraison sous 2h.')"><i class="fas fa-redo"></i> Renouveler</button>
+              </div>
+            </div>
+          </div>
+          <div class="ordo-card">
+            <div class="ordo-top">
+              <div class="ordo-header">
+                <div class="ordo-ic" style="background:#fef3c7;color:#d97706"><i class="fas fa-tint"></i></div>
+                <div><div class="ordo-name">Diabétologie</div><div class="ordo-dr">Dr. Mensah Kofi</div></div>
+              </div>
+              <div class="ordo-meds"><span class="ordo-med">Metformine 500mg</span><span class="ordo-med">Insuline Novorapid</span></div>
+            </div>
+            <div class="ordo-body">
+              <div class="ordo-expire"><i class="fas fa-clock"></i> Expire le 5 juin 2026 · <span style="color:var(--am);font-weight:700">En attente</span></div>
+              <div class="ordo-btns">
+                <button class="ob"><i class="fas fa-eye"></i> Voir</button>
+                <button class="ob solid" onclick="showToast('Renouvellement commandé !')"><i class="fas fa-redo"></i> Renouveler</button>
+              </div>
+            </div>
+          </div>
+          <div class="ordo-card">
+            <div class="ordo-top">
+              <div class="ordo-header">
+                <div class="ordo-ic" style="background:#dbeafe;color:var(--bl)"><i class="fas fa-stethoscope"></i></div>
+                <div><div class="ordo-name">Généraliste</div><div class="ordo-dr">Dr. Koffi Séna</div></div>
+              </div>
+              <div class="ordo-meds"><span class="ordo-med">Amoxicilline 500mg</span><span class="ordo-med">Doliprane 1g</span></div>
+            </div>
+            <div class="ordo-body">
+              <div class="ordo-expire"><i class="fas fa-clock"></i> Expire le 20 mai 2026 · <span style="color:var(--em);font-weight:700">Validée</span></div>
+              <div class="ordo-btns">
+                <button class="ob"><i class="fas fa-eye"></i> Voir</button>
+                <button class="ob solid" onclick="showToast('Renouvellement commandé !')"><i class="fas fa-redo"></i> Renouveler</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FAVORIS ══════════════════════════════ -->
+    <div class="panel" id="panel-favoris">
+      <div class="panel-head">
+        <div><div class="ph-title">Mes Favoris</div><div class="ph-sub">5 produits sauvegardés · Commander en 1 clic</div></div>
+        <div class="ph-actions">
+          <a href="boutique.html" class="btn-sm btn-sm-solid"><i class="fas fa-plus"></i> Parcourir le catalogue</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="favs-grid">
+          <div class="fav"><div class="fav-img">💊<div class="fav-rm" onclick="showToast('Retiré des favoris')"><i class="fas fa-times"></i></div></div><div class="fav-body"><div class="fav-name">Paracétamol 500mg</div><div class="fav-ph">Pharmacie Centrale · En stock</div><div class="fav-price">1 500 FCFA</div><button class="fav-add" onclick="showToast('Ajouté au panier !')"><i class="fas fa-cart-plus"></i> Ajouter au panier</button></div></div>
+          <div class="fav"><div class="fav-img">🍋<div class="fav-rm" onclick="showToast('Retiré des favoris')"><i class="fas fa-times"></i></div></div><div class="fav-body"><div class="fav-name">Vitamine C 1000mg</div><div class="fav-ph">Pharmacie du Bénin · En stock</div><div class="fav-price">3 500 FCFA</div><button class="fav-add" onclick="showToast('Ajouté au panier !')"><i class="fas fa-cart-plus"></i> Ajouter au panier</button></div></div>
+          <div class="fav"><div class="fav-img">💓<div class="fav-rm" onclick="showToast('Retiré des favoris')"><i class="fas fa-times"></i></div></div><div class="fav-body"><div class="fav-name">Tensiomètre OMRON</div><div class="fav-ph">Pharmacie Centrale · En stock</div><div class="fav-price">28 000 FCFA</div><button class="fav-add" onclick="showToast('Ajouté au panier !')"><i class="fas fa-cart-plus"></i> Ajouter au panier</button></div></div>
+          <div class="fav"><div class="fav-img">🌙<div class="fav-rm" onclick="showToast('Retiré des favoris')"><i class="fas fa-times"></i></div></div><div class="fav-body"><div class="fav-name">Mélatonine 1.9mg</div><div class="fav-ph">Pharmacie du Bénin · En stock</div><div class="fav-price">6 500 FCFA</div><button class="fav-add" onclick="showToast('Ajouté au panier !')"><i class="fas fa-cart-plus"></i> Ajouter au panier</button></div></div>
+          <div class="fav"><div class="fav-img">🍼<div class="fav-rm" onclick="showToast('Retiré des favoris')"><i class="fas fa-times"></i></div></div><div class="fav-body"><div class="fav-name">Couches Pampers T3</div><div class="fav-ph">Pharmacie de la Croix · En stock</div><div class="fav-price">9 500 FCFA</div><button class="fav-add" onclick="showToast('Ajouté au panier !')"><i class="fas fa-cart-plus"></i> Ajouter au panier</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PROFIL & SETTINGS ═══════════════════ -->
+    <div class="panel" id="panel-settings">
+      <div class="panel-head">
+        <div><div class="ph-title">Mon Profil</div><div class="ph-sub">Informations personnelles, adresse et préférences</div></div>
+        <div class="ph-actions">
+          <button class="btn-sm btn-sm-solid" onclick="showToast('Tous les changements enregistrés !')"><i class="fas fa-save"></i> Tout enregistrer</button>
+        </div>
+      </div>
+      <!-- Photo profil -->
+      <div class="card" style="margin-bottom:18px">
+        <div style="padding:20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+          <div style="position:relative">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80" alt="Photo profil" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--ln)">
+            <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--em);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--wh)" onclick="showToast('Fonctionnalité de changement de photo disponible bientôt')">
+              <i class="fas fa-camera" style="font-size:.6rem;color:#fff"></i>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:var(--ink)">Kofi Mensah</div>
+            <div style="font-size:.8rem;color:var(--mu);margin-bottom:6px">kofi.mensah@email.com · Membre depuis janvier 2024</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span style="display:inline-flex;align-items:center;gap:5px;background:var(--eml);border-radius:50px;padding:3px 12px;font-size:.71rem;font-weight:700;color:var(--em)"><i class="fas fa-star" style="font-size:.6rem"></i> Membre Premium</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;background:#ede9fe;border-radius:50px;padding:3px 12px;font-size:.71rem;font-weight:700;color:var(--vt)"><i class="fas fa-coins" style="font-size:.6rem"></i> 1 850 points</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-wrap">
+        <div class="scard">
+          <div class="scard-title"><i class="fas fa-user"></i> Informations personnelles</div>
+          <div class="fg-row">
+            <div class="fg"><label>Prénom</label><input type="text" value="Kofi"></div>
+            <div class="fg"><label>Nom</label><input type="text" value="Mensah"></div>
+          </div>
+          <div class="fg"><label>Adresse email</label><input type="email" value="kofi.mensah@email.com"></div>
+          <div class="fg"><label>Téléphone</label><input type="tel" value="+228 91 00 00 00"></div>
+          <div class="fg"><label>Date de naissance</label><input type="date" value="1990-05-15"></div>
+          <div class="fg"><label>Ville</label>
+            <select><option selected>Lomé</option><option>Kpalimé</option><option>Atakpamé</option><option>Sokodé</option><option>Kara</option></select>
+          </div>
+          <button class="btn-save" onclick="showToast('Profil mis à jour avec succès !')"><i class="fas fa-save"></i> Enregistrer</button>
+        </div>
+        <div>
+          <div class="scard" style="margin-bottom:16px">
+            <div class="scard-title"><i class="fas fa-map-marker-alt"></i> Adresse de livraison</div>
+            <div class="fg"><label>Adresse complète</label><input type="text" value="Quartier Tokoin, Rue 12, Bâtiment B"></div>
+            <div class="fg"><label>Complément</label><input type="text" placeholder="Appartement, étage, code porte…"></div>
+            <div class="fg"><label>Pharmacie préférée</label>
+              <select><option selected>Pharmacie Centrale</option><option>Pharmacie Hippocrate</option><option>Pharmacie du Bénin</option></select>
+            </div>
+            <button class="btn-save" onclick="showToast('Adresse enregistrée !')"><i class="fas fa-save"></i> Enregistrer</button>
+          </div>
+          <div class="scard">
+            <div class="scard-title"><i class="fas fa-bell"></i> Notifications</div>
+            <div class="tog-row"><div class="tog-left"><h5>Rappels d'ordonnance</h5><p>Alertes avant expiration</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="tog-row"><div class="tog-left"><h5>Suivi de livraison</h5><p>Mises à jour en temps réel</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="tog-row"><div class="tog-left"><h5>Promotions &amp; offres</h5><p>Newsletter hebdomadaire</p></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+            <div class="tog-row"><div class="tog-left"><h5>Alertes de stock</h5><p>Quand vos favoris sont disponibles</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="tog-row"><div class="tog-left"><h5>Résumé mensuel</h5><p>Rapport de vos commandes</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- WhatsApp -->
+<a href="https://wa.me/22896327992" target="_blank" class="wa-float" title="WhatsApp PharmaLoc"><i class="fab fa-whatsapp"></i></a>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt"></span></div>
+
+<script>
+/* ── Navigation panels ─────────────────────── */
+function switchPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  const lnk = document.getElementById('lnk-'+id);
+  if (lnk) lnk.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── Filtre commandes ──────────────────────── */
+function filtOrders(btn, st) {
+  document.querySelectorAll('[onclick^="filtOrders"]').forEach(b => {
+    b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+  });
+  btn.style.background = 'var(--em)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--em)';
+  document.querySelectorAll('#ordersBox .order-item').forEach(r => {
+    r.style.display = (st==='all' || r.dataset.st===st) ? 'flex' : 'none';
+  });
+}
+
+/* ── Toast ─────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('on'), 2800);
+}
+
+/* ── Barre de progression tracking (simulée) ── */
+let prog = 65;
+setInterval(() => {
+  if (prog < 95) {
+    prog += 0.2;
+    const bar = document.getElementById('progressBar');
+    if (bar) bar.style.width = prog + '%';
+  }
+}, 3000);
+
+/* ── Animations entrée KPIs ─────────────────── */
+const kpis = document.querySelectorAll('.kpi');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }, i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.1});
+kpis.forEach(k => {
+  k.style.opacity = '0';
+  k.style.transform = 'translateY(16px)';
+  k.style.transition = 'opacity .5s ease, transform .5s ease, border-color .3s, box-shadow .3s';
+  obs.observe(k);
+});
+
+/* ── PWA ───────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

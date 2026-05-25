@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc Boutique — Médicaments & Parapharmacie</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --em:#059669;--em2:#10b981;--eml:#d1fae5;--tl:#0d9488;
+  --ink:#0a1628;--ink2:#1e293b;--sl:#475569;--mu:#94a3b8;
+  --ln:#e2e8f0;--bg:#f8fafb;--wh:#ffffff;
+  --rd:#ef4444;--am:#f59e0b;--bl:#3b82f6;--vt:#7c3aed;
+  --sh:0 2px 12px rgba(0,0,0,.06);--shg:0 8px 28px rgba(5,150,105,.28);
+  --r:12px;--rl:18px;--t:all .26s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+
+/* ══ TOPBAR PROMO ══════════════════════════════════ */
+.top-strip{
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  text-align:center;padding:8px;
+  font-size:.78rem;font-weight:600;color:#fff;letter-spacing:.2px;
+}
+.top-strip a{color:#fff;text-decoration:underline}
+
+/* ══ NAVBAR ════════════════════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:900;
+  background:var(--wh);border-bottom:1px solid var(--ln);
+  box-shadow:var(--sh);
+}
+.nav-main{
+  display:flex;align-items:center;gap:14px;
+  padding:0 3%;height:68px;max-width:1540px;margin:0 auto;
+}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;box-shadow:var(--shg);flex-shrink:0}
+.logo-tx{font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;color:var(--ink);white-space:nowrap}
+.logo-tx em{font-style:normal;color:var(--em)}
+.nav-srch{
+  flex:1;max-width:620px;
+  display:flex;align-items:center;
+  border:1.5px solid var(--ln);border-radius:12px;overflow:hidden;
+  background:var(--bg);transition:var(--t);
+}
+.nav-srch:focus-within{border-color:var(--em);background:var(--wh);box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.ns-cat{
+  border:none;outline:none;background:none;
+  padding:0 12px 0 14px;height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:.8rem;color:var(--sl);font-weight:600;
+  border-right:1px solid var(--ln);cursor:pointer;flex-shrink:0;min-width:130px;
+}
+.ns-inp{flex:1;border:none;outline:none;background:none;padding:0 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:var(--ink);height:46px}
+.ns-inp::placeholder{color:var(--mu)}
+.ns-btn{height:46px;padding:0 18px;background:var(--em);border:none;color:#fff;cursor:pointer;transition:var(--t);font-size:1rem;flex-shrink:0}
+.ns-btn:hover{background:var(--tl)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nr-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:10px;border:1.5px solid var(--ln);
+  background:var(--wh);color:var(--sl);font-size:.82rem;font-weight:600;
+  cursor:pointer;transition:var(--t);text-decoration:none;font-family:'Plus Jakarta Sans',sans-serif;
+  position:relative;white-space:nowrap;
+}
+.nr-btn:hover{border-color:var(--em);color:var(--em)}
+.nr-cart{background:var(--em);border-color:var(--em);color:#fff;box-shadow:var(--shg)}
+.nr-cart:hover{background:var(--tl);border-color:var(--tl);color:#fff!important}
+.nbadge{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--rd);color:#fff;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--wh)}
+
+/* Barre catégories */
+.cat-strip{border-top:1px solid var(--ln);overflow-x:auto;scrollbar-width:none;background:var(--wh)}
+.cat-strip::-webkit-scrollbar{display:none}
+.cat-inner{display:flex;max-width:1540px;margin:0 auto;padding:0 3%;min-width:max-content}
+.cl{
+  display:flex;align-items:center;gap:6px;padding:11px 14px;
+  font-size:.81rem;font-weight:600;color:var(--sl);text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:var(--t);cursor:pointer;
+  background:none;border-left:none;border-right:none;border-top:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.cl:hover{color:var(--em);background:var(--eml)}
+.cl.on{color:var(--em);border-bottom-color:var(--em)}
+.cl-ico{font-size:.95rem}
+
+/* ══ HERO BANNERS ══════════════════════════════════ */
+.hero-grid{max-width:1540px;margin:0 auto;padding:18px 3%;display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+.hb-main{
+  background:linear-gradient(145deg,#064e3b 0%,#065f46 60%,#047857 100%);
+  border-radius:var(--rl);padding:28px 32px;position:relative;overflow:hidden;
+  cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-height:175px;
+  transition:var(--t);
+}
+.hb-main:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(5,150,105,.3)}
+.hb-main::after{content:'🏥';position:absolute;right:-15px;bottom:-20px;font-size:9rem;opacity:.07;pointer-events:none}
+.hb-tag{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.hb-main h2{font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:6px}
+.hb-main p{font-size:.83rem;color:rgba(255,255,255,.7);margin-bottom:14px}
+.hb-cta{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:50px;background:#fff;color:var(--em);font-weight:800;font-size:.83rem;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',sans-serif;transition:var(--t)}
+.hb-cta:hover{transform:scale(1.04)}
+.hb-sm{border-radius:var(--rl);padding:22px;cursor:pointer;position:relative;overflow:hidden;min-height:175px;display:flex;flex-direction:column;justify-content:space-between;transition:var(--t)}
+.hb-sm:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.hb-b{background:linear-gradient(145deg,#1e3a5f,#1d4ed8)}
+.hb-v{background:linear-gradient(145deg,#4c1d95,#7c3aed)}
+.hb-sm h3{font-family:'Clash Display',sans-serif;font-size:1.05rem;color:#fff;margin-bottom:4px}
+.hb-sm p{font-size:.76rem;color:rgba(255,255,255,.6);line-height:1.5}
+.hb-badge{display:inline-block;margin-top:10px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.18);font-size:.72rem;font-weight:700;color:#fff}
+.hb-deco{position:absolute;right:-12px;bottom:-12px;font-size:6rem;opacity:.12;pointer-events:none}
+
+/* ══ CORPS ═════════════════════════════════════════ */
+.body-wrap{display:flex;max-width:1540px;margin:0 auto;padding:0 3% 70px}
+
+/* ── Sidebar ── */
+.sb{width:225px;flex-shrink:0;padding:16px 16px 16px 0}
+.sb-card{background:var(--wh);border:1.5px solid var(--ln);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.sb-h{font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sb-h button{background:none;border:none;font-size:.72rem;color:var(--em);font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif}
+.sb-h button:hover{text-decoration:underline}
+/* Slider prix */
+.pr-wrap{display:flex;flex-direction:column;gap:7px}
+input[type=range]{width:100%;accent-color:var(--em);height:4px}
+.pr-row{display:flex;gap:6px}
+.pr-inp{flex:1;padding:7px 9px;border-radius:8px;border:1.5px solid var(--ln);font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;color:var(--ink);outline:none;background:var(--bg);transition:var(--t)}
+.pr-inp:focus{border-color:var(--em)}
+.pr-lbl{font-size:.72rem;color:var(--mu)}
+/* Checks */
+.chklist{display:flex;flex-direction:column;gap:8px}
+.chkitem{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;color:var(--sl)}
+.chkitem input{accent-color:var(--em);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.chkitem:hover{color:var(--em)}
+.chkc{margin-left:auto;font-size:.7rem;background:var(--bg);padding:1px 6px;border-radius:10px;color:var(--mu);font-weight:600}
+/* Marques */
+.brand-list{display:flex;flex-direction:column;gap:6px}
+.brand-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;border:1px solid var(--ln);cursor:pointer;font-size:.78rem;color:var(--sl);transition:var(--t)}
+.brand-item:hover,.brand-item.on{border-color:var(--em);color:var(--em);background:var(--eml)}
+
+/* ── Zone produits ── */
+.prod-area{flex:1;padding-top:16px}
+.prod-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.pt-info{font-size:.83rem;color:var(--mu)}
+.pt-info strong{color:var(--ink);font-weight:700}
+.pt-right{display:flex;align-items:center;gap:8px}
+.pt-sort{padding:8px 12px;border-radius:9px;border:1.5px solid var(--ln);background:var(--wh);font-family:'Plus Jakarta Sans',sans-serif;font-size:.81rem;color:var(--sl);outline:none;cursor:pointer}
+.vbtn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--mu);cursor:pointer;transition:var(--t)}
+.vbtn.on,.vbtn:hover{border-color:var(--em);color:var(--em);background:var(--eml)}
+
+/* Grille */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(192px,1fr));gap:14px}
+.pgrid.lv{grid-template-columns:1fr}
+
+/* Card produit */
+.card{
+  background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);
+  overflow:hidden;transition:var(--t);cursor:pointer;display:flex;flex-direction:column;
+}
+.card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(0,0,0,.1);border-color:rgba(5,150,105,.3)}
+/* List view */
+.pgrid.lv .card{flex-direction:row;height:116px}
+.pgrid.lv .card-img{width:116px;height:100%;flex-shrink:0;border-bottom:none;border-right:1px solid var(--ln)}
+.pgrid.lv .card-body{flex:1;display:flex;align-items:center;gap:14px;padding:12px 16px}
+.pgrid.lv .card-desc{flex:1}
+.pgrid.lv .card-foot{flex-direction:column;align-items:flex-end;gap:6px;width:auto;flex-shrink:0}
+
+.card-img{
+  height:148px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:3rem;position:relative;border-bottom:1px solid var(--ln);flex-shrink:0;
+}
+.badges{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:3px}
+.bge{padding:2px 7px;border-radius:4px;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.bge-p{background:var(--rd);color:#fff}
+.bge-n{background:var(--em);color:#fff}
+.bge-o{background:var(--am);color:#fff}
+.bge-b{background:var(--bl);color:#fff}
+.fav{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:var(--wh);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:.76rem;color:var(--mu);cursor:pointer;transition:var(--t)}
+.fav:hover,.fav.on{color:var(--rd);border-color:#fecaca;background:#fff5f5}
+
+.card-body{padding:12px 13px 13px;display:flex;flex-direction:column;flex:1}
+.c-cat{font-size:.64rem;font-weight:700;color:var(--em);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.c-name{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700;color:var(--ink);line-height:1.25;margin-bottom:3px}
+.c-desc{font-size:.73rem;color:var(--mu);line-height:1.45;margin-bottom:6px;flex:1}
+.c-ph{font-size:.68rem;color:var(--sl);margin-bottom:7px;display:flex;align-items:center;gap:3px}
+.c-st{display:flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;margin-bottom:9px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.di{background:#22c55e}.dl{background:var(--am)}.do{background:var(--rd)}
+.c-rt{margin-left:auto;font-size:.67rem;color:var(--am);font-weight:700}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto}
+.c-price{display:flex;flex-direction:column}
+.c-old{font-size:.69rem;color:var(--mu);text-decoration:line-through}
+.c-new{font-family:'Clash Display',sans-serif;font-size:1.02rem;font-weight:700;color:var(--ink)}
+.c-new em{font-style:normal;color:var(--em);font-size:.68rem}
+.btn-add{
+  padding:7px 13px;border-radius:50px;border:none;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  color:#fff;font-weight:700;font-size:.74rem;cursor:pointer;transition:var(--t);
+  font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:5px;
+  box-shadow:0 3px 10px rgba(5,150,105,.22);white-space:nowrap;
+}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(5,150,105,.35)}
+.btn-add.ok{background:linear-gradient(135deg,#16a34a,#15803d)}
+.btn-add:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* Pagination */
+.pager{display:flex;justify-content:center;align-items:center;gap:7px;margin-top:30px;flex-wrap:wrap}
+.pgbtn{width:36px;height:36px;border-radius:9px;border:1.5px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.84rem;font-weight:600;color:var(--sl);cursor:pointer;transition:var(--t)}
+.pgbtn:hover,.pgbtn.on{background:var(--em);border-color:var(--em);color:#fff}
+.pgbtn.dots{border:none;background:none;cursor:default;color:var(--mu)}
+
+/* ══ PANIER ════════════════════════════════════════ */
+.cart-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s}
+.cart-ov.open{opacity:1;pointer-events:all}
+.cart-dr{position:fixed;top:0;right:-460px;bottom:0;width:440px;background:var(--wh);z-index:2001;box-shadow:-20px 0 60px rgba(0,0,0,.15);transition:right .4s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.cart-ov.open .cart-dr{right:0}
+.cdh{padding:20px 22px;border-bottom:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center}
+.cdh h3{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700}
+.cdh-x{background:none;border:none;color:var(--mu);font-size:1.1rem;cursor:pointer;padding:3px;transition:var(--t)}
+.cdh-x:hover{color:var(--ink)}
+.cart-list{flex:1;overflow-y:auto;padding:14px}
+.cart-list::-webkit-scrollbar{width:3px}
+.cart-list::-webkit-scrollbar-thumb{background:var(--ln)}
+.ci{display:flex;gap:10px;padding:11px;background:var(--bg);border-radius:11px;border:1px solid var(--ln);margin-bottom:9px}
+.ci-em{font-size:2rem;flex-shrink:0}
+.ci-inf{flex:1;min-width:0}
+.ci-nm{font-size:.85rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-ph{font-size:.7rem;color:var(--mu);margin-bottom:6px}
+.ci-row{display:flex;align-items:center;gap:8px}
+.ciqb{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--ln);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;transition:var(--t)}
+.ciqb:hover{background:var(--em);color:#fff;border-color:var(--em)}
+.ciqty{font-size:.88rem;font-weight:700;min-width:18px;text-align:center}
+.cipr{font-family:'Clash Display',sans-serif;font-size:.98rem;font-weight:700;color:var(--em)}
+.cidl{background:none;border:none;color:var(--mu);cursor:pointer;font-size:.8rem;padding:3px;margin-left:auto;transition:var(--t)}
+.cidl:hover{color:var(--rd)}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--mu);text-align:center;flex:1}
+.ce-ic{font-size:3.5rem;opacity:.2}
+.cart-foot{padding:18px 22px;border-top:1px solid var(--ln)}
+.cf-r{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:5px}
+.cf-t{display:flex;justify-content:space-between;font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;margin-top:9px;padding-top:9px;border-top:1px solid var(--ln)}
+.cf-t span:last-child{color:var(--em)}
+.btn-co{width:100%;padding:14px;border-radius:13px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.96rem;cursor:pointer;margin-top:13px;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--shg)}
+.btn-co:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(5,150,105,.38)}
+
+/* ══ TOAST ══════════════════════════════════════════ */
+.toast{position:fixed;bottom:20px;right:20px;z-index:3000;background:var(--ink);color:#fff;border-radius:10px;padding:11px 18px;font-size:.82rem;display:flex;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,.22);opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast i{color:var(--em2)}
+
+/* ══ RESPONSIVE ════════════════════════════════════ */
+@media(max-width:1100px){.sb{width:190px}}
+@media(max-width:900px){
+  .sb{display:none}
+  .hero-grid{grid-template-columns:1fr 1fr}
+  .hb-main{grid-column:1/-1}
+}
+@media(max-width:640px){
+  .nav-main{padding:0 12px;height:58px}
+  .nav-srch{display:none}
+  .hero-grid{grid-template-columns:1fr;padding:10px 12px}
+  .body-wrap{padding:0 12px 50px}
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .cart-dr{width:100%;right:-100%}
+  .cat-inner{padding:0 12px}
+  .nr-btn span{display:none}
+  .nr-btn{padding:8px 11px}
+}
+</style>
+</head>
+<body>
+
+<!-- Bande promo -->
+<div class="top-strip">
+  🚚 Livraison gratuite dès 5 000 FCFA · 24h/24 · <a href="#">Pharmacies de garde →</a>
+</div>
+
+<!-- ══ NAVBAR ═════════════════════════════════════════ -->
+<nav>
+  <div class="nav-main">
+    <a href="pharma.html" class="nav-logo">
+      <div class="logo-ic"><i class="fas fa-plus"></i></div>
+      <span class="logo-tx">Pharma<em>Loc</em></span>
+    </a>
+    <div class="nav-srch">
+      <select class="ns-cat" id="catSel" onchange="catFromSel(this.value)">
+        <option value="all">Toutes catégories</option>
+        <option value="analgesique">Analgésiques</option>
+        <option value="antibiotique">Antibiotiques</option>
+        <option value="cardiovasculaire">Cardio-vasculaire</option>
+        <option value="digestion">Digestion</option>
+        <option value="dermatologie">Dermatologie</option>
+        <option value="ophtalmologie">Ophtalmologie</option>
+        <option value="orl">ORL / Gorge</option>
+        <option value="vitamine">Vitamines & Minéraux</option>
+        <option value="bebe">Bébé & Enfant</option>
+        <option value="maternite">Maternité</option>
+        <option value="beaute">Beauté & Soin</option>
+        <option value="materiel">Matériel médical</option>
+        <option value="diabete">Diabète</option>
+        <option value="allergie">Allergie</option>
+        <option value="sommeil">Sommeil & Stress</option>
+        <option value="sport">Sport & Récupération</option>
+        <option value="phyto">Phytothérapie</option>
+        <option value="parapharmacie">Parapharmacie</option>
+        <option value="veterinaire">Vétérinaire</option>
+      </select>
+      <input class="ns-inp" type="text" id="srch" placeholder="Médicament, symptôme, marque…" oninput="liveSearch(this.value)">
+      <button class="ns-btn"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="nav-right">
+      <a href="localisation.html" class="nr-btn"><i class="fas fa-map-marker-alt"></i> <span>Pharmacies</span></a>
+      <button class="nr-btn" onclick="showFavs()"><i class="fas fa-heart"></i> <span>Favoris</span> <span class="nbadge" id="wlB" style="display:none">0</span></button>
+      <button class="nr-btn nr-cart" onclick="toggleCart()">
+        <i class="fas fa-shopping-bag"></i> <span>Panier</span>
+        <span class="nbadge" id="crtB" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+  <!-- Catégories -->
+  <div class="cat-strip">
+    <div class="cat-inner" id="catBar">
+      <button class="cl on" data-c="all" onclick="setC(this,'all')"><span class="cl-ico">🏪</span> Tout</button>
+      <button class="cl" data-c="analgesique" onclick="setC(this,'analgesique')"><span class="cl-ico">💊</span> Analgésiques</button>
+      <button class="cl" data-c="antibiotique" onclick="setC(this,'antibiotique')"><span class="cl-ico">💉</span> Antibiotiques</button>
+      <button class="cl" data-c="cardiovasculaire" onclick="setC(this,'cardiovasculaire')"><span class="cl-ico">❤️</span> Cardio</button>
+      <button class="cl" data-c="digestion" onclick="setC(this,'digestion')"><span class="cl-ico">🫁</span> Digestion</button>
+      <button class="cl" data-c="dermatologie" onclick="setC(this,'dermatologie')"><span class="cl-ico">🧴</span> Dermatologie</button>
+      <button class="cl" data-c="ophtalmologie" onclick="setC(this,'ophtalmologie')"><span class="cl-ico">👁️</span> Ophtalmologie</button>
+      <button class="cl" data-c="orl" onclick="setC(this,'orl')"><span class="cl-ico">👃</span> ORL</button>
+      <button class="cl" data-c="vitamine" onclick="setC(this,'vitamine')"><span class="cl-ico">🍋</span> Vitamines</button>
+      <button class="cl" data-c="bebe" onclick="setC(this,'bebe')"><span class="cl-ico">👶</span> Bébé</button>
+      <button class="cl" data-c="maternite" onclick="setC(this,'maternite')"><span class="cl-ico">🤱</span> Maternité</button>
+      <button class="cl" data-c="beaute" onclick="setC(this,'beaute')"><span class="cl-ico">💆</span> Beauté</button>
+      <button class="cl" data-c="materiel" onclick="setC(this,'materiel')"><span class="cl-ico">🩺</span> Matériel</button>
+      <button class="cl" data-c="diabete" onclick="setC(this,'diabete')"><span class="cl-ico">🩸</span> Diabète</button>
+      <button class="cl" data-c="allergie" onclick="setC(this,'allergie')"><span class="cl-ico">🌿</span> Allergie</button>
+      <button class="cl" data-c="sommeil" onclick="setC(this,'sommeil')"><span class="cl-ico">🌙</span> Sommeil</button>
+      <button class="cl" data-c="sport" onclick="setC(this,'sport')"><span class="cl-ico">🏃</span> Sport</button>
+      <button class="cl" data-c="phyto" onclick="setC(this,'phyto')"><span class="cl-ico">🌱</span> Phyto</button>
+      <button class="cl" data-c="parapharmacie" onclick="setC(this,'parapharmacie')"><span class="cl-ico">🛍️</span> Parapharmacie</button>
+      <button class="cl" data-c="veterinaire" onclick="setC(this,'veterinaire')"><span class="cl-ico">🐾</span> Vétérinaire</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ BANNERS ═══════════════════════════════════════ -->
+<div class="hero-grid">
+  <div class="hb-main" onclick="promoFlash()">
+    <div>
+      <div class="hb-tag">🔥 Offre flash · Jusqu'à −45%</div>
+      <h2>Médicaments essentiels<br>à prix réduits</h2>
+      <p>Analgésiques, antibiotiques, vitamines et plus — Stock limité.</p>
+    </div>
+    <button class="hb-cta">Voir toutes les promos <i class="fas fa-arrow-right"></i></button>
+  </div>
+  <div class="hb-sm hb-b" onclick="setC(document.querySelector('[data-c=bebe]'),'bebe')">
+    <div><h3>Bébé & Enfant</h3><p>Soins adaptés dès la naissance</p></div>
+    <div class="hb-badge">+55 produits</div>
+    <div class="hb-deco">👶</div>
+  </div>
+  <div class="hb-sm hb-v" onclick="setC(document.querySelector('[data-c=vitamine]'),'vitamine')">
+    <div><h3>Vitamines & Santé</h3><p>Renforcez votre immunité</p></div>
+    <div class="hb-badge">+70 produits</div>
+    <div class="hb-deco">⚡</div>
+  </div>
+</div>
+
+<!-- ══ CORPS ═══════════════════════════════════════ -->
+<div class="body-wrap">
+
+  <!-- Sidebar -->
+  <aside class="sb">
+    <!-- Prix -->
+    <div class="sb-card">
+      <div class="sb-h">Prix (FCFA) <button onclick="resetPr()">Réinitialiser</button></div>
+      <div class="pr-wrap">
+        <input type="range" id="pSlide" min="0" max="100000" value="100000" step="500" oninput="onSlide(this.value)">
+        <div class="pr-row">
+          <input class="pr-inp" type="number" id="pMin" value="0" placeholder="Min" oninput="onManPr()">
+          <input class="pr-inp" type="number" id="pMax" value="100000" placeholder="Max" oninput="onManPr()">
+        </div>
+        <div class="pr-lbl">Fourchette : <strong id="prLbl">0 – 100 000 FCFA</strong></div>
+      </div>
+    </div>
+    <!-- Disponibilité -->
+    <div class="sb-card">
+      <div class="sb-h">Disponibilité</div>
+      <div class="chklist">
+        <label class="chkitem"><input type="checkbox" id="fIn" checked onchange="render()"> En stock <span class="chkc" id="cIn">—</span></label>
+        <label class="chkitem"><input type="checkbox" id="fLow" checked onchange="render()"> Stock limité <span class="chkc" id="cLow">—</span></label>
+        <label class="chkitem"><input type="checkbox" id="fOut" onchange="render()"> En rupture <span class="chkc" id="cOut">—</span></label>
+      </div>
+    </div>
+    <!-- Options -->
+    <div class="sb-card">
+      <div class="sb-h">Options</div>
+      <div class="chklist">
+        <label class="chkitem"><input type="checkbox" id="fPr" onchange="render()"> Promotions seulement</label>
+        <label class="chkitem"><input type="checkbox" id="fNw" onchange="render()"> Nouveautés</label>
+        <label class="chkitem"><input type="checkbox" id="fNo" onchange="render()"> Sans ordonnance</label>
+        <label class="chkitem"><input type="checkbox" id="fLiv" onchange="render()"> Livrable en 24h</label>
+      </div>
+    </div>
+    <!-- Pharmacies -->
+    <div class="sb-card">
+      <div class="sb-h">Pharmacies</div>
+      <div class="chklist" id="phFl"></div>
+    </div>
+    <!-- Marques -->
+    <div class="sb-card">
+      <div class="sb-h">Marques populaires</div>
+      <div class="brand-list" id="brandList"></div>
+    </div>
+  </aside>
+
+  <!-- Produits -->
+  <div class="prod-area">
+    <div class="prod-toolbar">
+      <div class="pt-info"><strong id="rCount">0</strong> produits trouvés</div>
+      <div class="pt-right">
+        <select class="pt-sort" onchange="setSort(this.value)">
+          <option value="pop">⭐ Popularité</option>
+          <option value="pa">Prix ↑</option>
+          <option value="pd">Prix ↓</option>
+          <option value="nv">Nouveautés</option>
+          <option value="rt">Mieux notés</option>
+          <option value="az">A – Z</option>
+        </select>
+        <button class="vbtn on" id="vg" onclick="setV('grid')"><i class="fas fa-th"></i></button>
+        <button class="vbtn" id="vl" onclick="setV('list')"><i class="fas fa-list"></i></button>
+      </div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+    <div class="pager" id="pager"></div>
+  </div>
+</div>
+
+<!-- ══ PANIER ═══════════════════════════════════════ -->
+<div class="cart-ov" id="cartOv" onclick="closeOv(event)">
+  <div class="cart-dr">
+    <div class="cdh">
+      <h3>🛒 Mon Panier <span id="cCnt" style="font-size:.8rem;color:var(--mu);font-weight:400"></span></h3>
+      <button class="cdh-x" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-foot" id="cartFoot" style="display:none">
+      <div class="cf-r"><span>Sous-total</span><span id="cSub">—</span></div>
+      <div class="cf-r"><span>Livraison</span><span style="color:var(--em)">Gratuite ✓</span></div>
+      <div class="cf-t"><span>Total</span><span id="cTot">—</span></div>
+      <button class="btn-co" onclick="checkout()"><i class="fas fa-lock"></i> Passer la commande</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTx"></span></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CATALOGUE — 130 PRODUITS PHARMACEUTIQUES
+══════════════════════════════════════════════════════════ */
+const P = [
+/* ─── ANALGÉSIQUES ────────────────────────────────────── */
+{id:1, n:'Paracétamol 500mg',e:'💊',c:'analgesique',d:'Antidouleur & antipyrétique · Boîte 20 cp',p:1500,o:2000,pr:true, nw:false,rd:false,st:'in', rt:4.8,s:890,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:2, n:'Ibuprofène 400mg', e:'💊',c:'analgesique',d:'Anti-inflammatoire non stéroïdien · 20 cp', p:2200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.6,s:650,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:3, n:'Doliprane 1000mg', e:'💊',c:'analgesique',d:'Paracétamol forte dose · Adultes · 8 cp',   p:1800,o:2500, pr:true, nw:false,rd:false,st:'in', rt:4.7,s:720,ph:'Pharmacie Centrale',  br:'Sanofi',     liv:true},
+{id:4, n:'Aspirine 500mg',   e:'💊',c:'analgesique',d:'Acide acétylsalicylique · 20 comprimés',    p:1200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.4,s:430,ph:'Pharmacie Hippocrate',br:'Bayer',      liv:true},
+{id:5, n:'Tramadol 50mg',    e:'💉',c:'analgesique',d:'Opioïde faible · Douleurs modérées-sévères',p:4500,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.5,s:310,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+{id:6, n:'Diclofénac 50mg',  e:'💊',c:'analgesique',d:'AINS · Douleurs articulaires · 30 cp',      p:3200,o:4000, pr:true, nw:false,rd:false,st:'low',rt:4.3,s:280,ph:'Pharmacie Saint-Luc', br:'Générique',  liv:true},
+{id:7, n:'Néocodion',        e:'💊',c:'analgesique',d:'Codéine · Toux & douleurs · 16 cp',         p:3800,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.2,s:240,ph:'Pharmacie Centrale',  br:'Boiron',     liv:false},
+{id:8, n:'Antalgique Efferalgan',e:'🫧',c:'analgesique',d:'Paracétamol effervescent 1g · 16 cp',   p:2800,o:3200, pr:true, nw:false,rd:false,st:'in', rt:4.6,s:510,ph:'Pharmacie du Bénin',  br:'UPSA',       liv:true},
+
+/* ─── ANTIBIOTIQUES ───────────────────────────────────── */
+{id:9, n:'Amoxicilline 500mg',e:'💉',c:'antibiotique',d:'Pénicilline · Infections bactériennes · 16 gél',p:6000,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.6,s:540,ph:'Pharmacie Centrale',  br:'Générique',  liv:false},
+{id:10,n:'Azithromycine 500mg',e:'💉',c:'antibiotique',d:'Macrolide · Infections respiratoires · 3 cp', p:8500,o:10000,pr:true, nw:false,rd:true, st:'in', rt:4.8,s:480,ph:'Pharmacie du Bénin',  br:'Pfizer',     liv:false},
+{id:11,n:'Ciprofloxacine 500mg',e:'💉',c:'antibiotique',d:'Fluoroquinolone · UTI & infections · 10 cp', p:7200,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.5,s:360,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+{id:12,n:'Métronidazole 250mg',e:'💊',c:'antibiotique',d:'Antiprotozoaire · Infections anaérobies · 20',p:3800,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.3,s:290,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+{id:13,n:'Doxycycline 100mg', e:'💉',c:'antibiotique',d:'Tétracycline · Paludisme & infections · 10cp', p:5500,o:null, pr:false,nw:true, rd:true, st:'in', rt:4.6,s:410,ph:'Pharmacie Centrale',  br:'Générique',  liv:false},
+{id:14,n:'Érythromycine 500mg',e:'💊',c:'antibiotique',d:'Macrolide · Allergie pénicilline · 16 cp',   p:6800,o:null, pr:false,nw:false,rd:true, st:'low',rt:4.2,s:195,ph:'Pharmacie du Bénin',  br:'Générique',  liv:false},
+{id:15,n:'Céfixime 200mg',    e:'💉',c:'antibiotique',d:'Céphalosporine 3G · Infections urinaires · 8', p:9500,o:11000,pr:true, nw:false,rd:true, st:'in', rt:4.7,s:280,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+
+/* ─── CARDIO-VASCULAIRE ───────────────────────────────── */
+{id:16,n:'Amlodipine 5mg',   e:'❤️',c:'cardiovasculaire',d:'Antihypertenseur · Antagoniste Ca · 30cp',p:5200,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.7,s:370,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+{id:17,n:'Lisinopril 10mg',  e:'❤️',c:'cardiovasculaire',d:'IEC · Hypertension · Insuffisance cardiaque',p:4800,o:6000,pr:true, nw:false,rd:true, st:'in', rt:4.5,s:310,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+{id:18,n:'Atorvastatine 20mg',e:'❤️',c:'cardiovasculaire',d:'Statine · Hypocholestérolémiant · 30 cp', p:7500,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.6,s:285,ph:'Pharmacie de la Croix',br:'Pfizer',     liv:false},
+{id:19,n:'Métoprolol 50mg',  e:'❤️',c:'cardiovasculaire',d:'Bêtabloquant · Arythmie · Angine · 30 cp', p:6000,o:null, pr:false,nw:false,rd:true, st:'low',rt:4.4,s:220,ph:'Pharmacie Centrale',  br:'Générique',  liv:false},
+{id:20,n:'Aspirine Cardio 100mg',e:'🩸',c:'cardiovasculaire',d:'Prévention cardiovasculaire · 30 cp',  p:2500,o:3000, pr:true, nw:false,rd:false,st:'in', rt:4.7,s:560,ph:'Pharmacie du Bénin',  br:'Bayer',      liv:true},
+{id:21,n:'Furosémide 40mg',  e:'💧',c:'cardiovasculaire',d:'Diurétique de l\'anse · Œdèmes · 20 cp',   p:3500,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.4,s:195,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+{id:22,n:'Warfarine 5mg',    e:'🩸',c:'cardiovasculaire',d:'Anticoagulant · Prévention thrombose · 28cp',p:8500,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.6,s:165,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+
+/* ─── DIGESTION ───────────────────────────────────────── */
+{id:23,n:'Oméprazole 20mg',  e:'🫁',c:'digestion',d:'IPP · Ulcère & Reflux gastrique · 14 gél',  p:4200,o:5500, pr:true, nw:false,rd:false,st:'in', rt:4.8,s:720,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:24,n:'Métoclopramide 10mg',e:'🫁',c:'digestion',d:'Antiémétique · Nausées vomissements · 20cp',p:2800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.4,s:380,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:25,n:'Loperamide 2mg',   e:'🫁',c:'digestion',d:'Antidiarrhéique · 12 gélules',               p:3000,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:450,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:26,n:'Bisacodyl 5mg',    e:'🌿',c:'digestion',d:'Laxatif stimulant · Constipation · 20 cp',   p:2200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.2,s:290,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+{id:27,n:'Charbon Activé',   e:'⚫',c:'digestion',d:'Intoxication légère · Ballonnements · 20 gél',p:1800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.3,s:340,ph:'Pharmacie Saint-Luc', br:'Générique',  liv:true},
+{id:28,n:'Eno Sel Effervescent',e:'🫧',c:'digestion',d:'Antiacide · Brûlures estomac · 10 sachets',p:2500,o:3000,pr:true, nw:false,rd:false,st:'in', rt:4.6,s:480,ph:'Pharmacie Centrale',  br:'GSK',        liv:true},
+{id:29,n:'Spasfon 80mg',     e:'🫁',c:'digestion',d:'Antispasmodique · Crampes · 30 cp',          p:5500,o:6500, pr:true, nw:false,rd:false,st:'in', rt:4.7,s:560,ph:'Pharmacie du Bénin',  br:'Lafon',      liv:true},
+{id:30,n:'Duphalac Sirop',   e:'🍯',c:'digestion',d:'Lactulose · Constipation · Flacon 200ml',     p:4800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:310,ph:'Pharmacie Hippocrate',br:'Abbott',     liv:true},
+
+/* ─── DERMATOLOGIE ────────────────────────────────────── */
+{id:31,n:'Clobétasol Crème',  e:'🧴',c:'dermatologie',d:'Corticoïde topique · Eczéma & Psoriasis',  p:5500,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.5,s:310,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:32,n:'Clotrimazole 1%',   e:'🧴',c:'dermatologie',d:'Antifongique · Mycoses cutanées · Tube 30g',p:3800,o:4500,pr:true, nw:false,rd:false,st:'in', rt:4.7,s:420,ph:'Pharmacie Centrale',  br:'Bayer',      liv:true},
+{id:33,n:'Hydrocortisone 1%', e:'🧴',c:'dermatologie',d:'Anti-inflammatoire · Démangeaisons · 30g',  p:3200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.4,s:380,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:34,n:'Peroxyde Benzoyle', e:'✨',c:'dermatologie',d:'Acné · Gel facial 5% · Tube 30g',           p:4500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.6,s:290,ph:'Pharmacie de la Paix',br:'Galderma',   liv:true},
+{id:35,n:'Terbinafine Spray', e:'🫧',c:'dermatologie',d:'Antifongique · Pied d\'athlète · 150ml',    p:6200,o:7000, pr:true, nw:false,rd:false,st:'low',rt:4.5,s:210,ph:'Pharmacie du Bénin',  br:'Novartis',   liv:true},
+{id:36,n:'Acide Salicylique', e:'💧',c:'dermatologie',d:'Kératolytique · Verrues & Cors · 10ml',     p:2800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.3,s:185,ph:'Pharmacie Saint-Luc', br:'Générique',  liv:true},
+
+/* ─── OPHTALMOLOGIE ───────────────────────────────────── */
+{id:37,n:'Ciprofloxacine Collyre',e:'👁️',c:'ophtalmologie',d:'Antibiotique oculaire · 5ml · Conjonctivite',p:5800,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.6,s:280,ph:'Pharmacie Centrale',  br:'Générique',  liv:false},
+{id:38,n:'Larmes Artificielles',  e:'💧',c:'ophtalmologie',d:'Lubrification oculaire · Sécheresse · 10ml',  p:3500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.8,s:560,ph:'Pharmacie du Bénin',  br:'Alcon',      liv:true},
+{id:39,n:'Dexaméthasone Collyre', e:'👁️',c:'ophtalmologie',d:'Corticoïde oculaire · Inflammation · 5ml',   p:6500,o:null, pr:false,nw:false,rd:true, st:'low',rt:4.4,s:180,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+{id:40,n:'Timolol 0.5% Collyre',  e:'👁️',c:'ophtalmologie',d:'Glaucome · Réduction tension oculaire · 5ml',p:7500,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.5,s:145,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+{id:41,n:'Solution Nettoyante Lentilles',e:'🔵',c:'ophtalmologie',d:'Entretien lentilles · Multifonctions · 360ml',p:5500,o:6000,pr:true,nw:false,rd:false,st:'in',rt:4.7,s:320,ph:'Pharmacie Centrale',br:'Bausch',liv:true},
+
+/* ─── ORL ─────────────────────────────────────────────── */
+{id:42,n:'Amox. Sirop Pédiatrique',e:'🍯',c:'orl',d:'Antibiotique pédiatrique · Flacon 60ml',     p:4800,o:5500, pr:true, nw:false,rd:true, st:'in', rt:4.7,s:390,ph:'Pharmacie Saint-Luc', br:'Générique',  liv:false},
+{id:43,n:'Nasonex Spray Nasal',    e:'👃',c:'orl',d:'Béclométhasone · Rhinite allergique · 120d',  p:14500,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.8,s:340,ph:'Pharmacie Centrale',  br:'MSD',        liv:false},
+{id:44,n:'Strepsils Pastilles',    e:'🍬',c:'orl',d:'Antiseptique gorge · Miel-citron · 24 past',  p:3000,o:3500, pr:true, nw:false,rd:false,st:'in', rt:4.5,s:580,ph:'Pharmacie du Bénin',  br:'Reckitt',    liv:true},
+{id:45,n:'Sudafed Décongestionnant',e:'💊',c:'orl',d:'Pseudoéphédrine · Congestion nasale · 12cp', p:4200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.3,s:310,ph:'Pharmacie Hippocrate',br:'J&J',        liv:true},
+{id:46,n:'Otipax Gouttes',         e:'👂',c:'orl',d:'Otite externe · Anesthésique auriculaire',    p:8500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.7,s:265,ph:'Pharmacie de la Paix',br:'Biocodex',   liv:true},
+{id:47,n:'Mucomyst 200mg Sach.',   e:'🫁',c:'orl',d:'Acétylcystéine · Fluidifiant bronchique · 20',p:5500,o:6000,pr:true, nw:false,rd:false,st:'in', rt:4.6,s:420,ph:'Pharmacie Centrale',  br:'Zambon',     liv:true},
+
+/* ─── VITAMINES & MINÉRAUX ────────────────────────────── */
+{id:48,n:'Vitamine C 1000mg Efferv.',e:'🍋',c:'vitamine',d:'Immunité · 20 comprimés effervescents', p:3500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.8,s:890,ph:'Pharmacie du Bénin',  br:'Bayer',      liv:true},
+{id:49,n:'Vitamine D3 1000 UI',     e:'☀️',c:'vitamine',d:'Ossature · Immunité · 30 capsules molles',p:6500,o:null,pr:false,nw:true, rd:false,st:'in', rt:4.9,s:720,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:50,n:'Magnésium B6 48mg',       e:'⚡',c:'vitamine',d:'Fatigue · Stress · Crampes · 30 cp',     p:5500,o:6500, pr:true, nw:false,rd:false,st:'in', rt:4.7,s:640,ph:'Pharmacie Hippocrate',br:'Sanofi',     liv:true},
+{id:51,n:'Zinc 15mg + Sélénium',    e:'⚗️',c:'vitamine',d:'Immunité · Antioxydant · 30 comprimés',  p:4800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.6,s:480,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+{id:52,n:'Oméga-3 DHA EPA 1000mg',  e:'🐟',c:'vitamine',d:'Cardio · Cerveau · 60 capsules molles',  p:12000,o:14500,pr:true,nw:false,rd:false,st:'in', rt:4.8,s:420,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:53,n:'Fer + Acide Folique',      e:'🩸',c:'vitamine',d:'Anémie · Grossesse · 30 comprimés',      p:4200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:390,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:54,n:'Multivitamines Adultes',   e:'🌈',c:'vitamine',d:'Complexe complet vitamines & minéraux · 30',p:7500,o:9000,pr:true,nw:false,rd:false,st:'in', rt:4.7,s:520,ph:'Pharmacie Hippocrate',br:'Centrum',    liv:true},
+{id:55,n:'Vitamine B12 1000µg',      e:'🔴',c:'vitamine',d:'Énergie · Système nerveux · 30 cp',      p:5500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.6,s:310,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+{id:56,n:'Calcium 500mg + Vit D',    e:'🦴',c:'vitamine',d:'Ossature · Dents · 30 comprimés à croquer',p:6000,o:7000,pr:true,nw:false,rd:false,st:'in', rt:4.7,s:440,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+
+/* ─── BÉBÉ & ENFANT ───────────────────────────────────── */
+{id:57,n:'Doliprane Nourrisson',   e:'👶',c:'bebe',d:'Paracétamol 2.4% sirop · 0-1 an · 90ml',   p:4200,o:null, pr:false,nw:false,rd:false,st:'low',rt:4.8,s:670,ph:'Pharmacie Saint-Luc', br:'Sanofi',     liv:true},
+{id:58,n:'Smecta Sachets Enfants', e:'🍯',c:'bebe',d:'Diarrhée · 0–24 mois · 10 sachets',         p:3800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.7,s:490,ph:'Pharmacie Centrale',  br:'Ipsen',      liv:true},
+{id:59,n:'Couches Pampers T3',     e:'🍼',c:'bebe',d:'6–10 kg · 40 couches · Douceur maximale',   p:9500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.9,s:830,ph:'Pharmacie de la Croix',br:'P&G',        liv:true},
+{id:60,n:'Lait 1er âge Blédilait', e:'🥛',c:'bebe',d:'Lait infantile 0–6 mois · Boîte 900g',      p:18000,o:22000,pr:true,nw:false,rd:false,st:'in', rt:4.8,s:380,ph:'Pharmacie Centrale',  br:'Blédina',    liv:true},
+{id:61,n:'Thermomètre Auriculaire',e:'🌡️',c:'bebe',d:'Résultat en 1s · Mémoire 10 mesures',       p:8500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.7,s:310,ph:'Pharmacie Hippocrate',br:'Braun',      liv:true},
+{id:62,n:'Sérum Physiologique 20', e:'💧',c:'bebe',d:'Lavage nasal · Yeux · 20 ampoules 5ml',     p:3200,o:3800, pr:true, nw:false,rd:false,st:'in', rt:4.9,s:720,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:63,n:'Crème Bébé Mustela',     e:'🌸',c:'bebe',d:'Change · Érythème fessier · 100ml',          p:6800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.8,s:450,ph:'Pharmacie Saint-Luc', br:'Mustela',    liv:true},
+{id:64,n:'Sirop Toux Pédiatrique', e:'🍓',c:'bebe',d:'Pastillen · Toux sèche · 3–12 ans · 100ml', p:5500,o:6000, pr:true, nw:false,rd:false,st:'in', rt:4.6,s:380,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:65,n:'Lait 2ème âge Nidal',    e:'🥛',c:'bebe',d:'6-12 mois · 900g · Enrichi fer + DHA',      p:16000,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.7,s:290,ph:'Pharmacie de la Paix',br:'Nidal',      liv:true},
+
+/* ─── MATERNITÉ ───────────────────────────────────────── */
+{id:66,n:'Acide Folique 5mg',        e:'🤱',c:'maternite',d:'Prévention malformations · Grossesse · 30',p:2800,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.9,s:580,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:67,n:'Fer III Grossesse',         e:'🩸',c:'maternite',d:'Supplémentation anémie gestationnelle · 30',p:5500,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.7,s:340,ph:'Pharmacie du Bénin',  br:'Générique',  liv:false},
+{id:68,n:'Test de Grossesse Digital', e:'🔬',c:'maternite',d:'Résultat 3 min · 99% précision · x2',      p:7500,o:9000,pr:true, nw:false,rd:false,st:'in', rt:4.8,s:620,ph:'Pharmacie Hippocrate',br:'Clearblue',  liv:true},
+{id:69,n:'Crème Mamelons Allaitement',e:'🌸',c:'maternite',d:'Lanoline pure · Protection · 37g',          p:8500,o:null,pr:false,nw:true, rd:false,st:'in', rt:4.7,s:280,ph:'Pharmacie Saint-Luc', br:'Medela',     liv:true},
+{id:70,n:'Ceinture Lombaire Grossesse',e:'🤍',c:'maternite',d:'Soutien lombaire · Réglable · T. S à XL',  p:18500,o:22000,pr:true,nw:false,rd:false,st:'in',rt:4.6,s:190,ph:'Pharmacie de la Croix',br:'Générique', liv:true},
+
+/* ─── BEAUTÉ & SOIN ───────────────────────────────────── */
+{id:71,n:'Crème Hydratante SPF50',    e:'☀️',c:'beaute',d:'Protection solaire · Peau sensible · 150ml',p:8500,o:10000,pr:true,nw:false,rd:false,st:'in', rt:4.6,s:490,ph:'Pharmacie de la Paix',br:'Vichy',      liv:true},
+{id:72,n:'Gel Douche Dermatologique', e:'🧼',c:'beaute',d:'Peau atopique · Sans savon · Hypoallerg. 200ml',p:5500,o:null,pr:false,nw:false,rd:false,st:'in',rt:4.7,s:380,ph:'Pharmacie Centrale',  br:'Avène',      liv:true},
+{id:73,n:'Huile Argan Pure Bio',      e:'💫',c:'beaute',d:'Cheveux · Peau · Ongles · 50ml · Certifié bio',p:9500,o:12000,pr:true,nw:false,rd:false,st:'in',rt:4.9,s:410,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:74,n:'Gel Hydroalcoolique 500ml', e:'🧪',c:'beaute',d:'Désinfectant mains · Virucide · 500ml',        p:2800,o:3500,pr:true, nw:false,rd:false,st:'low',rt:4.5,s:820,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:75,n:'Dentifrice Elmex Caries',   e:'🦷',c:'beaute',d:'Protection caries · Fluorure d\'amines · 75ml',p:3200,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.6,s:560,ph:'Pharmacie de la Paix',br:'GABA',       liv:true},
+{id:76,n:'Shampoing Anti-Pellicules', e:'🧖',c:'beaute',d:'Kétoconazole 2% · Pellicules · 100ml',         p:6500,o:7500,pr:true, nw:false,rd:false,st:'in', rt:4.7,s:340,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+
+/* ─── MATÉRIEL MÉDICAL ────────────────────────────────── */
+{id:77,n:'Tensiomètre Bras OMRON',  e:'💓',c:'materiel',d:'Numérique · Mémoire 90 mesures · 2 users',    p:28000,o:32000,pr:true,nw:false,rd:false,st:'in', rt:4.8,s:320,ph:'Pharmacie Centrale',  br:'OMRON',      liv:true},
+{id:78,n:'Glucomètre AccuChek Active',e:'🩸',c:'materiel',d:'Glycémie · 50 bandelettes incluses',         p:18500,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.9,s:280,ph:'Pharmacie du Bénin',  br:'Roche',      liv:true},
+{id:79,n:'Oxymètre de Pouls',        e:'💜',c:'materiel',d:'SpO2 & fréquence cardiaque · Clip doigt · LED',p:6500,o:8000,pr:true,nw:true, rd:false,st:'in', rt:4.7,s:450,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:80,n:'Masques FFP2 · Boîte 10',  e:'😷',c:'materiel',d:'Protection respiratoire · CE · x10',          p:4500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.6,s:680,ph:'Pharmacie de la Paix',br:'3M',         liv:true},
+{id:81,n:'Seringues 5ml x10',        e:'💉',c:'materiel',d:'Stériles · Emballage individuel · x10',        p:2500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.4,s:390,ph:'Pharmacie Centrale',  br:'BD',         liv:true},
+{id:82,n:'Gants Latex M · Boîte 50', e:'🧤',c:'materiel',d:'Stériles · Sans poudre · Taille M · x50',     p:5500,o:6500, pr:true, nw:false,rd:false,st:'low',rt:4.5,s:310,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:83,n:'Béquilles Réglables',       e:'🦯',c:'materiel',d:'Aluminium léger · Réglable 70–94cm · Paire',  p:22000,o:null,pr:false,nw:false,rd:false,st:'low',rt:4.3,s:120,ph:'Pharmacie Hippocrate',br:'Générique',  liv:false},
+{id:84,n:'Bandelettes Réactives x50', e:'🔬',c:'materiel',d:'Glycémie · Compatibles AccuChek · 50u',       p:9500,o:11000,pr:true, nw:false,rd:false,st:'in', rt:4.8,s:290,ph:'Pharmacie de la Paix',br:'Roche',      liv:true},
+{id:85,n:'Stéthoscope Littmann',      e:'🩺',c:'materiel',d:'Classic III · Adulte & Pédiatrique · Acier',  p:85000,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.9,s:95, ph:'Pharmacie Centrale',  br:'3M Littmann',liv:false},
+{id:86,n:'Pèse-personne Électronique',e:'⚖️',c:'materiel',d:'Précision 100g · IMC intégré · 180kg max',    p:12000,o:15000,pr:true,nw:false,rd:false,st:'in', rt:4.6,s:210,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+
+/* ─── DIABÈTE ─────────────────────────────────────────── */
+{id:87,n:'Metformine 500mg',        e:'🩸',c:'diabete',d:'Biguanide · Diabète type 2 · 30 comprimés',p:4500,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.7,s:380,ph:'Pharmacie de la Paix',br:'Générique',  liv:false},
+{id:88,n:'Insuline Novorapid',      e:'💉',c:'diabete',d:'Analogue rapide · Stylo FlexPen 3ml',       p:25000,o:null,pr:false,nw:false,rd:true, st:'low',rt:4.9,s:180,ph:'Pharmacie du Bénin',  br:'Novo Nordisk',liv:false},
+{id:89,n:'Glibenclamide 5mg',       e:'💊',c:'diabete',d:'Sulfamide hypoglycémiant · 30 comprimés',   p:3800,o:null, pr:false,nw:false,rd:true, st:'in', rt:4.4,s:215,ph:'Pharmacie Centrale',  br:'Générique',  liv:false},
+{id:90,n:'Sitagliptine 100mg',      e:'💊',c:'diabete',d:'Inhibiteur DPP-4 · Diabète T2 · 28 cp',    p:18000,o:22000,pr:true,nw:false,rd:true, st:'in', rt:4.6,s:145,ph:'Pharmacie Hippocrate',br:'MSD',        liv:false},
+
+/* ─── ALLERGIE ────────────────────────────────────────── */
+{id:91,n:'Cétirizine 10mg',         e:'🌿',c:'allergie',d:'Antihistaminique · 24h · Rhinite · 15 cp', p:3500,o:4500, pr:true, nw:false,rd:false,st:'in', rt:4.8,s:560,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:92,n:'Loratadine 10mg',         e:'🌸',c:'allergie',d:'Anti-allergique · Non sédatif · 10 cp',    p:3200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.6,s:420,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+{id:93,n:'Béconase Spray Nasal',    e:'👃',c:'allergie',d:'Béclométhasone · Rhinite · 200 doses',      p:11500,o:13000,pr:true,nw:false,rd:false,st:'in', rt:4.7,s:280,ph:'Pharmacie Centrale',  br:'GSK',        liv:true},
+{id:94,n:'Desloratadine 5mg',       e:'💊',c:'allergie',d:'Antihistaminique · 1ère génération · 10 cp',p:4500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.5,s:230,ph:'Pharmacie du Bénin',  br:'MSD',        liv:true},
+
+/* ─── SOMMEIL & STRESS ────────────────────────────────── */
+{id:95, n:'Mélatonine 1.9mg',       e:'🌙',c:'sommeil',d:'Régulateur sommeil · Naturel · 30 cp',      p:6500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.7,s:480,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:96, n:'Valériane + Passiflore', e:'🌿',c:'sommeil',d:'Plantes relaxantes · Anxiété · 30 gélules', p:5800,o:7000, pr:true, nw:false,rd:false,st:'in', rt:4.6,s:390,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:97, n:'Lexomil 6mg',            e:'💊',c:'sommeil',d:'Bromazépam · Anxiété sévère · 30 cp',        p:8500,o:null, pr:false,nw:false,rd:true, st:'low',rt:4.3,s:210,ph:'Pharmacie de la Paix',br:'Roche',      liv:false},
+{id:98, n:'Stilnox 10mg',           e:'🌙',c:'sommeil',d:'Zolpidem · Insomnie · 14 comprimés',         p:12000,o:null,pr:false,nw:false,rd:true, st:'in', rt:4.4,s:175,ph:'Pharmacie Centrale',  br:'Sanofi',     liv:false},
+
+/* ─── SPORT & RÉCUPÉRATION ────────────────────────────── */
+{id:99, n:'Protéines Whey Chocolat',e:'💪',c:'sport',d:'80% protéines · 500g · Récupération musc.',  p:32000,o:38000,pr:true,nw:false,rd:false,st:'in', rt:4.8,s:290,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:100,n:'BCAA 2:1:1 · 60 gél.',  e:'🏃',c:'sport',d:'Acides aminés branchés · Anti-catabolisme',  p:14500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.7,s:230,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:101,n:'Bandage Élastique 5m',   e:'🩹',c:'sport',d:'Contention · Entorse · Réutilisable · 5m',   p:3500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:380,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:102,n:'Crème Chauffante Sportive',e:'🔥',c:'sport',d:'Échauffement musculaire · Massage · 100ml',p:5800,o:7000, pr:true, nw:false,rd:false,st:'in', rt:4.6,s:310,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+{id:103,n:'Magnésium Sport 400mg',  e:'⚡',c:'sport',d:'Crampes · Récupération · 30 comprimés',       p:7500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.7,s:260,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:104,n:'Genouillère Sportive',   e:'🦵',c:'sport',d:'Compression · Neoprène · Taille universelle', p:9500,o:11000,pr:true, nw:false,rd:false,st:'in', rt:4.5,s:185,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+
+/* ─── PHYTOTHÉRAPIE ───────────────────────────────────── */
+{id:105,n:'Gingembre + Curcuma Bio',e:'🫚',c:'phyto',d:'Anti-inflammatoire naturel · Bio · 60 gél', p:8500,o:null, pr:false,nw:true, rd:false,st:'in', rt:4.8,s:340,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:106,n:'Propolis + Miel Noir Bio',e:'🍯',c:'phyto',d:'Immunité · Antibactérien naturel · 30 gél',p:9500,o:12000, pr:true, nw:false,rd:false,st:'in', rt:4.9,s:280,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:107,n:'Artichaut Extraits',     e:'🌱',c:'phyto',d:'Digestion & Foie · Sécrétion biliaire · 60g',p:7500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.6,s:215,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:108,n:'Millepertuis 300mg',     e:'☀️',c:'phyto',d:'Dépression légère · Anxiété · 30 gélules',  p:8000,o:9500, pr:true, nw:false,rd:false,st:'in', rt:4.5,s:175,ph:'Pharmacie de la Paix',br:'Générique',  liv:true},
+
+/* ─── PARAPHARMACIE ───────────────────────────────────── */
+{id:109,n:'Bandes Plâtrées x5',     e:'🩹',c:'parapharmacie',d:'Plâtre médical · 5m × 15cm · x5',     p:5500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.4,s:165,ph:'Pharmacie Centrale',  br:'3M',         liv:true},
+{id:110,n:'Alcool Éthylique 70° 1L',e:'🧪',c:'parapharmacie',d:'Désinfectant · Usage externe · 1 litre',p:3500,o:4000,pr:true,nw:false,rd:false,st:'in', rt:4.6,s:580,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:111,n:'Compresses Stériles x20',e:'🩼',c:'parapharmacie',d:'10×10cm · Stériles · x20 sachets',    p:3200,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:420,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+{id:112,n:'Povidone Iodée BETADINE',e:'🟤',c:'parapharmacie',d:'Antiseptique · Plaies · 30ml',         p:4500,o:5000, pr:true, nw:false,rd:false,st:'in', rt:4.7,s:390,ph:'Pharmacie de la Paix',br:'Meda',       liv:true},
+{id:113,n:'Eau Oxygénée 3% 250ml',  e:'💧',c:'parapharmacie',d:'Antiseptique léger · Plaies · 250ml',  p:1800,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.3,s:510,ph:'Pharmacie Centrale',  br:'Générique',  liv:true},
+{id:114,n:'Pansements Elastoplast',  e:'🩹',c:'parapharmacie',d:'Assortiment tailles · Boîte 40 pièces',p:4200,o:5000,pr:true,nw:false,rd:false,st:'in', rt:4.6,s:640,ph:'Pharmacie du Bénin',  br:'BSN',        liv:true},
+
+/* ─── VÉTÉRINAIRE ────────────────────────────────────── */
+{id:115,n:'Antiparasitaire Chien',  e:'🐕',c:'veterinaire',d:'Pipettes · Puces & Tiques · Chiens 10-25kg',p:8500,o:null,pr:false,nw:false,rd:false,st:'in', rt:4.7,s:195,ph:'Pharmacie de la Croix',br:'Frontline',  liv:true},
+{id:116,n:'Antiparasitaire Chat',   e:'🐈',c:'veterinaire',d:'Pipettes · Puces & Tiques · Chats 1-4kg',  p:7500,o:9000,pr:true, nw:false,rd:false,st:'in', rt:4.6,s:165,ph:'Pharmacie Centrale',  br:'Frontline',  liv:true},
+{id:117,n:'Vermifuge Animaux',      e:'🐾',c:'veterinaire',d:'Antiparasitaire interne · 6 comprimés',     p:6500,o:null, pr:false,nw:false,rd:false,st:'in', rt:4.5,s:130,ph:'Pharmacie du Bénin',  br:'Générique',  liv:true},
+{id:118,n:'Vitamines Animaux x30',  e:'🐾',c:'veterinaire',d:'Complexe · Poils brillants · Tonus · 30cp',p:5500,o:6500,pr:true, nw:true, rd:false,st:'in', rt:4.4,s:105,ph:'Pharmacie Hippocrate',br:'Générique',  liv:true},
+];
+
+/* ══════════════════════════════════════════════════════════
+   ÉTAT
+══════════════════════════════════════════════════════════ */
+let CAT='all', Q='', SORT='pop', PRMIN=0, PRMAX=100000, PAGE=1, VIEW='grid';
+const PER=24;
+let cart=[], wl=[], promoOnly=false;
+
+/* ══════════════════════════════════════════════════════════
+   INIT SIDEBAR
+══════════════════════════════════════════════════════════ */
+(function initSidebar(){
+  // Pharmacies
+  const phs=[...new Set(P.map(x=>x.ph))].sort();
+  document.getElementById('phFl').innerHTML=phs.map(ph=>`
+    <label class="chkitem" style="font-size:.76rem">
+      <input type="checkbox" checked data-ph="${ph}" onchange="render()">
+      <span>${ph}</span>
+    </label>`).join('');
+  // Marques
+  const brs=[...new Set(P.map(x=>x.br))].sort().slice(0,8);
+  document.getElementById('brandList').innerHTML=brs.map(br=>`
+    <div class="brand-item" onclick="filterBrand(this,'${br}')">${br}</div>`).join('');
+})();
+
+/* ══════════════════════════════════════════════════════════
+   FILTRAGE
+══════════════════════════════════════════════════════════ */
+let activeBrand='';
+function filterBrand(el,br){
+  document.querySelectorAll('.brand-item').forEach(b=>b.classList.remove('on'));
+  if(activeBrand===br){activeBrand='';el.classList.remove('on')}
+  else{activeBrand=br;el.classList.add('on')}
+  PAGE=1;render();
+}
+
+function getList(){
+  let L=[...P];
+  if(CAT!=='all') L=L.filter(x=>x.c===CAT);
+  if(Q){const q=Q.toLowerCase();L=L.filter(x=>x.n.toLowerCase().includes(q)||x.d.toLowerCase().includes(q)||x.c.includes(q)||x.br.toLowerCase().includes(q))}
+  L=L.filter(x=>x.p>=PRMIN&&x.p<=PRMAX);
+  if(!document.getElementById('fIn')?.checked)  L=L.filter(x=>x.st!=='in');
+  if(!document.getElementById('fLow')?.checked) L=L.filter(x=>x.st!=='low');
+  if(document.getElementById('fOut')?.checked)  {} else L=L.filter(x=>x.st!=='out');
+  if(document.getElementById('fPr')?.checked)   L=L.filter(x=>x.pr);
+  if(document.getElementById('fNw')?.checked)   L=L.filter(x=>x.nw);
+  if(document.getElementById('fNo')?.checked)   L=L.filter(x=>!x.rd);
+  if(document.getElementById('fLiv')?.checked)  L=L.filter(x=>x.liv);
+  if(promoOnly) L=L.filter(x=>x.pr);
+  if(activeBrand) L=L.filter(x=>x.br===activeBrand);
+  // Pharmacies cochées
+  const phChecks=[...document.querySelectorAll('#phFl input')];
+  if(phChecks.length){
+    const unchecked=phChecks.filter(c=>!c.checked).map(c=>c.dataset.ph);
+    if(unchecked.length) L=L.filter(x=>!unchecked.includes(x.ph));
+  }
+  // Tri
+  if(SORT==='pop') L.sort((a,b)=>b.s-a.s);
+  else if(SORT==='pa') L.sort((a,b)=>a.p-b.p);
+  else if(SORT==='pd') L.sort((a,b)=>b.p-a.p);
+  else if(SORT==='nv') L.sort((a,b)=>Number(b.nw)-Number(a.nw));
+  else if(SORT==='rt') L.sort((a,b)=>b.rt-a.rt);
+  else if(SORT==='az') L.sort((a,b)=>a.n.localeCompare(b.n));
+  return L;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════════ */
+function render(){
+  const all=getList(), tot=all.length, pgs=Math.ceil(tot/PER)||1;
+  if(PAGE>pgs)PAGE=1;
+  const sl=all.slice((PAGE-1)*PER,PAGE*PER);
+  document.getElementById('rCount').textContent=tot;
+
+  // Compteurs sidebar
+  const fAll=CAT==='all'?P:P.filter(x=>x.c===CAT);
+  document.getElementById('cIn').textContent=fAll.filter(x=>x.st==='in').length;
+  document.getElementById('cLow').textContent=fAll.filter(x=>x.st==='low').length;
+  document.getElementById('cOut').textContent=fAll.filter(x=>x.st==='out').length;
+
+  const pg=document.getElementById('pgrid');
+  pg.className=VIEW==='list'?'pgrid lv':'pgrid';
+
+  if(!sl.length){
+    pg.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--mu)"><div style="font-size:4rem;margin-bottom:16px;opacity:.2">🔍</div><div style="font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:8px">Aucun produit trouvé</div><p style="font-size:.85rem">Essayez d'autres filtres ou une autre recherche</p></div>`;
+    document.getElementById('pager').innerHTML='';
+    return;
+  }
+
+  pg.innerHTML=sl.map(p=>{
+    const disc=p.o?Math.round((1-p.p/p.o)*100):0;
+    const inWL=wl.includes(p.id), oos=p.st==='out';
+    const stLbl=p.st==='in'?'En stock':p.st==='low'?'Stock limité':'Rupture de stock';
+    const dotC=p.st==='in'?'di':p.st==='low'?'dl':'do';
+    return `<div class="card">
+      <div class="card-img">
+        <div class="badges">
+          ${p.pr?`<span class="bge bge-p">−${disc}%</span>`:''}
+          ${p.nw?`<span class="bge bge-n">Nouveau</span>`:''}
+          ${p.rd?`<span class="bge bge-o">Ordonnance</span>`:''}
+          ${p.liv?`<span class="bge bge-b">Livrable</span>`:''}
+        </div>
+        <div class="fav${inWL?' on':''}" onclick="toggleWL(${p.id},this)"><i class="fas fa-heart"></i></div>
+        <span style="font-size:3rem">${p.e}</span>
+      </div>
+      <div class="card-body">
+        <div class="c-cat">${p.c.replace(/-/g,' ')}</div>
+        <div class="c-name">${p.n}</div>
+        <div class="c-desc">${p.d}</div>
+        <div class="c-ph"><i class="fas fa-map-marker-alt" style="color:var(--em);font-size:.62rem"></i>${p.ph}</div>
+        <div class="c-st"><div class="dot ${dotC}"></div><span style="font-size:.7rem;font-weight:600;color:var(--sl)">${stLbl}</span><span class="c-rt">★${p.rt}</span></div>
+        <div class="card-foot">
+          <div class="c-price">
+            ${p.o?`<span class="c-old">${p.o.toLocaleString()} FCFA</span>`:''}
+            <span class="c-new">${p.p.toLocaleString()} <em>FCFA</em></span>
+          </div>
+          <button class="btn-add" id="add${p.id}" ${oos?'disabled':''} onclick="addToCart(${p.id})">
+            ${oos?'<i class="fas fa-times"></i> Indisponible':'<i class="fas fa-cart-plus"></i> Ajouter'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderPager(pgs);
+}
+
+function renderPager(pgs){
+  if(pgs<=1){document.getElementById('pager').innerHTML='';return}
+  let h='';
+  if(PAGE>1) h+=`<button class="pgbtn" onclick="goP(${PAGE-1})"><i class="fas fa-chevron-left"></i></button>`;
+  for(let i=1;i<=pgs;i++){
+    if(i===1||i===pgs||Math.abs(i-PAGE)<=1)
+      h+=`<button class="pgbtn${i===PAGE?' on':''}" onclick="goP(${i})">${i}</button>`;
+    else if(Math.abs(i-PAGE)===2)
+      h+=`<span class="pgbtn dots">…</span>`;
+  }
+  if(PAGE<pgs) h+=`<button class="pgbtn" onclick="goP(${PAGE+1})"><i class="fas fa-chevron-right"></i></button>`;
+  document.getElementById('pager').innerHTML=h;
+}
+function goP(n){PAGE=n;render();window.scrollTo({top:200,behavior:'smooth'})}
+
+/* ══════════════════════════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════════════════════════ */
+function setC(el,cat){
+  document.querySelectorAll('.cl').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('catSel').value=cat;
+  CAT=cat; PAGE=1; promoOnly=false; render();
+}
+function catFromSel(v){
+  CAT=v; PAGE=1;
+  document.querySelectorAll('.cl').forEach(b=>b.classList.toggle('on',b.dataset.c===v));
+  render();
+}
+function liveSearch(q){Q=q;PAGE=1;render()}
+function setSort(v){SORT=v;PAGE=1;render()}
+function setV(v){
+  VIEW=v;
+  document.getElementById('vg').classList.toggle('on',v==='grid');
+  document.getElementById('vl').classList.toggle('on',v==='list');
+  render();
+}
+function onSlide(v){
+  PRMAX=+v;
+  document.getElementById('pMax').value=v;
+  document.getElementById('prLbl').textContent=`${PRMIN.toLocaleString()} – ${(+v).toLocaleString()} FCFA`;
+  PAGE=1;render();
+}
+function onManPr(){
+  PRMIN=+(document.getElementById('pMin').value)||0;
+  PRMAX=+(document.getElementById('pMax').value)||100000;
+  document.getElementById('pSlide').value=PRMAX;
+  document.getElementById('prLbl').textContent=`${PRMIN.toLocaleString()} – ${PRMAX.toLocaleString()} FCFA`;
+  PAGE=1;render();
+}
+function resetPr(){
+  PRMIN=0;PRMAX=100000;
+  document.getElementById('pSlide').value=100000;
+  document.getElementById('pMin').value=0;
+  document.getElementById('pMax').value=100000;
+  document.getElementById('prLbl').textContent='0 – 100 000 FCFA';
+  render();
+}
+function promoFlash(){promoOnly=true;PAGE=1;document.querySelectorAll('.cl').forEach(b=>b.classList.remove('on'));document.querySelector('[data-c=all]').classList.add('on');CAT='all';render();}
+function showFavs(){toast(`${wl.length} produit${wl.length>1?'s':''} dans vos favoris`)}
+
+/* Panier */
+function addToCart(id){
+  const p=P.find(x=>x.id===id);if(!p||p.st==='out')return;
+  const ex=cart.find(x=>x.id===id);
+  ex?ex.qty++:cart.push({...p,qty:1});
+  updateCart();
+  toast(`${p.n} ajouté au panier`);
+  const btn=document.getElementById('add'+id);
+  if(btn){btn.classList.add('ok');btn.innerHTML='<i class="fas fa-check"></i> Ajouté';setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML='<i class="fas fa-cart-plus"></i> Ajouter'},2000)}
+}
+function remCart(id){cart=cart.filter(x=>x.id!==id);updateCart()}
+function chgQty(id,d){const i=cart.find(x=>x.id===id);if(i)i.qty=Math.max(1,i.qty+d);updateCart()}
+function updateCart(){
+  const n=cart.reduce((s,i)=>s+i.qty,0),t=cart.reduce((s,i)=>s+i.p*i.qty,0);
+  const b=document.getElementById('crtB');b.textContent=n;b.style.display=n?'flex':'none';
+  document.getElementById('cCnt').textContent=n?`(${n} article${n>1?'s':''})`:'' ;
+  const el=document.getElementById('cartList'),ft=document.getElementById('cartFoot');
+  if(!cart.length){
+    el.innerHTML=`<div class="cart-empty"><div class="ce-ic">🛒</div><p style="font-weight:700;color:var(--ink);font-size:.95rem">Votre panier est vide</p><p style="font-size:.82rem;margin-top:6px">Ajoutez des produits depuis le catalogue</p></div>`;
+    ft.style.display='none';
+  }else{
+    el.innerHTML=cart.map(i=>`<div class="ci"><div class="ci-em">${i.e}</div><div class="ci-inf"><div class="ci-nm">${i.n}</div><div class="ci-ph">${i.ph}</div><div class="ci-row"><button class="ciqb" onclick="chgQty(${i.id},-1)">−</button><span class="ciqty">${i.qty}</span><button class="ciqb" onclick="chgQty(${i.id},1)">+</button><span class="cipr">${(i.p*i.qty).toLocaleString()} FCFA</span><button class="cidl" onclick="remCart(${i.id})"><i class="fas fa-trash"></i></button></div></div></div>`).join('');
+    document.getElementById('cSub').textContent=t.toLocaleString()+' FCFA';
+    document.getElementById('cTot').textContent=t.toLocaleString()+' FCFA';
+    ft.style.display='block';
+  }
+}
+function toggleCart(){document.getElementById('cartOv').classList.toggle('open')}
+function closeOv(e){if(e.target===document.getElementById('cartOv'))toggleCart()}
+function checkout(){toggleCart();toast('🎉 Commande passée ! Livraison sous 2h.');cart=[];updateCart()}
+
+/* Favoris */
+function toggleWL(id,el){
+  wl.includes(id)?(wl=wl.filter(x=>x!==id),el.classList.remove('on')):(wl.push(id),el.classList.add('on'),toast('Ajouté aux favoris ❤️'));
+  const b=document.getElementById('wlB');b.textContent=wl.length;b.style.display=wl.length?'flex':'none';
+}
+
+/* Toast */
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastTx').textContent=msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('on'),2800);
+}
+
+/* Init */
+updateCart();
+render();
+</script>
+
+<!-- ══════════════════════════════════════════════════
+     NEWSLETTER
+══════════════════════════════════════════════════ -->
+<section style="
+  background:linear-gradient(135deg,#064e3b 0%,#065f46 50%,#047857 100%);
+  padding:70px 3%;position:relative;overflow:hidden;
+">
+  <div style="position:absolute;right:-60px;top:50%;transform:translateY(-50%);font-size:18rem;opacity:.05;pointer-events:none">💊</div>
+  <div style="max-width:600px;margin:0 auto;text-align:center;position:relative;z-index:1">
+    <span style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:5px 16px;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.5px;margin-bottom:16px">
+      Alertes & Promotions
+    </span>
+    <h2 style="font-family:'Clash Display',sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);font-weight:700;color:#fff;margin-bottom:10px;letter-spacing:-.5px">
+      Restez informé des nouveautés
+    </h2>
+    <p style="font-size:.9rem;color:rgba(255,255,255,.65);margin-bottom:26px;line-height:1.7">
+      Recevez les alertes de disponibilité, les promotions exclusives et les rappels de renouvellement d'ordonnance.
+    </p>
+    <form onsubmit="nlSub(event)" style="display:flex;gap:10px;max-width:480px;margin:0 auto">
+      <input type="email" placeholder="votre@email.com" required style="flex:1;padding:13px 18px;border-radius:50px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;outline:none">
+      <button type="submit" id="nlBtn" style="padding:13px 26px;border-radius:50px;border:none;background:#fff;color:#059669;font-weight:800;font-size:.88rem;cursor:pointer;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;transition:all .3s;flex-shrink:0">
+        <i class="fas fa-bell"></i> S'abonner
+      </button>
+    </form>
+    <p style="font-size:.74rem;color:rgba(255,255,255,.35);margin-top:12px">Aucun spam · Désabonnement en un clic</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════ -->
+<footer style="background:#0a1628;padding:60px 3% 0;color:rgba(255,255,255,.5)">
+  <div style="max-width:1540px;margin:0 auto">
+
+    <!-- Grille footer -->
+    <div style="display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:50px">
+
+      <!-- Colonne marque -->
+      <div>
+        <a href="pharma.html" style="display:flex;align-items:center;gap:9px;text-decoration:none;margin-bottom:16px">
+          <div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#059669,#0d9488);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0">
+            <i class="fas fa-plus"></i>
+          </div>
+          <span style="font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;color:#fff">Pharma<em style="font-style:normal;color:#10b981">Loc</em></span>
+        </a>
+        <p style="font-size:.85rem;line-height:1.75;max-width:260px;margin-bottom:20px">
+          Votre plateforme de référence pour localiser les pharmacies et commander vos médicaments en ligne 24h/24, en toute sécurité.
+        </p>
+        <!-- Réseaux sociaux -->
+        <div style="display:flex;gap:10px">
+          <a href="#" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .3s" onmouseover="this.style.background='#059669';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(255,255,255,.5)'"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .3s" onmouseover="this.style.background='#059669';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(255,255,255,.5)'"><i class="fab fa-instagram"></i></a>
+          <a href="#" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .3s" onmouseover="this.style.background='#25D366';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(255,255,255,.5)'"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .3s" onmouseover="this.style.background='#1d9bf0';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,255,255,.07)';this.style.color='rgba(255,255,255,.5)'"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+
+      <!-- Catégories -->
+      <div>
+        <h4 style="font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.3px">Catégories</h4>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="#" onclick="setC(document.querySelector('[data-c=analgesique]'),'analgesique')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">💊 Analgésiques</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=antibiotique]'),'antibiotique')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">💉 Antibiotiques</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=vitamine]'),'vitamine')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🍋 Vitamines & Minéraux</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=bebe]'),'bebe')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">👶 Bébé & Enfant</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=dermatologie]'),'dermatologie')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🧴 Dermatologie</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=materiel]'),'materiel')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🩺 Matériel médical</a>
+          <a href="#" onclick="setC(document.querySelector('[data-c=parapharmacie]'),'parapharmacie')" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🛍️ Parapharmacie</a>
+        </div>
+      </div>
+
+      <!-- Services -->
+      <div>
+        <h4 style="font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.3px">Services</h4>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="localisation.html" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">📍 Localiser une pharmacie</a>
+          <a href="boutique.html" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🛒 Boutique en ligne</a>
+          <a href="pharma.html#ordonnance" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">📋 Envoi d'ordonnance</a>
+          <a href="pharma.html#urgences" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🏥 Pharmacie de garde</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">💬 Conseil pharmacien</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🚚 Livraison express 2h</a>
+        </div>
+      </div>
+
+      <!-- Aide -->
+      <div>
+        <h4 style="font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.3px">Aide & Support</h4>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">❓ FAQ</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🔄 Retours & Remboursements</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">📦 Suivi de commande</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">🔒 Confidentialité</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">📄 Conditions générales</a>
+          <a href="#" style="font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='rgba(255,255,255,.45)'">⚖️ Mentions légales</a>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h4 style="font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:18px;letter-spacing:.3px">Contact</h4>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:.84rem">
+            <i class="fas fa-map-marker-alt" style="color:#10b981;margin-top:2px;flex-shrink:0"></i>
+            <span>Lomé, Togo<br><span style="font-size:.76rem">Livraison dans tout le pays</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.84rem">
+            <i class="fas fa-phone" style="color:#10b981;flex-shrink:0"></i>
+            <a href="tel:+22896327992" style="color:rgba(255,255,255,.45);text-decoration:none">+228 96 32 79 92</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.84rem">
+            <i class="fab fa-whatsapp" style="color:#25D366;flex-shrink:0"></i>
+            <a href="https://wa.me/22896327992" target="_blank" style="color:rgba(255,255,255,.45);text-decoration:none">WhatsApp 24h/24</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.84rem">
+            <i class="fas fa-envelope" style="color:#10b981;flex-shrink:0"></i>
+            <a href="mailto:contact@pharmaloc.tg" style="color:rgba(255,255,255,.45);text-decoration:none">contact@pharmaloc.tg</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:.84rem">
+            <i class="fas fa-clock" style="color:#10b981;flex-shrink:0"></i>
+            <span>Lun–Sam : 8h–20h</span>
+          </div>
+        </div>
+        <!-- Badge sécurité -->
+        <div style="margin-top:18px;display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(5,150,105,.12);border:1px solid rgba(5,150,105,.2);border-radius:10px">
+          <i class="fas fa-shield-alt" style="color:#10b981;font-size:.95rem"></i>
+          <span style="font-size:.74rem;color:#6ee7b7;font-weight:600">Paiements 100% sécurisés</span>
+        </div>
+      </div>
+  
+    </div><!-- /grid -->
+
+    <!-- Séparateur -->
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding:24px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+      <p style="font-size:.8rem">© 2026 <strong style="color:rgba(255,255,255,.7)">PharmaLoc</strong> · Tous droits réservés · Lomé, Togo</p>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <!-- Modes de paiement -->
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:.72rem;color:rgba(255,255,255,.35);margin-right:4px">Paiements acceptés :</span>
+          <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.08);font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6)">📱 Mobile Money</div>
+          <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.08);font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6)">🏦 Virement</div>
+          <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.08);font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6)">💳 Carte</div>
+          <div style="padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.08);font-size:.72rem;font-weight:700;color:rgba(255,255,255,.6)">💵 À la livraison</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<script>
+function nlSub(e){
+  e.preventDefault();
+  const btn=document.getElementById('nlBtn');
+  btn.innerHTML='<i class="fas fa-check"></i> Abonné !';
+  btn.style.background='#d1fae5';btn.style.color='#065f46';
+  e.target.querySelector('input').value='';
+  setTimeout(()=>{btn.innerHTML='<i class="fas fa-bell"></i> S\'abonner';btn.style.background='#fff';btn.style.color='#059669';},3000);
+}
+</script>
+
+</body>
+</html> 

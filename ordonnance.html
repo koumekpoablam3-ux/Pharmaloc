@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaLoc — Envoi d'Ordonnance en ligne</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --em:#059669;--em2:#10b981;--eml:#d1fae5;--tl:#0d9488;
+  --ink:#0a1628;--ink2:#1e293b;--sl:#475569;--mu:#94a3b8;
+  --ln:#e2e8f0;--bg:#f8fafb;--wh:#ffffff;
+  --rd:#ef4444;--am:#f59e0b;--bl:#3b82f6;
+  --sh:0 2px 12px rgba(0,0,0,.06);--shg:0 8px 28px rgba(5,150,105,.28);
+  --r:14px;--rl:20px;--t:all .28s cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden}
+
+/* ══ TOPBAR ══════════════════════════════════════ */
+.top-strip{background:linear-gradient(135deg,var(--em),var(--tl));text-align:center;padding:8px;font-size:.78rem;font-weight:600;color:#fff}
+.top-strip a{color:#fff;text-decoration:underline}
+
+/* ══ NAVBAR ══════════════════════════════════════ */
+nav{position:sticky;top:0;z-index:900;background:var(--wh);border-bottom:1px solid var(--ln);box-shadow:var(--sh)}
+.nav-inner{display:flex;align-items:center;gap:14px;padding:0 4%;height:66px;max-width:1400px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.logo-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;box-shadow:var(--shg)}
+.logo-tx{font-family:'Clash Display',sans-serif;font-size:1.25rem;font-weight:700;color:var(--ink)}
+.logo-tx em{font-style:normal;color:var(--em)}
+.nav-links{display:flex;align-items:center;gap:4px;flex:1;justify-content:center}
+.nav-links a{text-decoration:none;color:var(--sl);font-size:.85rem;font-weight:500;padding:8px 14px;border-radius:10px;transition:var(--t)}
+.nav-links a:hover{color:var(--em);background:var(--eml)}
+.nav-links a.on{color:var(--em);background:var(--eml);font-weight:600}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nbtn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--ln);background:var(--wh);color:var(--sl);font-size:.83rem;font-weight:600;cursor:pointer;transition:var(--t);text-decoration:none;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+.nbtn:hover{border-color:var(--em);color:var(--em)}
+.nbtn-solid{background:linear-gradient(135deg,var(--em),var(--tl));border-color:transparent;color:#fff;box-shadow:var(--shg)}
+.nbtn-solid:hover{opacity:.9;transform:translateY(-1px);color:#fff}
+.hamburger{display:none;background:none;border:none;font-size:1.3rem;color:var(--ink);cursor:pointer}
+
+/* ══ HERO ════════════════════════════════════════ */
+.hero{
+  background:linear-gradient(145deg,#f0fdf4 0%,#ecfdf5 40%,#f0fdfa 100%);
+  padding:90px 4% 70px;position:relative;overflow:hidden;
+}
+.hero::before{content:'📋';position:absolute;right:4%;top:10%;font-size:18rem;opacity:.04;pointer-events:none;transform:rotate(10deg)}
+.hero::after{content:'';position:absolute;top:-150px;right:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.1),transparent 65%);pointer-events:none}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;position:relative;z-index:1}
+
+/* Gauche hero */
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:var(--eml);border:1px solid rgba(5,150,105,.2);border-radius:50px;padding:5px 16px;font-size:.74rem;font-weight:700;color:var(--em);letter-spacing:.5px;text-transform:uppercase;margin-bottom:18px}
+.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--em);animation:bk 2.5s infinite}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:'Clash Display',sans-serif;font-size:clamp(2rem,4.5vw,3.4rem);font-weight:700;letter-spacing:-1.2px;line-height:1.08;margin-bottom:18px;color:var(--ink)}
+.hero h1 span{background:linear-gradient(135deg,var(--em),var(--tl));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-desc{font-size:1rem;color:var(--sl);line-height:1.75;margin-bottom:30px;max-width:460px}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.hbadge{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;background:var(--wh);border:1px solid var(--ln);font-size:.8rem;font-weight:600;color:var(--sl);box-shadow:var(--sh)}
+.hbadge i{color:var(--em);font-size:.85rem}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{padding:14px 28px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px;box-shadow:var(--shg);text-decoration:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(5,150,105,.38)}
+.btn-ghost{padding:13px 24px;border-radius:50px;border:2px solid var(--em);background:none;color:var(--em);font-weight:700;font-size:.95rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px}
+.btn-ghost:hover{background:var(--em);color:#fff}
+
+/* Droite hero — Stats */
+.hero-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hstat-card{background:var(--wh);border-radius:var(--rl);padding:22px 20px;border:1.5px solid var(--ln);transition:var(--t);box-shadow:var(--sh)}
+.hstat-card:hover{border-color:rgba(5,150,105,.25);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.09)}
+.hstat-ic{font-size:1.8rem;margin-bottom:10px}
+.hstat-n{font-family:'Clash Display',sans-serif;font-size:1.7rem;font-weight:700;color:var(--em);line-height:1;margin-bottom:4px}
+.hstat-l{font-size:.78rem;color:var(--mu);font-weight:500}
+
+/* ══ ÉTAPES ══════════════════════════════════════ */
+.steps-section{padding:80px 4%;background:var(--wh)}
+.steps-inner{max-width:1100px;margin:0 auto}
+.sec-tag{display:inline-block;background:var(--eml);border:1px solid rgba(5,150,105,.15);border-radius:50px;padding:4px 16px;font-size:.72rem;font-weight:700;color:var(--em);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.sec-title{font-family:'Clash Display',sans-serif;font-size:clamp(1.7rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-.8px;color:var(--ink);margin-bottom:10px}
+.sec-sub{font-size:.95rem;color:var(--sl);line-height:1.7;max-width:520px;margin-bottom:50px}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+.steps-grid::before{content:'';position:absolute;top:36px;left:10%;right:10%;height:2px;background:linear-gradient(to right,var(--em),var(--tl));opacity:.15;z-index:0}
+.step-card{background:var(--bg);border-radius:var(--rl);padding:28px 24px;border:1.5px solid var(--ln);transition:var(--t);text-align:center;position:relative;z-index:1}
+.step-card:hover{border-color:rgba(5,150,105,.3);transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.1)}
+.step-num{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:1.1rem;color:#fff;margin:0 auto 16px;box-shadow:var(--shg)}
+.step-card h3{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.step-card p{font-size:.83rem;color:var(--sl);line-height:1.6}
+.step-card .step-icon{font-size:2rem;margin-bottom:12px}
+
+/* ══ FORMULAIRE PRINCIPAL ════════════════════════ */
+.form-section{padding:80px 4%;background:var(--bg)}
+.form-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:start}
+
+/* Carte formulaire */
+.form-card{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);overflow:hidden;box-shadow:var(--sh)}
+.fc-head{padding:22px 26px;border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:12px}
+.fc-head-ic{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0;box-shadow:var(--shg)}
+.fc-head h3{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:2px}
+.fc-head p{font-size:.78rem;color:var(--mu)}
+.fc-body{padding:26px}
+
+/* Upload zone */
+.upload-zone{
+  border:2px dashed rgba(5,150,105,.3);border-radius:var(--rl);padding:40px 30px;
+  text-align:center;transition:var(--t);cursor:pointer;background:linear-gradient(135deg,rgba(5,150,105,.02),rgba(13,148,136,.02));
+  position:relative;margin-bottom:20px;
+}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--em);background:var(--eml)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.uz-icon{font-size:3.5rem;margin-bottom:14px;display:block}
+.uz-title{font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.uz-sub{font-size:.84rem;color:var(--sl);line-height:1.6;margin-bottom:16px}
+.uz-formats{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.uz-fmt{padding:3px 10px;border-radius:6px;background:var(--bg);border:1px solid var(--ln);font-size:.72rem;font-weight:700;color:var(--sl)}
+.uz-btn{padding:10px 24px;border-radius:50px;border:2px solid var(--em);background:none;color:var(--em);font-weight:700;font-size:.86rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif}
+.uz-btn:hover{background:var(--em);color:#fff}
+
+/* Aperçu fichier */
+.file-preview{display:none;align-items:center;gap:12px;padding:14px 16px;background:var(--eml);border-radius:11px;border:1px solid rgba(5,150,105,.2);margin-bottom:20px}
+.file-preview.show{display:flex}
+.fp-ic{width:42px;height:42px;border-radius:10px;background:var(--em);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;flex-shrink:0}
+.fp-name{flex:1;font-size:.86rem;font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fp-size{font-size:.74rem;color:var(--mu)}
+.fp-del{background:none;border:none;color:var(--sl);cursor:pointer;font-size:.95rem;padding:4px;transition:var(--t);flex-shrink:0}
+.fp-del:hover{color:var(--rd)}
+
+/* Champs formulaire */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:7px}
+.fg label .req{color:var(--em)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fi-wrap{position:relative}
+.fi-wrap .fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:.82rem;pointer-events:none;transition:.2s}
+.fi-wrap input,.fi-wrap select,.fi-wrap textarea{
+  width:100%;padding:11px 13px 11px 38px;
+  background:var(--bg);border:1.5px solid var(--ln);border-radius:11px;
+  color:var(--ink);font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;outline:none;transition:var(--t);
+  appearance:none;-webkit-appearance:none;
+}
+.fi-wrap input::placeholder,.fi-wrap textarea::placeholder{color:var(--mu)}
+.fi-wrap input:focus,.fi-wrap select:focus,.fi-wrap textarea:focus{border-color:var(--em);background:var(--wh);box-shadow:0 0 0 3px rgba(5,150,105,.08)}
+.fi-wrap:focus-within .fi{color:var(--em)}
+.fi-wrap textarea{resize:vertical;min-height:90px}
+.fi-wrap select option{background:var(--wh);color:var(--ink)}
+.fg.error .fi-wrap input,.fg.error .fi-wrap select{border-color:var(--rd)}
+.ferr{font-size:.74rem;color:var(--rd);margin-top:4px;display:none}
+.fg.error .ferr{display:block}
+
+/* Urgence toggle */
+.urgence-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-radius:11px;border:1.5px solid var(--ln);
+  background:var(--bg);cursor:pointer;margin-bottom:16px;transition:var(--t);
+}
+.urgence-toggle:hover{border-color:rgba(239,68,68,.3)}
+.urgence-toggle.on{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.04)}
+.ut-left{display:flex;align-items:center;gap:11px}
+.ut-ic{width:38px;height:38px;border-radius:10px;background:#fee2e2;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--rd)}
+.ut-title{font-size:.88rem;font-weight:700;color:var(--ink);margin-bottom:2px}
+.ut-sub{font-size:.74rem;color:var(--mu)}
+.toggle-switch{width:44px;height:24px;border-radius:12px;background:var(--ln);position:relative;transition:.3s;flex-shrink:0}
+.toggle-switch.on{background:var(--rd)}
+.toggle-switch::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.3s;box-shadow:var(--sh)}
+.toggle-switch.on::after{left:23px}
+
+/* Mode paiement */
+.payment-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pm-btn{padding:10px 8px;border-radius:10px;border:1.5px solid var(--ln);background:var(--bg);text-align:center;cursor:pointer;transition:var(--t)}
+.pm-btn:hover{border-color:rgba(5,150,105,.3)}
+.pm-btn.on{border-color:var(--em);background:var(--eml)}
+.pm-ic{font-size:1.2rem;margin-bottom:4px}
+.pm-lbl{font-size:.72rem;font-weight:700;color:var(--sl)}
+.pm-btn.on .pm-lbl{color:var(--em)}
+
+/* Bouton soumettre */
+.btn-submit{
+  width:100%;padding:15px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--em),var(--tl));
+  color:#fff;font-weight:800;font-size:1rem;cursor:pointer;transition:var(--t);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:var(--shg);margin-top:4px;
+}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(5,150,105,.4)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-submit.loading{opacity:.75}
+.btn-submit.success{background:linear-gradient(135deg,#16a34a,#15803d)}
+.form-note{font-size:.76rem;color:var(--mu);text-align:center;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ── Colonne droite info ── */
+.info-col{display:flex;flex-direction:column;gap:14px}
+.info-box{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);padding:20px 22px;box-shadow:var(--sh);transition:var(--t)}
+.info-box:hover{border-color:rgba(5,150,105,.2);transform:translateY(-2px)}
+.ib-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ib-ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ib-ic.g{background:var(--eml);color:var(--em)}
+.ib-ic.b{background:#dbeafe;color:var(--bl)}
+.ib-ic.a{background:#fef3c7;color:var(--am)}
+.ib-ic.r{background:#fee2e2;color:var(--rd)}
+.ib-head h4{font-family:'Clash Display',sans-serif;font-size:.92rem;font-weight:700;color:var(--ink)}
+.ib-head p{font-size:.74rem;color:var(--mu)}
+.ib-list{display:flex;flex-direction:column;gap:8px}
+.ib-item{display:flex;align-items:flex-start;gap:9px;font-size:.82rem;color:var(--sl);line-height:1.5}
+.ib-item i{color:var(--em);font-size:.72rem;margin-top:3px;flex-shrink:0}
+/* Délai estimé */
+.delay-box{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1.5px solid rgba(5,150,105,.2);border-radius:var(--rl);padding:20px 22px}
+.db-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed rgba(5,150,105,.15)}
+.db-row:last-child{border-bottom:none;padding-bottom:0}
+.db-label{font-size:.83rem;color:var(--sl);display:flex;align-items:center;gap:8px}
+.db-label i{color:var(--em);width:16px}
+.db-val{font-family:'Clash Display',sans-serif;font-size:.9rem;font-weight:700;color:var(--em)}
+/* Pharmaciens */
+.pharma-list-box{background:var(--wh);border-radius:var(--rl);border:1.5px solid var(--ln);padding:18px 20px;box-shadow:var(--sh)}
+.ph-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--ln)}
+.ph-item:last-child{border-bottom:none;padding-bottom:0}
+.ph-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#fff;flex-shrink:0}
+.ph-info{flex:1}
+.ph-name{font-size:.86rem;font-weight:700;color:var(--ink);margin-bottom:1px}
+.ph-role{font-size:.72rem;color:var(--mu)}
+.ph-status{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700}
+.ph-on{color:var(--em)}
+.ph-off{color:var(--mu)}
+.ph-dot{width:6px;height:6px;border-radius:50%}
+.dot-on{background:var(--em);animation:bk 2s infinite}
+.dot-off{background:var(--mu)}
+
+/* ══ SECTION CONFIANCE ═══════════════════════════ */
+.trust-section{padding:70px 4%;background:var(--wh)}
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;max-width:1100px;margin:40px auto 0}
+.trust-card{padding:26px 22px;border-radius:var(--rl);border:1.5px solid var(--ln);text-align:center;transition:var(--t)}
+.trust-card:hover{border-color:rgba(5,150,105,.25);transform:translateY(-4px);box-shadow:0 14px 36px rgba(0,0,0,.09)}
+.tc-ic{width:56px;height:56px;border-radius:16px;margin:0 auto 16px;background:linear-gradient(135deg,var(--em),var(--tl));display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;box-shadow:var(--shg)}
+.trust-card h3{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.trust-card p{font-size:.84rem;color:var(--sl);line-height:1.65}
+
+/* ══ FAQ ══════════════════════════════════════════ */
+.faq-section{padding:80px 4%;background:var(--bg)}
+.faq-grid{max-width:900px;margin:40px auto 0;display:flex;flex-direction:column;gap:10px}
+.faq-item{background:var(--wh);border:1.5px solid var(--ln);border-radius:var(--r);overflow:hidden;transition:var(--t)}
+.faq-item:hover{border-color:rgba(5,150,105,.2)}
+.faq-item.open{border-color:rgba(5,150,105,.3)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;gap:16px}
+.faq-q span{font-size:.9rem;font-weight:600;color:var(--ink)}
+.faq-ic{font-size:.8rem;color:var(--em);flex-shrink:0;transition:transform .3s}
+.faq-item.open .faq-ic{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s}
+.faq-a p{padding:0 20px 16px;font-size:.86rem;color:var(--sl);line-height:1.7}
+.faq-item.open .faq-a{max-height:300px}
+
+/* ══ CTA FINAL ═══════════════════════════════════ */
+.cta-final{
+  padding:90px 4%;
+  background:linear-gradient(145deg,#064e3b,#065f46,#047857);
+  position:relative;overflow:hidden;text-align:center;
+}
+.cta-final::before{content:'➕';position:absolute;font-size:30rem;opacity:.03;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;font-family:'Clash Display',sans-serif}
+.cta-final h2{font-family:'Clash Display',sans-serif;font-size:clamp(1.7rem,3.5vw,2.6rem);font-weight:700;color:#fff;margin-bottom:12px;position:relative;z-index:1}
+.cta-final p{font-size:1rem;color:rgba(255,255,255,.65);max-width:500px;margin:0 auto 32px;line-height:1.7;position:relative;z-index:1}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.cta-btn-w{padding:14px 30px;border-radius:50px;background:#fff;border:none;color:var(--em);font-weight:800;font-size:.95rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px}
+.cta-btn-w:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.cta-btn-t{padding:13px 28px;border-radius:50px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif;display:inline-flex;align-items:center;gap:9px;text-decoration:none}
+.cta-btn-t:hover{background:rgba(255,255,255,.25)}
+
+/* ══ NEWSLETTER ══════════════════════════════════ */
+.nl-section{padding:70px 4%;background:var(--ink2)}
+.nl-inner{max-width:560px;margin:0 auto;text-align:center}
+.nl-inner h2{font-family:'Clash Display',sans-serif;font-size:1.9rem;font-weight:700;color:#fff;margin-bottom:10px}
+.nl-inner p{font-size:.9rem;color:rgba(255,255,255,.55);margin-bottom:26px;line-height:1.7}
+.nl-form{display:flex;gap:10px}
+.nl-form input{flex:1;padding:13px 18px;border-radius:50px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;outline:none;transition:.3s}
+.nl-form input::placeholder{color:rgba(255,255,255,.35)}
+.nl-form input:focus{border-color:rgba(16,185,129,.5);background:rgba(255,255,255,.12)}
+.nl-form button{padding:13px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;transition:var(--t);white-space:nowrap}
+.nl-form button:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ══ FOOTER ══════════════════════════════════════ */
+footer{background:var(--ink);padding:55px 4% 0;color:rgba(255,255,255,.5)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:44px;max-width:1400px;margin:0 auto 44px}
+.fb-logo{margin-bottom:14px}
+.fb-desc{font-size:.85rem;line-height:1.75;max-width:250px;margin-bottom:20px}
+.footer-col h4{font-family:'Clash Display',sans-serif;font-size:.88rem;font-weight:700;color:#fff;margin-bottom:16px;letter-spacing:.3px}
+.footer-col a{display:block;font-size:.84rem;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:10px;transition:.2s}
+.footer-col a:hover{color:var(--em2)}
+.footer-socials{display:flex;gap:9px}
+.fsoc{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);text-decoration:none;font-size:.88rem;transition:var(--t)}
+.fsoc:hover{background:var(--em);border-color:var(--em);color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding:22px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;max-width:1400px;margin:0 auto}
+.footer-bottom p{font-size:.8rem}
+.foot-badge{display:flex;align-items:center;gap:7px;padding:5px 14px;background:rgba(5,150,105,.12);border:1px solid rgba(5,150,105,.2);border-radius:50px;font-size:.74rem;color:var(--em2);font-weight:600}
+
+/* ══ MODAL SUCCÈS ════════════════════════════════ */
+.modal-ov{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--wh);border-radius:var(--rl);padding:44px;max-width:480px;width:100%;text-align:center;transform:scale(.95);transition:transform .3s;box-shadow:0 30px 80px rgba(0,0,0,.2)}
+.modal-ov.open .modal{transform:scale(1)}
+.modal-ring{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--eml),#a7f3d0);border:2px solid #6ee7b7;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 20px;animation:pop .6s cubic-bezier(.2,1,.3,1)}
+@keyframes pop{from{transform:scale(0);opacity:0}70%{transform:scale(1.1)}to{transform:scale(1);opacity:1}}
+.modal h3{font-family:'Clash Display',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:10px;color:var(--ink)}
+.modal p{font-size:.88rem;color:var(--sl);line-height:1.7;margin-bottom:24px}
+.modal-ref{background:var(--bg);border-radius:11px;padding:12px 16px;margin-bottom:24px;font-size:.82rem;color:var(--sl);border:1px solid var(--ln)}
+.modal-ref strong{color:var(--em);font-family:'Clash Display',sans-serif;font-size:1rem}
+.modal-btns{display:flex;gap:10px;justify-content:center}
+.mb-main{padding:12px 24px;border-radius:50px;border:none;background:linear-gradient(135deg,var(--em),var(--tl));color:#fff;font-weight:700;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif}
+.mb-ghost{padding:11px 20px;border-radius:50px;border:1.5px solid var(--ln);background:none;color:var(--sl);font-weight:600;cursor:pointer;transition:var(--t);font-family:'Plus Jakarta Sans',sans-serif}
+.mb-ghost:hover{border-color:var(--em);color:var(--em)}
+
+/* ══ TOAST ═══════════════════════════════════════ */
+.toast{position:fixed;bottom:20px;right:20px;z-index:3000;background:var(--ink);color:#fff;border-radius:10px;padding:11px 18px;font-size:.83rem;display:flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(0,0,0,.22);opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.on{opacity:1;transform:translateY(0)}
+.toast i{color:var(--em2)}
+
+/* Whatsapp float */
+.wa-float{position:fixed;bottom:28px;right:28px;z-index:800;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;text-decoration:none;box-shadow:0 6px 24px rgba(37,211,102,.45);transition:var(--t)}
+.wa-float:hover{transform:scale(1.1)}
+
+/* ══ RESPONSIVE ══════════════════════════════════ */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:40px}
+  .hero-stats-grid{grid-template-columns:repeat(4,1fr)}
+  .form-inner{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .steps-grid::before{display:none}
+  .hero-stats-grid{grid-template-columns:1fr 1fr}
+  .payment-modes{grid-template-columns:1fr 1fr 1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .hamburger{display:block}
+  .nl-form{flex-direction:column}
+}
+@media(max-width:480px){
+  .steps-grid{grid-template-columns:1fr}
+  .hero-stats-grid{grid-template-columns:1fr 1fr}
+  .fg-row{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;text-align:center}
+  .cta-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- Bande promo -->
+<div class="top-strip">
+  📋 Ordonnance traitée en moins de 30 minutes · <a href="localisation.html">Voir les pharmacies de garde →</a>
+</div>
+
+<!-- ══ NAVBAR ══════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="pharma.html" class="nav-logo">
+      <div class="logo-ic"><i class="fas fa-plus"></i></div>
+      <span class="logo-tx">Pharma<em>Loc</em></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="pharma.html">Accueil</a>
+      <a href="apropos.html">À propos</a>
+      <a href="localisation.html">Localiser</a>
+      <a href="boutique.html">Boutique</a>
+      <a href="ordonnance.html" class="on">Ordonnance</a>
+      <a href="urgences.html">Urgences</a>
+    </div>
+    <div class="nav-right">
+      <a href="https://wa.me/22896327992" target="_blank" class="nbtn">
+        <i class="fab fa-whatsapp" style="color:#25D366"></i> WhatsApp
+      </a>
+      <a href="boutique.html" class="nbtn nbtn-solid">
+        <i class="fas fa-pills"></i> Boutique
+      </a>
+      <button class="hamburger" onclick="toggleNav()"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ═══════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <!-- Texte -->
+    <div>
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Service 100% sécurisé · Pharmaciens certifiés
+      </div>
+      <h1>Envoyez votre<br><span>ordonnance en ligne</span></h1>
+      <p class="hero-desc">
+        Prenez votre ordonnance en photo, envoyez-la et notre équipe de pharmaciens diplômés prépare votre commande et vous livre à domicile sous 2 heures.
+      </p>
+      <div class="hero-badges">
+        <div class="hbadge"><i class="fas fa-clock"></i> Traitement en 30 min</div>
+        <div class="hbadge"><i class="fas fa-shield-alt"></i> 100% confidentiel</div>
+        <div class="hbadge"><i class="fas fa-truck"></i> Livraison 2h</div>
+        <div class="hbadge"><i class="fas fa-certificate"></i> Pharmaciens certifiés</div>
+      </div>
+      <div class="hero-ctas">
+        <a href="#formulaire" class="btn-primary">
+          <i class="fas fa-upload"></i> Envoyer mon ordonnance
+        </a>
+        <a href="https://wa.me/22896327992" target="_blank" class="btn-ghost">
+          <i class="fab fa-whatsapp"></i> Via WhatsApp
+        </a>
+      </div>
+    </div>
+    <!-- Stats -->
+    <div class="hero-stats-grid">
+      <div class="hstat-card">
+        <div class="hstat-ic">📋</div>
+        <div class="hstat-n">8 500+</div>
+        <div class="hstat-l">Ordonnances traitées</div>
+      </div>
+      <div class="hstat-card">
+        <div class="hstat-ic">⏱️</div>
+        <div class="hstat-n">28 min</div>
+        <div class="hstat-l">Délai moyen</div>
+      </div>
+      <div class="hstat-card">
+        <div class="hstat-ic">👨‍⚕️</div>
+        <div class="hstat-n">12</div>
+        <div class="hstat-l">Pharmaciens actifs</div>
+      </div>
+      <div class="hstat-card">
+        <div class="hstat-ic">⭐</div>
+        <div class="hstat-n">4.9/5</div>
+        <div class="hstat-l">Satisfaction clients</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ÉTAPES ════════════════════════════════════ -->
+<section class="steps-section">
+  <div class="steps-inner">
+    <div class="sec-tag">Simple & rapide</div>
+    <h2 class="sec-title">Comment ça fonctionne ?</h2>
+    <p class="sec-sub">En 4 étapes simples, recevez vos médicaments sur ordonnance sans sortir de chez vous.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-icon">📸</div>
+        <div class="step-num">1</div>
+        <h3>Photographiez</h3>
+        <p>Prenez une photo claire et lisible de votre ordonnance médicale. JPG, PNG ou PDF acceptés.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">📤</div>
+        <div class="step-num">2</div>
+        <h3>Envoyez</h3>
+        <p>Téléversez votre ordonnance via notre formulaire sécurisé ou directement par WhatsApp.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">👨‍⚕️</div>
+        <div class="step-num">3</div>
+        <h3>Validation</h3>
+        <p>Un pharmacien diplômé vérifie et valide votre ordonnance sous 30 minutes maximum.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">🏠</div>
+        <div class="step-num">4</div>
+        <h3>Livraison</h3>
+        <p>Vos médicaments vous sont livrés à domicile en moins de 2 heures. Paiement à la livraison.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FORMULAIRE ════════════════════════════════ -->
+<section class="form-section" id="formulaire">
+  <div class="form-inner">
+
+    <!-- Carte formulaire -->
+    <div class="form-card">
+      <div class="fc-head">
+        <div class="fc-head-ic"><i class="fas fa-file-medical"></i></div>
+        <div>
+          <h3>Envoyer mon ordonnance</h3>
+          <p>Formulaire sécurisé — Données chiffrées</p>
+        </div>
+      </div>
+      <div class="fc-body">
+
+        <!-- Zone upload -->
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this)">
+          <span class="uz-icon">📋</span>
+          <div class="uz-title">Déposez votre ordonnance ici</div>
+          <p class="uz-sub">Glissez-déposez votre fichier ou cliquez pour parcourir.<br>L'ordonnance doit être lisible et complète.</p>
+          <div class="uz-formats">
+            <span class="uz-fmt">JPG</span>
+            <span class="uz-fmt">PNG</span>
+            <span class="uz-fmt">PDF</span>
+            <span class="uz-fmt">Max 10 Mo</span>
+          </div>
+          <button class="uz-btn" type="button">
+            <i class="fas fa-folder-open"></i> Parcourir mes fichiers
+          </button>
+        </div>
+
+        <!-- Aperçu fichier -->
+        <div class="file-preview" id="filePreview">
+          <div class="fp-ic"><i class="fas fa-file-medical"></i></div>
+          <div style="flex:1;min-width:0">
+            <div class="fp-name" id="fpName">—</div>
+            <div class="fp-size" id="fpSize">—</div>
+          </div>
+          <button class="fp-del" onclick="removeFile()" title="Supprimer"><i class="fas fa-times-circle"></i></button>
+        </div>
+
+        <!-- Infos patient -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:12px">
+            <i class="fas fa-user" style="color:var(--em)"></i> Informations patient
+          </div>
+          <div class="fg-row">
+            <div class="fg" id="fg-fname">
+              <label>Prénom <span class="req">*</span></label>
+              <div class="fi-wrap"><i class="fi fas fa-user"></i><input type="text" id="fname" placeholder="Votre prénom"></div>
+              <span class="ferr">Champ requis.</span>
+            </div>
+            <div class="fg" id="fg-lname">
+              <label>Nom <span class="req">*</span></label>
+              <div class="fi-wrap"><i class="fi fas fa-user"></i><input type="text" id="lname" placeholder="Votre nom"></div>
+              <span class="ferr">Champ requis.</span>
+            </div>
+          </div>
+          <div class="fg-row">
+            <div class="fg" id="fg-phone">
+              <label>Téléphone <span class="req">*</span></label>
+              <div class="fi-wrap"><i class="fi fas fa-phone"></i><input type="tel" id="fphone" placeholder="+228 xx xx xx xx"></div>
+              <span class="ferr">Numéro requis.</span>
+            </div>
+            <div class="fg" id="fg-email">
+              <label>Email</label>
+              <div class="fi-wrap"><i class="fi fas fa-envelope"></i><input type="email" id="femail" placeholder="email@exemple.com"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adresse livraison -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:12px">
+            <i class="fas fa-map-marker-alt" style="color:var(--em)"></i> Adresse de livraison
+          </div>
+          <div class="fg" id="fg-addr">
+            <label>Adresse complète <span class="req">*</span></label>
+            <div class="fi-wrap"><i class="fi fas fa-home"></i><input type="text" id="faddr" placeholder="Quartier, rue, bâtiment…"></div>
+            <span class="ferr">Adresse requise.</span>
+          </div>
+          <div class="fg-row">
+            <div class="fg" id="fg-ville">
+              <label>Ville <span class="req">*</span></label>
+              <div class="fi-wrap">
+                <i class="fi fas fa-city"></i>
+                <select id="fville">
+                  <option value="" disabled selected>Sélectionner…</option>
+                  <option>Lomé</option><option>Kpalimé</option><option>Atakpamé</option>
+                  <option>Sokodé</option><option>Kara</option><option>Dapaong</option>
+                  <option>Tsévié</option><option>Aneho</option><option>Autre</option>
+                </select>
+              </div>
+              <span class="ferr">Ville requise.</span>
+            </div>
+            <div class="fg">
+              <label>Pharmacie préférée</label>
+              <div class="fi-wrap">
+                <i class="fi fas fa-hospital"></i>
+                <select id="fpharma">
+                  <option value="">La plus proche</option>
+                  <option>Pharmacie Centrale</option>
+                  <option>Pharmacie du Bénin</option>
+                  <option>Pharmacie Hippocrate</option>
+                  <option>Pharmacie de la Paix</option>
+                  <option>Pharmacie de la Croix</option>
+                  <option>Pharmacie Saint-Luc</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="fg">
+          <label>Informations complémentaires</label>
+          <div class="fi-wrap">
+            <i class="fi fas fa-comment" style="top:14px;transform:none"></i>
+            <textarea id="fnote" placeholder="Allergies connues, médicaments déjà en cours, notes pour le pharmacien…"></textarea>
+          </div>
+        </div>
+
+        <!-- Urgence -->
+        <div class="urgence-toggle" id="urgenceToggle" onclick="toggleUrgence()">
+          <div class="ut-left">
+            <div class="ut-ic"><i class="fas fa-bolt"></i></div>
+            <div>
+              <div class="ut-title">Livraison urgente (+1 500 FCFA)</div>
+              <div class="ut-sub">Livraison prioritaire en moins de 45 minutes</div>
+            </div>
+          </div>
+          <div class="toggle-switch" id="urgSwitch"></div>
+        </div>
+
+        <!-- Mode paiement -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:10px">
+            <i class="fas fa-credit-card" style="color:var(--em)"></i> Mode de paiement
+          </div>
+          <div class="payment-modes" id="payModes">
+            <div class="pm-btn on" onclick="selPay(this,'mobile')">
+              <div class="pm-ic">📱</div>
+              <div class="pm-lbl">Mobile Money</div>
+            </div>
+            <div class="pm-btn" onclick="selPay(this,'livraison')">
+              <div class="pm-ic">💵</div>
+              <div class="pm-lbl">À la livraison</div>
+            </div>
+            <div class="pm-btn" onclick="selPay(this,'carte')">
+              <div class="pm-ic">💳</div>
+              <div class="pm-lbl">Carte bancaire</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CGV -->
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;cursor:pointer" id="cgvRow" onclick="toggleCGV()">
+          <div id="cgvBox" style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--ln);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent;transition:.2s;flex-shrink:0;margin-top:1px"></div>
+          <span style="font-size:.82rem;color:var(--sl);line-height:1.5">
+            J'accepte que mes données de santé soient traitées de manière confidentielle par les pharmaciens PharmaLoc conformément à la <a href="#" style="color:var(--em);text-decoration:none" onclick="event.stopPropagation()">politique de confidentialité</a>.
+          </span>
+        </div>
+
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">
+          <i class="fas fa-paper-plane" id="submitIcon"></i>
+          <span id="submitTxt">Envoyer l'ordonnance</span>
+        </button>
+
+        <p class="form-note">
+          <i class="fas fa-shield-alt" style="color:var(--em)"></i>
+          Données chiffrées · RGPD · Traitement en 30 min maximum
+        </p>
+      </div>
+    </div><!-- /form-card -->
+
+    <!-- Colonne info -->
+    <div class="info-col">
+
+      <!-- Délais estimés -->
+      <div class="delay-box">
+        <div style="font-family:'Clash Display',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+          <i class="fas fa-clock" style="color:var(--em)"></i> Délais estimés
+        </div>
+        <div class="db-row">
+          <div class="db-label"><i class="fas fa-check-circle"></i> Réception & confirmation</div>
+          <div class="db-val">Immédiat</div>
+        </div>
+        <div class="db-row">
+          <div class="db-label"><i class="fas fa-stethoscope"></i> Validation pharmacien</div>
+          <div class="db-val">≤ 30 min</div>
+        </div>
+        <div class="db-row">
+          <div class="db-label"><i class="fas fa-box"></i> Préparation commande</div>
+          <div class="db-val">15–20 min</div>
+        </div>
+        <div class="db-row">
+          <div class="db-label"><i class="fas fa-truck"></i> Livraison à domicile</div>
+          <div class="db-val">≤ 2h</div>
+        </div>
+        <div class="db-row" style="margin-top:4px;border-top:2px solid rgba(5,150,105,.2);padding-top:10px">
+          <div class="db-label" style="font-weight:700;color:var(--ink)"><i class="fas fa-flag-checkered"></i> Délai total estimé</div>
+          <div class="db-val" style="font-size:1.1rem">~2h30</div>
+        </div>
+      </div>
+
+      <!-- Pharmaciens en ligne -->
+      <div class="pharma-list-box">
+        <div style="font-family:'Clash Display',sans-serif;font-size:.92rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+          <span><i class="fas fa-user-md" style="color:var(--em);margin-right:8px"></i>Pharmaciens disponibles</span>
+          <span style="font-size:.72rem;color:var(--em);font-weight:600;background:var(--eml);padding:3px 10px;border-radius:20px">5 en ligne</span>
+        </div>
+        <div class="ph-item">
+          <div class="ph-av">MK</div>
+          <div class="ph-info">
+            <div class="ph-name">Dr. Mireille Koffi</div>
+            <div class="ph-role">Pharmacienne · Pharmacie Centrale</div>
+          </div>
+          <div class="ph-status ph-on"><div class="ph-dot dot-on"></div> En ligne</div>
+        </div>
+        <div class="ph-item">
+          <div class="ph-av" style="background:linear-gradient(135deg,#2563eb,#0891b2)">YD</div>
+          <div class="ph-info">
+            <div class="ph-name">Dr. Yao Dossou</div>
+            <div class="ph-role">Pharmacien · Pharmacie Hippocrate</div>
+          </div>
+          <div class="ph-status ph-on"><div class="ph-dot dot-on"></div> En ligne</div>
+        </div>
+        <div class="ph-item">
+          <div class="ph-av" style="background:linear-gradient(135deg,#7c3aed,#5b21b6)">AT</div>
+          <div class="ph-info">
+            <div class="ph-name">Dr. Adjoa Tetteh</div>
+            <div class="ph-role">Pharmacienne · Pharmacie du Bénin</div>
+          </div>
+          <div class="ph-status ph-on"><div class="ph-dot dot-on"></div> En ligne</div>
+        </div>
+        <div class="ph-item">
+          <div class="ph-av" style="background:linear-gradient(135deg,#b45309,#d97706)">KM</div>
+          <div class="ph-info">
+            <div class="ph-name">Dr. Kofi Mensah</div>
+            <div class="ph-role">Pharmacien · Pharmacie de la Paix</div>
+          </div>
+          <div class="ph-status ph-off"><div class="ph-dot dot-off"></div> Hors ligne</div>
+        </div>
+      </div>
+
+      <!-- Ce dont vous avez besoin -->
+      <div class="info-box">
+        <div class="ib-head">
+          <div class="ib-ic g"><i class="fas fa-list-check"></i></div>
+          <div>
+            <h4>Ce qu'il vous faut</h4>
+            <p>Pour une ordonnance valide</p>
+          </div>
+        </div>
+        <div class="ib-list">
+          <div class="ib-item"><i class="fas fa-check-circle"></i> Ordonnance datée de moins de 3 mois</div>
+          <div class="ib-item"><i class="fas fa-check-circle"></i> Signature et cachet du médecin</div>
+          <div class="ib-item"><i class="fas fa-check-circle"></i> Nom du patient lisible</div>
+          <div class="ib-item"><i class="fas fa-check-circle"></i> Médicaments et dosages clairement indiqués</div>
+          <div class="ib-item"><i class="fas fa-check-circle"></i> Photo nette, bonne luminosité</div>
+        </div>
+      </div>
+
+      <!-- Ordonnances refusées -->
+      <div class="info-box">
+        <div class="ib-head">
+          <div class="ib-ic r"><i class="fas fa-ban"></i></div>
+          <div>
+            <h4>Ordonnances refusées</h4>
+            <p>Nous ne pouvons pas traiter</p>
+          </div>
+        </div>
+        <div class="ib-list">
+          <div class="ib-item" style="color:var(--rd)"><i class="fas fa-times-circle" style="color:var(--rd)"></i> Ordonnance illisible ou floue</div>
+          <div class="ib-item" style="color:var(--rd)"><i class="fas fa-times-circle" style="color:var(--rd)"></i> Date expirée (+ de 3 mois)</div>
+          <div class="ib-item" style="color:var(--rd)"><i class="fas fa-times-circle" style="color:var(--rd)"></i> Sans signature du médecin</div>
+          <div class="ib-item" style="color:var(--rd)"><i class="fas fa-times-circle" style="color:var(--rd)"></i> Ordonnance modifiée ou falsifiée</div>
+        </div>
+      </div>
+
+      <!-- Confidentialité -->
+      <div class="info-box">
+        <div class="ib-head">
+          <div class="ib-ic b"><i class="fas fa-shield-alt"></i></div>
+          <div>
+            <h4>Données 100% sécurisées</h4>
+            <p>Protection de vos informations médicales</p>
+          </div>
+        </div>
+        <div class="ib-list">
+          <div class="ib-item"><i class="fas fa-lock"></i> Chiffrement SSL 256 bits</div>
+          <div class="ib-item"><i class="fas fa-eye-slash"></i> Accès limité aux pharmaciens certifiés</div>
+          <div class="ib-item"><i class="fas fa-trash-alt"></i> Suppression automatique après 30 jours</div>
+          <div class="ib-item"><i class="fas fa-file-contract"></i> Conforme RGPD et loi togolaise</div>
+        </div>
+      </div>
+
+    </div><!-- /info-col -->
+  </div><!-- /form-inner -->
+</section>
+
+<!-- ══ CONFIANCE ════════════════════════════════ -->
+<section class="trust-section">
+  <div style="max-width:1100px;margin:0 auto;text-align:center">
+    <div class="sec-tag">Pourquoi nous choisir</div>
+    <h2 class="sec-title">Service de confiance</h2>
+    <p class="sec-sub" style="margin:0 auto">Notre service d'ordonnance en ligne est conçu pour être simple, rapide et sécurisé.</p>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="tc-ic"><i class="fas fa-user-md"></i></div>
+      <h3>Pharmaciens diplômés</h3>
+      <p>Chaque ordonnance est vérifiée par un pharmacien d'État certifié avant toute délivrance de médicaments.</p>
+    </div>
+    <div class="trust-card">
+      <div class="tc-ic"><i class="fas fa-shield-alt"></i></div>
+      <h3>Données confidentielles</h3>
+      <p>Vos ordonnances et données médicales sont chiffrées et strictement confidentielles. Suppression automatique après 30 jours.</p>
+    </div>
+    <div class="trust-card">
+      <div class="tc-ic"><i class="fas fa-shipping-fast"></i></div>
+      <h3>Livraison express 2h</h3>
+      <p>Une fois validée, votre commande est préparée et livrée à domicile en moins de 2 heures dans Lomé.</p>
+    </div>
+    <div class="trust-card">
+      <div class="tc-ic"><i class="fas fa-headset"></i></div>
+      <h3>Support 24h/24</h3>
+      <p>Notre équipe est disponible par WhatsApp pour répondre à toutes vos questions, jour et nuit.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ════════════════════════════════════════ -->
+<section class="faq-section">
+  <div style="text-align:center;max-width:1100px;margin:0 auto">
+    <div class="sec-tag">Questions fréquentes</div>
+    <h2 class="sec-title">Vous avez des questions ?</h2>
+    <p class="sec-sub" style="margin:0 auto">Tout ce que vous devez savoir sur notre service d'ordonnance en ligne.</p>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Combien de temps prend le traitement de mon ordonnance ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>En moyenne, votre ordonnance est validée en moins de 30 minutes. La livraison intervient ensuite sous 1h30 à 2h dans la ville de Lomé. En cas d'urgence, optez pour la livraison urgente (45 minutes).</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Mon ordonnance est-elle en sécurité ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>Oui, absolument. Toutes vos données médicales sont chiffrées avec le protocole SSL 256 bits. Seuls les pharmaciens certifiés y ont accès. Vos ordonnances sont automatiquement supprimées après 30 jours.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Quels types d'ordonnances acceptez-vous ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>Nous acceptons toutes les ordonnances médicales datées de moins de 3 mois, signées et tamponnées par un médecin diplômé. Les ordonnances pour médicaments stupéfiants font l'objet d'une procédure spéciale.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Puis-je envoyer mon ordonnance par WhatsApp ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>Oui ! Vous pouvez envoyer votre ordonnance directement sur notre WhatsApp au +228 91 00 00 00. Un pharmacien vous répondra dans les 15 minutes pour confirmer la réception et le délai de traitement.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Comment se passe le paiement ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>Vous pouvez payer par Mobile Money (Flooz, T-Money), à la livraison en espèces, ou par carte bancaire. Le montant exact vous est communiqué après validation par le pharmacien.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)"><span>Que faire si mon ordonnance est refusée ?</span><i class="fas fa-plus faq-ic"></i></div><div class="faq-a"><p>Si votre ordonnance ne peut être traitée (illisible, expirée, incomplète), vous en serez informé immédiatement par SMS et WhatsApp avec la raison du refus. Vous pouvez renvoyer une nouvelle version corrigée.</p></div></div>
+  </div>
+</section>
+
+<!-- ══ CTA FINAL ══════════════════════════════════ -->
+<section class="cta-final">
+  <h2>Prêt à envoyer votre ordonnance ?</h2>
+  <p>Des milliers de patients nous font confiance chaque mois. Rejoignez-les et recevez vos médicaments chez vous en toute sécurité.</p>
+  <div class="cta-btns">
+    <button class="cta-btn-w" onclick="document.getElementById('formulaire').scrollIntoView({behavior:'smooth'})">
+      <i class="fas fa-upload"></i> Envoyer maintenant
+    </button>
+    <a href="https://wa.me/22896327992" target="_blank" class="cta-btn-t">
+      <i class="fab fa-whatsapp"></i> Contacter par WhatsApp
+    </a>
+    <a href="localisation.html" class="cta-btn-t">
+      <i class="fas fa-map-marker-alt"></i> Trouver une pharmacie
+    </a>
+  </div>
+</section>
+
+<!-- ══ NEWSLETTER ════════════════════════════════ -->
+<section class="nl-section">
+  <div class="nl-inner">
+    <div style="display:inline-block;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2);border-radius:50px;padding:4px 16px;font-size:.72rem;font-weight:700;color:var(--em2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Restez informé</div>
+    <h2>Renouvellement d'ordonnance</h2>
+    <p>Recevez un rappel automatique avant l'expiration de votre ordonnance et les alertes de disponibilité de vos médicaments habituels.</p>
+    <form class="nl-form" onsubmit="nlSub(event)">
+      <input type="email" placeholder="votre@email.com" required>
+      <button type="submit"><i class="fas fa-bell"></i> S'abonner</button>
+    </form>
+    <p style="font-size:.74rem;color:rgba(255,255,255,.3);margin-top:10px">Aucun spam · Désabonnement en un clic</p>
+  </div>
+</section>
+
+<!-- ══ FOOTER ════════════════════════════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="fb-logo">
+        <a href="pharma.html" class="nav-logo">
+          <div class="logo-ic"><i class="fas fa-plus"></i></div>
+          <span class="logo-tx">Pharma<em>Loc</em></span>
+        </a>
+      </div>
+      <p class="fb-desc">Votre plateforme de référence pour localiser les pharmacies et commander vos médicaments en ligne en toute sécurité à Lomé, Togo.</p>
+      <div class="footer-socials">
+        <a href="#" class="fsoc"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="fsoc"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/22896327992" class="fsoc" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" class="fsoc"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a href="localisation.html">Localiser une pharmacie</a>
+      <a href="boutique.html">Boutique en ligne</a>
+      <a href="ordonnance.html">Envoi d'ordonnance</a>
+      <a href="pharma.html#urgences">Pharmacie de garde</a>
+      <a href="#">Conseil pharmacien</a>
+    </div>
+    <div class="footer-col">
+      <h4>Catégories</h4>
+      <a href="boutique.html">Médicaments</a>
+      <a href="boutique.html">Vitamines & Minéraux</a>
+      <a href="boutique.html">Bébé & Maman</a>
+      <a href="boutique.html">Matériel médical</a>
+      <a href="boutique.html">Parapharmacie</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="tel:+22896327992">+228 96 32 79 92</a>
+      <a href="https://wa.me/22891000000" target="_blank">WhatsApp 24h/24</a>
+      <a href="mailto:contact@pharmaloc.tg">contact@pharmaloc.tg</a>
+      <a href="#">Lomé, Togo</a>
+      <a href="#">FAQ & Aide</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 <strong style="color:rgba(255,255,255,.7)">PharmaLoc</strong> · Tous droits réservés · Lomé, Togo</p>
+    <div class="foot-badge"><i class="fas fa-shield-alt"></i> Service certifié · Pharmaciens diplômés d'État</div>
+  </div>
+</footer>
+
+<!-- WhatsApp flottant -->
+<a href="https://wa.me/22896327992" target="_blank" class="wa-float" title="Contacter par WhatsApp">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<!-- Modal succès -->
+<div class="modal-ov" id="modalOv" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-ring">✅</div>
+    <h3>Ordonnance envoyée !</h3>
+    <p>Votre ordonnance a été reçue avec succès. Un pharmacien va la vérifier et vous contactera sous 30 minutes pour confirmer votre commande.</p>
+    <div class="modal-ref">
+      Numéro de référence : <strong id="refNum">—</strong><br>
+      <span style="font-size:.76rem;color:var(--mu)">Conservez ce numéro pour suivre votre commande</span>
+    </div>
+    <div class="modal-btns">
+      <button class="mb-main" onclick="closeModal()"><i class="fas fa-check"></i> Parfait, merci !</button>
+      <a href="boutique.html" class="mb-ghost" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"><i class="fas fa-pills"></i> Boutique</a>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toastTxt"></span></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   FICHIER UPLOAD
+═══════════════════════════════════════════ */
+let selectedFile = null;
+let cgvAccepted  = false;
+let urgence      = false;
+let payMode      = 'mobile';
+
+function handleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('Fichier trop volumineux (max 10 Mo)'); return; }
+  selectedFile = file;
+  const size = file.size < 1024*1024
+    ? (file.size/1024).toFixed(0)+' Ko'
+    : (file.size/(1024*1024)).toFixed(1)+' Mo';
+  document.getElementById('fpName').textContent = file.name;
+  document.getElementById('fpSize').textContent = size;
+  document.getElementById('filePreview').classList.add('show');
+  const zone = document.getElementById('uploadZone');
+  zone.style.borderColor = 'var(--em)';
+  zone.style.background  = 'var(--eml)';
+  zone.innerHTML = `
+    <span class="uz-icon">✅</span>
+    <div class="uz-title" style="color:var(--em)">Fichier sélectionné !</div>
+    <p class="uz-sub">${file.name}</p>
+    <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+    <button class="uz-btn" type="button" onclick="removeFile()"><i class="fas fa-redo"></i> Changer de fichier</button>`;
+  showToast('Fichier chargé avec succès !');
+}
+
+function removeFile() {
+  selectedFile = null;
+  document.getElementById('filePreview').classList.remove('show');
+  document.getElementById('uploadZone').style.borderColor = '';
+  document.getElementById('uploadZone').style.background  = '';
+  document.getElementById('uploadZone').innerHTML = `
+    <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer">
+    <span class="uz-icon">📋</span>
+    <div class="uz-title">Déposez votre ordonnance ici</div>
+    <p class="uz-sub">Glissez-déposez votre fichier ou cliquez pour parcourir.<br>L'ordonnance doit être lisible et complète.</p>
+    <div class="uz-formats">
+      <span class="uz-fmt">JPG</span><span class="uz-fmt">PNG</span>
+      <span class="uz-fmt">PDF</span><span class="uz-fmt">Max 10 Mo</span>
+    </div>
+    <button class="uz-btn" type="button"><i class="fas fa-folder-open"></i> Parcourir mes fichiers</button>`;
+}
+
+/* Drag & drop */
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) { const fakeInput = {files:[f]}; handleFile(fakeInput); }
+});
+
+/* ═══════════════════════════════════════════
+   URGENCE TOGGLE
+═══════════════════════════════════════════ */
+function toggleUrgence() {
+  urgence = !urgence;
+  const sw  = document.getElementById('urgSwitch');
+  const row = document.getElementById('urgenceToggle');
+  sw.classList.toggle('on', urgence);
+  row.classList.toggle('on', urgence);
+}
+
+/* ═══════════════════════════════════════════
+   PAIEMENT
+═══════════════════════════════════════════ */
+function selPay(btn, mode) {
+  document.querySelectorAll('.pm-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  payMode = mode;
+}
+
+/* ═══════════════════════════════════════════
+   CGV
+═══════════════════════════════════════════ */
+function toggleCGV() {
+  cgvAccepted = !cgvAccepted;
+  const box = document.getElementById('cgvBox');
+  box.style.background     = cgvAccepted ? 'var(--em)' : 'var(--bg)';
+  box.style.borderColor    = cgvAccepted ? 'var(--em)' : 'var(--ln)';
+  box.style.color          = cgvAccepted ? '#fff' : 'transparent';
+  box.innerHTML            = cgvAccepted ? '<i class="fas fa-check" style="font-size:.55rem"></i>' : '';
+}
+
+/* ═══════════════════════════════════════════
+   VALIDATION & SOUMISSION
+═══════════════════════════════════════════ */
+function setErr(id, hasErr) {
+  const el = document.getElementById(id);
+  hasErr ? el.classList.add('error') : el.classList.remove('error');
+}
+function chk(id, val) { const ok = !!val; setErr(id, !ok); return ok; }
+
+function submitForm() {
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const phone = document.getElementById('fphone').value.trim();
+  const addr  = document.getElementById('faddr').value.trim();
+  const ville = document.getElementById('fville').value;
+
+  let ok = true;
+  ok = chk('fg-fname', fname) && ok;
+  ok = chk('fg-lname', lname) && ok;
+  ok = chk('fg-phone', phone) && ok;
+  ok = chk('fg-addr',  addr) && ok;
+  ok = chk('fg-ville', ville) && ok;
+
+  if (!selectedFile) {
+    showToast('⚠️ Veuillez joindre votre ordonnance');
+    document.getElementById('uploadZone').style.borderColor = 'var(--rd)';
+    ok = false;
+  }
+  if (!cgvAccepted) {
+    showToast('⚠️ Veuillez accepter la politique de confidentialité');
+    ok = false;
+  }
+  if (!ok) return;
+
+  // Animation chargement
+  const btn  = document.getElementById('submitBtn');
+  const icon = document.getElementById('submitIcon');
+  const txt  = document.getElementById('submitTxt');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  icon.className = 'fas fa-spinner fa-spin';
+  txt.textContent = 'Envoi en cours…';
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.classList.add('success');
+    icon.className = 'fas fa-check';
+    txt.textContent = 'Ordonnance envoyée !';
+    // Générer un numéro de référence
+    const ref = 'ORD-2026-' + Math.random().toString(36).substring(2,8).toUpperCase();
+    document.getElementById('refNum').textContent = ref;
+    // Ouvrir modal
+    document.getElementById('modalOv').classList.add('open');
+    // Réinitialiser après fermeture
+  }, 2000);
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOv') && !e.target.closest('.mb-main,.mb-ghost')) return;
+  document.getElementById('modalOv').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modalOv').classList.remove('open'); });
+
+/* ═══════════════════════════════════════════
+   FAQ
+═══════════════════════════════════════════ */
+function toggleFAQ(el) {
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* ═══════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════ */
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+// Scroll navbar
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.boxShadow = window.scrollY > 20 ? '0 4px 20px rgba(0,0,0,.1)' : '';
+});
+
+/* ═══════════════════════════════════════════
+   NEWSLETTER
+═══════════════════════════════════════════ */
+function nlSub(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  btn.innerHTML = '<i class="fas fa-check"></i> Abonné !';
+  btn.style.background = '#16a34a';
+  e.target.querySelector('input').value = '';
+  setTimeout(() => { btn.innerHTML = '<i class="fas fa-bell"></i> S\'abonner'; btn.style.background = ''; }, 3000);
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('on'), 2800);
+}
+
+/* Animation scroll */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='translateY(0)'; io.unobserve(e.target); }
+  });
+}, { threshold:.1 });
+document.querySelectorAll('.step-card, .trust-card, .hstat-card, .info-box').forEach((el, i) => {
+  el.style.opacity = '0'; el.style.transform = 'translateY(20px)';
+  el.style.transition = `opacity .6s ease ${i*.07}s, transform .6s ease ${i*.07}s, border-color .3s, box-shadow .3s`;
+  io.observe(el);
+});
+</script>
+</body>
+</html>
